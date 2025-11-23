@@ -1,189 +1,80 @@
-// ----------------------------
-// WHISTLE SOUNDS (Base64 audio, works offline)
-// ----------------------------
-
-// Short whistle (foul/handball)
-const whistleShort = new Audio(
-    "data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA…(shortened for clarity)…"
-);
-
-// Long whistle (goal)
-const whistleLong = new Audio(
-    "data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA…(shortened)…"
-);
-
-function playWhistleShort() {
-    whistleShort.currentTime = 0;
-    whistleShort.play();
-}
-
-function playWhistleLong() {
-    whistleLong.currentTime = 0;
-    whistleLong.play();
-}
-
-
-// --------------------------------------
-// (REST OF YOUR SCRIPT — ADD WHISTLE HERE)
-// --------------------------------------
-
 const video = document.getElementById("camera");
-const canvas = document.getElementById("canvas");
-const replay = document.getElementById("replay");
-const ctx = canvas.getContext("2d");
-const eventText = document.getElementById("event");
+const output = document.getElementById("output");
+const whistle = document.getElementById("whistle");
 
-let detector, handDetector;
-
-// Replay buffer (last 3 sec)
-let replayFrames = [];
-
-// SPEAK EVENT
-function say(text) {
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "en-US";
-    speechSynthesis.speak(u);
-}
-
-// CAMERA SETUP
-async function setupCamera() {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+// Start BACK CAMERA only
+navigator.mediaDevices.getUserMedia({
+    video: { facingMode: { exact: "environment" } },
+    audio: false
+})
+.then(stream => {
     video.srcObject = stream;
-    return new Promise((resolve) => (video.onloadedmetadata = () => resolve(video)));
-}
+})
+.catch(err => {
+    output.innerText = "Camera error: " + err;
+});
 
-// LOAD MODELS
-async function loadModels() {
-    detector = await poseDetection.createDetector(
-        poseDetection.SupportedModels.MoveNet, { modelType: "Lightning" }
-    );
+// AI Models (uses browser vision API)
+const detector = new ObjectDetector({
+    model: "object_detector",
+    maxResults: 5
+});
 
-    handDetector = await handPoseDetection.createDetector(
-        handPoseDetection.SupportedModels.MediaPipeHands
-    );
-}
+async function analyseFrame() {
+    if (!video.srcObject) return;
 
-// SIMPLE BALL DETECTION
-function detectBall(imageData) {
-    let count = 0;
-    let posX = 0,
-        posY = 0;
+    const results = await detector.detect(video);
 
-    for (let i = 0; i < imageData.data.length; i += 4) {
-        const r = imageData.data[i];
-        const g = imageData.data[i + 1];
-        const b = imageData.data[i + 2];
+    let ball = null;
+    let hand = null;
+    let person = null;
 
-        if (r > 200 && g > 200 && b > 200) {
-            const p = i / 4;
-            posX += p % canvas.width;
-            posY += Math.floor(p / canvas.width);
-            count++;
+    // read objects
+    results.forEach(r => {
+        if (r.label.toLowerCase().includes("ball") || r.label.includes("sports ball"))
+            ball = r;
+        if (r.label.includes("hand"))
+            hand = r;
+        if (r.label.includes("person"))
+            person = r;
+    });
+
+    // ---- HANDBALL ----
+    if (ball && hand) {
+        const dx = Math.abs(ball.x - hand.x);
+        const dy = Math.abs(ball.y - hand.y);
+
+        if (dx < 80 && dy < 80) {
+            whistle.play();
+            output.innerText = "❌ HANDBALL!";
+            return;
         }
     }
 
-    if (count < 30) return null;
-
-    return { x: posX / count, y: posY / count };
-}
-
-// VAR SLOW MOTION REPLAY
-async function playSlowMotion() {
-    replay.style.display = "block";
-
-    const canvas2 = document.createElement("canvas");
-    canvas2.width = canvas.width;
-    canvas2.height = canvas.height;
-
-    const ctx2 = canvas2.getContext("2d");
-
-    let chunks = [];
-    const stream = canvas2.captureStream(20);
-    const rec = new MediaRecorder(stream, { mimeType: "video/webm" });
-
-    rec.ondataavailable = (e) => chunks.push(e.data);
-
-    rec.onstop = () => {
-        const blob = new Blob(chunks, { type: "video/webm" });
-        replay.src = URL.createObjectURL(blob);
-        replay.playbackRate = 0.3;
-        replay.play();
-    };
-
-    rec.start();
-
-    for (let frame of replayFrames) {
-        const img = new Image();
-        img.src = frame;
-        await new Promise((r) => (img.onload = r));
-        ctx2.drawImage(img, 0, 0, canvas.width, canvas.height);
-        await new Promise((r) => setTimeout(r, 50));
-    }
-
-    rec.stop();
-}
-
-// MAIN LOOP
-async function run() {
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const poses = await detector.estimatePoses(video);
-    const hands = await handDetector.estimateHands(video);
-
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const ball = detectBall(
-        ctx.getImageData(0, 0, canvas.width, canvas.height)
-    );
-
-    replayFrames.push(canvas.toDataURL("image/webp"));
-    if (replayFrames.length > 60) replayFrames.shift();
-
-    // ----------- GOAL DETECTION -----------
-    if (ball && ball.y < canvas.height * 0.1) {
-        eventText.textContent = "GOAL!";
-        say("Goal!");
-        playWhistleLong(); // 🔊 long whistle
-        playSlowMotion();
-    }
-
-    // ----------- HAND BALL DETECTION -----------
-    if (hands.length > 0 && ball) {
-        for (let h of hands) {
-            const hx = h.keypoints[0].x;
-            const hy = h.keypoints[0].y;
-
-            if (Math.hypot(hx - ball.x, hy - ball.y) < 70) {
-                eventText.textContent = "HAND BALL!";
-                say("Hand Ball!");
-                playWhistleShort(); // 🔊 short whistle
-                playSlowMotion();
-            }
+    // ---- GOAL ----
+    if (ball) {
+        // If ball reaches top 15% of screen
+        if (ball.y < video.videoHeight * 0.15) {
+            whistle.play();
+            output.innerText = "✅ GOAL!";
+            return;
         }
     }
 
-    // ----------- FOUL DETECTION -----------
-    if (poses.length >= 2) {
-        const p1 = poses[0].keypoints[0];
-        const p2 = poses[1].keypoints[0];
+    // ---- FOUL (Kick, shoulder, push) ----
+    if (person && ball) {
+        const tooClose = Math.abs(person.x - ball.x) < 50;
+        const fastDown = ball.y > video.videoHeight * 0.70;
 
-        if (Math.hypot(p1.x - p2.x, p1.y - p2.y) < 90) {
-            eventText.textContent = "FOUL!";
-            say("Foul!");
-            playWhistleShort(); // 🔊 short whistle
-            playSlowMotion();
+        if (tooClose && fastDown) {
+            whistle.play();
+            output.innerText = "❌ FOUL! (Kick / Push)";
+            return;
         }
     }
 
-    requestAnimationFrame(run);
+    // Nothing detected
+    output.innerText = "Watching...";
 }
 
-// START
-async function main() {
-    await setupCamera();
-    await loadModels();
-    run();
-}
-
-main();
+setInterval(analyseFrame, 200);
