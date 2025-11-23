@@ -48,15 +48,30 @@ function say(text) {
 // CAMERA SETUP (Back camera only)
 async function setupCamera() {
   const constraints = {
+    audio: false,
     video: {
-      facingMode: { exact: "environment" }  // 🔥 Force REAR camera
-    },
-    audio: false
+      facingMode: { exact: "environment" }   // 🔥 Force iPhone BACK camera
+    }
   };
 
-  let stream;
+  let stream = null;
 
   try {
+    // Try back camera
+    stream = await navigator.mediaDevices.getUserMedia(constraints);
+  } catch (err) {
+    // If back camera fails → try any camera (fallback)
+    console.warn("Back camera not available, using default camera.");
+    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  }
+
+  video.srcObject = stream;
+
+  return new Promise((resolve) => {
+    video.onloadedmetadata = () => resolve(video);
+  });
+}
+
     // Try with explicit back camera
     stream = await navigator.mediaDevices.getUserMedia(constraints);
   } catch (e) {
@@ -220,5 +235,6 @@ async function main() {
 }
 
 main();
+
 
 
