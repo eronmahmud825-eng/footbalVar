@@ -1,0 +1,32 @@
+body {
+    margin: 0;
+    background: #111;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+h1 {
+    margin-top: 15px;
+    font-size: 26px;
+}
+
+video,
+canvas {
+    width: 95%;
+    margin-top: 10px;
+    border-radius: 10px;
+}
+
+#replay {
+    width: 95%;
+    margin-top: 10px;
+    border-radius: 10px;
+    border: 2px solid yellow;
+}
+
+#event {
+    font-size: 30px;
+    margin-top: 20px;
+    color: yellow;
+}

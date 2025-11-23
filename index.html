@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mobile Referee System</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <h1>⚽ Live Referee (Mobile)</h1>
+
+    <!-- Live Camera Feed -->
+    <video id="camera" autoplay playsinline></video>
+
+    <!-- Canvas for AI Processing -->
+    <canvas id="canvas"></canvas>
+
+    <!-- VAR Replay -->
+    <video id="replay" controls style="display:none;"></video>
+
+    <h2 id="event">Waiting...</h2>
+
+    <!-- TensorFlow Models -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/movenet"></script>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
