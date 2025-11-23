@@ -1,38 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mobile Referee System</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI VAR Football System</title>
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Tensorflow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.9.0"></script>
+
+    <!-- Pose detection -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
+
+    <!-- Hand detection -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
+
+    <!-- Ball detection YOLO tiny -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 </head>
+
 <body>
+    <h1>AI VAR Football System</h1>
 
-<h1>⚽ Live Referee (Mobile)</h1>
+    <div class="scoreboard">
+        Player 1: <span id="p1">0</span>  
+        Player 2: <span id="p2">0</span>
+    </div>
 
-<!-- Live Camera Feed -->
-<video id="camera" autoplay playsinline></video>
+    <video id="camera" autoplay playsinline></video>
+    <canvas id="output"></canvas>
 
-<!-- Canvas for AI Processing -->
-<canvas id="canvas"></canvas>
+    <div id="decision">Waiting...</div>
 
-<!-- VAR Replay -->
-<video id="replay" controls style="display:none;"></video>
+    <button id="start">Start VAR</button>
+    <button id="stop">Stop</button>
 
-<h2 id="event">Waiting...</h2>
-
-<!-- TensorFlow Models -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/movenet"></script>
-
-<script src="script.js"></script>
-
+    <script src="script.js"></script>
 </body>
 </html>
 
 
 
+
 </html>
+
 
