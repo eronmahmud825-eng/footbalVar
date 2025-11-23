@@ -46,17 +46,12 @@ function say(text) {
 // SELFIE CAMERA ONLY (NO SWITCH)
 // ----------------------------
 // CAMERA SETUP (Back camera only)
+// CAMERA SETUP
 async function setupCamera() {
-  const constraints = {
-    audio: false,
-    video: {
-      facingMode: { exact: "environment" }   // 🔥 Force iPhone BACK camera
-    }
-  };
-
-  let stream = null;
-
-  try {
+  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  video.srcObject = stream;
+  return new Promise((resolve) => (video.onloadedmetadata = () => resolve(video)));
+}
     // Try back camera
     stream = await navigator.mediaDevices.getUserMedia(constraints);
   } catch (err) {
@@ -235,6 +230,7 @@ async function main() {
 }
 
 main();
+
 
 
 
