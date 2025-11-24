@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 # -------------------------
-# Camera and Settings
+# Camera Setup
 # -------------------------
 cap = cv2.VideoCapture(0)
 if not cap.isOpened():
@@ -16,7 +16,7 @@ cap.set(3, frame_width)
 cap.set(4, frame_height)
 
 # -------------------------
-# Goal area (pixels)
+# Goal Area (pixels)
 # -------------------------
 goal_area_top_left = (200, 100)
 goal_area_bottom_right = (440, 300)
@@ -28,10 +28,11 @@ score_team1 = 0
 score_team2 = 0
 
 # -------------------------
-# Ball color range (white)
+# Ball detection (white ball)
+# Adjusted HSV for real-world white balls
 # -------------------------
-lower_white = np.array([0, 0, 200])
-upper_white = np.array([180, 25, 255])
+lower_white = np.array([0, 0, 150])
+upper_white = np.array([180, 80, 255])
 
 # -------------------------
 # Handball detection area (upper half)
@@ -46,7 +47,7 @@ freeze_frame = None
 freeze_timer = 0
 
 # -------------------------
-# Helper functions
+# Helper Functions
 # -------------------------
 def inside_goal(x, y):
     return (goal_area_top_left[0] < x < goal_area_bottom_right[0] and
@@ -56,7 +57,7 @@ def check_handball(x, y):
     return hand_area_top < y < hand_area_bottom
 
 # -------------------------
-# Main loop
+# Main Loop
 # -------------------------
 while True:
     ret, frame = cap.read()
@@ -67,21 +68,21 @@ while True:
     mask = cv2.inRange(hsv, lower_white, upper_white)
     contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Draw goal area rectangle
+    # Draw goal area
     cv2.rectangle(frame, goal_area_top_left, goal_area_bottom_right, (0,255,0), 2)
 
     # Default event text
-    event_text = "Game in progress..."
+    event_text = "Waiting for ball..."
 
     # Detect ball
     for cnt in contours:
         area = cv2.contourArea(cnt)
-        if area > 500:  # Minimum ball size
+        if area > 200:  # smaller minimum to detect small balls
             x, y, w, h = cv2.boundingRect(cnt)
             cx = x + w // 2
             cy = y + h // 2
 
-            # Draw ball center
+            # Draw ball
             cv2.circle(frame, (cx, cy), 10, (0,0,255), -1)
             cv2.putText(frame, "BALL", (cx+10, cy), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
 
@@ -114,6 +115,9 @@ while True:
     # Show event text
     cv2.putText(frame, event_text, (20, frame_height-20), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0,255,255), 3)
 
+    # Show mask window (optional for debugging)
+    # cv2.imshow("Mask", mask)
+
     # Display frame
     cv2.imshow("AI Football VAR System", frame)
 
@@ -122,6 +126,6 @@ while True:
     if key == ord('q'):
         break
 
-# Release camera and close
+# Release camera
 cap.release()
 cv2.destroyAllWindows()
