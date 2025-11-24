@@ -1,29 +1,337 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>AI Football VAR</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Home VAR Football — Full Prototype</title>
+  <style>
+    :root{--bg:#0b0b0f;--card:#0f1720;--accent:#06b6d4;--good:#10b981;--bad:#ef4444}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,Segoe UI,Arial;background:linear-gradient(180deg,#020206 0%,#071028 100%);color:#e6eef6}
+    .app{max-width:980px;margin:18px auto;padding:16px}
+    header{display:flex;gap:12px;align-items:center}
+    h1{margin:0;font-size:1.25rem}
+    #controls{display:flex;gap:8px;margin-top:10px}
+    button{background:var(--accent);border:none;color:#022;padding:8px 12px;border-radius:8px;cursor:pointer}
+    main{display:grid;grid-template-columns:1fr 320px;gap:14px;margin-top:14px}
+    .card{background:rgba(255,255,255,0.03);padding:12px;border-radius:12px;min-height:120px}
+
+    #videoCanvas{width:100%;border-radius:10px;background:#000}
+    #videoElement{display:none}
+
+    .status{font-weight:700;padding:8px;margin-top:8px;border-radius:8px}
+    .goal{background:rgba(16,185,129,0.12);color:var(--good)}
+    .hand{background:rgba(239,68,68,0.08);color:var(--bad)}
+    .foul{background:rgba(250,204,21,0.06);color:#ffd166}
+
+    .scoreboard{display:flex;justify-content:space-between;align-items:center;padding:8px}
+    .score{font-size:2rem;font-weight:800}
+
+    .small{font-size:0.9rem;color:#cdd7e6}
+
+    /* Animations */
+    .flashGoal{animation:goalFlash 1s ease-in-out}
+    @keyframes goalFlash{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+
+    footer{margin-top:10px;color:#9fb0c8;font-size:0.85rem}
+    label{display:flex;align-items:center;gap:8px}
+    input[type=checkbox]{transform:scale(1.1)}
+  </style>
 </head>
 <body>
-    <h1>AI Football VAR System</h1>
+  <div class="app">
+    <header>
+      <h1>Home VAR Football — Full Prototype</h1>
+      <div class="small">Detects white ball, goal (inside goal box), handball, fouls. Uses TensorFlow MoveNet & color analysis.</div>
+    </header>
 
-    <div class="camera-container">
-        <video id="video" autoplay></video>
-        <canvas id="overlay"></canvas>
+    <div id="controls">
+      <button id="startBtn">Start Camera & AI</button>
+      <button id="stopBtn" disabled>Stop</button>
+      <label><input type="checkbox" id="showDebug"/> Show Debug Overlays</label>
+      <label style="margin-left:auto"><input type="checkbox" id="whistle" checked/> Whistle Sound</label>
     </div>
 
-    <div class="scoreboard">
-        <p id="score">Player1: 0 | Player2: 0</p>
-        <p id="event">Waiting for ball...</p>
-    </div>
+    <main>
+      <div class="card">
+        <canvas id="videoCanvas"></canvas>
+        <video id="videoElement" autoplay playsinline></video>
+        <div id="status" class="status">Idle — press <b>Start Camera & AI</b></div>
+      </div>
 
-    <audio id="whistle" src="sounds/whistle.mp3"></audio>
+      <aside class="card">
+        <div class="scoreboard">
+          <div>
+            <div class="small">Home</div>
+            <div id="homeScore" class="score">0</div>
+          </div>
+          <div style="text-align:center">
+            <div class="small">Timer</div>
+            <div id="timer" class="score">00:00</div>
+          </div>
+          <div>
+            <div class="small">Away</div>
+            <div id="awayScore" class="score">0</div>
+          </div>
+        </div>
 
-    <script src="app.js"></script>
+        <div style="margin-top:12px">
+          <div class="small">Events</div>
+          <div id="events" style="margin-top:6px;max-height:360px;overflow:auto"></div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="small">Settings</div>
+          <label>Goal box (pixels): <input id="goalBoxInput" type="range" min="50" max="400" value="200"/></label>
+          <div class="small">Adjust goal-box width (for small doors) — used for demo tuning.</div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>Prototype: not for competitive use. False positives are possible — tune thresholds for your environment.</footer>
+  </div>
+
+  <!-- External libs (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.12.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@1.4.1/dist/pose-detection.min.js"></script>
+  <script>
+    // --- Globals ---
+    const video = document.getElementById('videoElement');
+    const canvas = document.getElementById('videoCanvas');
+    const ctx = canvas.getContext('2d');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const statusEl = document.getElementById('status');
+    const eventsEl = document.getElementById('events');
+    const homeScoreEl = document.getElementById('homeScore');
+    const awayScoreEl = document.getElementById('awayScore');
+    const timerEl = document.getElementById('timer');
+    const showDebug = document.getElementById('showDebug');
+    const whistleCheckbox = document.getElementById('whistle');
+    const goalBoxInput = document.getElementById('goalBoxInput');
+
+    let detector = null;
+    let stream = null;
+    let rafId = null;
+    let modelLoaded = false;
+    let startTime = null;
+    let timerInterval = null;
+
+    // tuning thresholds
+    const BALL_COLOR_THRESHOLD = 180; // brightness threshold for "white"
+    const BALL_AREA_MIN = 40; // min detected white area
+    const HANDBALL_DISTANCE_THRESHOLD = 90; // pixels from hand to ball considered handball
+
+    // sounds
+    const whistleAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_d1e1be07f3.mp3?filename=referee-whistle-6047.mp3');
+    const goalAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/11/01/audio_3f1b3f3b0b.mp3?filename=crowd-cheer-03-12570.mp3');
+
+    // simple event push
+    function pushEvent(text, cls=''){
+      const el = document.createElement('div');
+      el.className = 'small';
+      el.style.padding = '6px 4px';
+      if(cls) el.classList.add(cls);
+      el.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+      eventsEl.prepend(el);
+    }
+
+    // initialize pose detector (MoveNet via TF.js)
+    async function initDetector(){
+      statusEl.textContent = 'Loading model...';
+      const model = poseDetection.SupportedModels.MoveNet;
+      detector = await poseDetection.createDetector(model, {modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING});
+      modelLoaded = true;
+      statusEl.textContent = 'Model loaded.';
+    }
+
+    // start camera
+    async function startCamera(){
+      stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:640},height:{ideal:480}},audio:false});
+      video.srcObject = stream;
+      await video.play();
+
+      // set canvas size to video size
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      startTime = Date.now();
+      timerInterval = setInterval(updateTimer, 500);
+
+      statusEl.textContent = 'Camera started. Initializing AI...';
+      await initDetector();
+      statusEl.textContent = 'Detecting — play on.';
+
+      rafId = requestAnimationFrame(loop);
+    }
+
+    function stopCamera(){
+      if(rafId) cancelAnimationFrame(rafId);
+      if(timerInterval) clearInterval(timerInterval);
+      if(stream){
+        stream.getTracks().forEach(t=>t.stop());
+        stream = null;
+      }
+      modelLoaded = false;
+      statusEl.textContent = 'Stopped.';
+    }
+
+    function updateTimer(){
+      const s = Math.floor((Date.now()-startTime)/1000);
+      const mm = String(Math.floor(s/60)).padStart(2,'0');
+      const ss = String(s%60).padStart(2,'0');
+      timerEl.textContent = `${mm}:${ss}`;
+    }
+
+    // core loop: draw video -> detect ball color -> detect poses -> decide events
+    async function loop(){
+      // draw video frame
+      ctx.drawImage(video,0,0,canvas.width,canvas.height);
+
+      // small-scale image for color detection
+      const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+
+      // ball detection: find clusters of bright pixels (white ball)
+      const ball = detectWhiteBall(imgData);
+
+      // goal-box: define at top center (adjustable width)
+      const gbWidth = Number(goalBoxInput.value);
+      const gbHeight = Math.floor(canvas.height * 0.35); // goal box height
+      const gbX = Math.floor((canvas.width - gbWidth)/2);
+      const gbY = canvas.height - gbHeight; // bottom area = goal (door)
+
+      // debug draw goal box
+      if(showDebug.checked){
+        ctx.strokeStyle = 'rgba(0,255,150,0.7)';
+        ctx.lineWidth = 3; ctx.strokeRect(gbX,gbY,gbWidth,gbHeight);
+      }
+
+      // detect poses (hands/players)
+      let poses = [];
+      if(modelLoaded && detector){
+        try{
+          poses = await detector.estimatePoses(video,{flipHorizontal:false});
+        }catch(e){console.error(e)}
+      }
+
+      // draw pose keypoints when debug
+      if(showDebug.checked && poses.length){
+        ctx.fillStyle = 'rgba(255,0,0,0.7)';
+        poses.forEach(p=>{
+          p.keypoints.forEach(k=>{
+            if(k.score>0.4){ctx.beginPath();ctx.arc(k.x,k.y,4,0,Math.PI*2);ctx.fill()}
+          })
+        })
+      }
+
+      // Event logic
+      if(ball){
+        // draw ball
+        ctx.beginPath(); ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=2; ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); ctx.stroke();
+
+        // check goal: ball center inside goal box and ball moving downward (approx)
+        if(ball.x > gbX && ball.x < gbX+gbWidth && ball.y+ball.r > gbY){
+          // count as goal
+          triggerGoal(ball);
+        }
+
+        // check handball: distance between ball and any hand keypoint
+        let handballDetected = false;
+        poses.forEach(p=>{
+          // keypoint names: 'left_wrist','right_wrist'
+          const kp = p.keypoints;
+          const wrists = kp.filter(k=>k.name && (k.name.includes('wrist')||k.name.includes('left_hand')||k.name.includes('right_hand')));
+          wrists.forEach(w=>{
+            if(w.score>0.4){
+              const dx = w.x - ball.x; const dy = w.y - ball.y;
+              const dist = Math.sqrt(dx*dx+dy*dy);
+              if(dist < HANDBALL_DISTANCE_THRESHOLD){
+                handballDetected = true;
+                triggerHandball(ball,w);
+              }
+            }
+          })
+        })
+
+        // simple foul heuristic: two players' bodies too close (should be tuned)
+        if(poses.length>=2){
+          const a = poses[0].keypoints.find(k=>k.name==='nose');
+          const b = poses[1].keypoints.find(k=>k.name==='nose');
+          if(a && b && a.score>0.3 && b.score>0.3){
+            const d = Math.hypot(a.x-b.x,a.y-b.y);
+            if(d < 60){ triggerFoul(); }
+          }
+        }
+      }
+
+      rafId = requestAnimationFrame(loop);
+    }
+
+    // --- Detection helpers ---
+    function detectWhiteBall(imgData){
+      // naive approach: scan pixels for bright clusters; pick largest cluster center
+      const w = imgData.width, h = imgData.height; const data = imgData.data;
+      const bright = [];
+      for(let y=0;y<h;y+=4){
+        for(let x=0;x<w;x+=4){
+          const i = (y*w + x)*4;
+          const r = data[i], g = data[i+1], b = data[i+2];
+          const brightness = (r+g+b)/3;
+          // require all channels high and not saturated green/blue (to avoid grass)
+          if(brightness > BALL_COLOR_THRESHOLD && r>g-10 && r>b-10){
+            bright.push({x,y});
+          }
+        }
+      }
+      if(bright.length < BALL_AREA_MIN) return null;
+      // compute centroid
+      let sx=0,sy=0; bright.forEach(p=>{sx+=p.x;sy+=p.y});
+      const cx = sx/bright.length, cy = sy/bright.length;
+      // estimate radius from spread
+      let maxd=0; bright.forEach(p=>{const d=Math.hypot(p.x-cx,p.y-cy); if(d>maxd) maxd=d});
+      return {x:cx,y:cy,r:Math.max(6,Math.min(60,Math.floor(maxd)))};
+    }
+
+    // event triggers (debounce to avoid repeating)
+    let lastGoalAt=0, lastHandAt=0, lastFoulAt=0;
+    function triggerGoal(ball){
+      const now=Date.now(); if(now - lastGoalAt < 3000) return; lastGoalAt=now;
+      statusEl.textContent='GOAL!!!'; statusEl.classList.add('goal'); setTimeout(()=>statusEl.classList.remove('goal'),1000);
+      pushEvent('GOAL detected — ball entered goal area', 'goal');
+      goalAudio.play().catch(()=>{});
+      // increment home for demo
+      homeScoreEl.textContent = String(Number(homeScoreEl.textContent)+1);
+      // small animation
+      canvas.classList.add('flashGoal'); setTimeout(()=>canvas.classList.remove('flashGoal'),600);
+    }
+
+    function triggerHandball(ball, wrist){
+      const now=Date.now(); if(now - lastHandAt < 2500) return; lastHandAt=now;
+      statusEl.textContent='HAND BALL!'; statusEl.classList.add('hand'); setTimeout(()=>statusEl.classList.remove('hand'),1200);
+      pushEvent('Handball detected near wrist — foul/stop play', 'hand');
+      if(whistleCheckbox.checked) whistleAudio.play().catch(()=>{});
+    }
+
+    function triggerFoul(){
+      const now=Date.now(); if(now - lastFoulAt < 3000) return; lastFoulAt=now;
+      statusEl.textContent='FOUL'; statusEl.classList.add('foul'); setTimeout(()=>statusEl.classList.remove('foul'),900);
+      pushEvent('Foul detected (players too close)', 'foul');
+      if(whistleCheckbox.checked) whistleAudio.play().catch(()=>{});
+    }
+
+    // attach controls
+    startBtn.onclick = async ()=>{
+      startBtn.disabled=true; stopBtn.disabled=false;
+      try{ await startCamera(); }catch(e){console.error(e); statusEl.textContent = 'Camera error: '+e.message; startBtn.disabled=false; stopBtn.disabled=true}
+    }
+    stopBtn.onclick = ()=>{ startBtn.disabled=false; stopBtn.disabled=true; stopCamera(); }
+
+    // cleanup on page unload
+    window.addEventListener('beforeunload',()=>{ if(stream) stream.getTracks().forEach(t=>t.stop()) });
+
+  </script>
 </body>
 </html>
-
 
 
 
