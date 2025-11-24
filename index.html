@@ -1,247 +1,46 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-  <title>Home VAR Football — iPhone Fixed Version</title>
-
-  <style>
-    body{margin:0;background:#0b0b0f;color:#fff;font-family:Arial;padding:10px;text-align:center}
-    h1{font-size:1.1rem;margin-bottom:10px}
-    #videoCanvas{width:100%;max-width:500px;border:3px solid #0f0;border-radius:12px;background:#000}
-    #videoElement{display:none}
-    .status{margin-top:10px;padding:10px;font-size:1.2rem;border-radius:8px}
-    .goal{background:#0f03;color:#0f0}
-    .hand{background:#300;color:#f44}
-    .foul{background:#330;color:#fe0}
-    button{padding:10px 16px;font-size:1rem;border:none;border-radius:8px;background:#0af;color:#000;margin:5px;cursor:pointer}
-  </style>
+  <title>Home VAR Football — iPhone Fixed</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="container">
+    <h1>Home VAR Football</h1>
+    <p class="muted">Tap <b>Start Camera</b> to give permission (required on iPhone).</p>
 
-<h1>HOME VAR FOOTBALL — iPhone 11 PRO FIXED</h1>
-<p>Detects: Goal • Handball • Fouls • White Ball</p>
+    <div class="controls">
+      <button id="startBtn">Start Camera</button>
+      <button id="stopBtn" disabled>Stop</button>
+    </div>
 
-<button id="startBtn">Start Camera</button>
-<button id="stopBtn" disabled>Stop</button>
+    <div class="video-wrap">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="canvas"></canvas>
+    </div>
 
-<br>
-<video id="videoElement" autoplay playsinline></video>
-<canvas id="videoCanvas"></canvas>
-<div id="status" class="status">Idle...</div>
+    <div id="status" class="status">Idle — press Start Camera</div>
 
-<!-- TensorFlow + MoveNet -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.12.0/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@1.4.1/dist/pose-detection.min.js"></script>
+    <div class="sidebar">
+      <div class="scoreboard">
+        <div>Home: <span id="homeScore">0</span></div>
+        <div>Away: <span id="awayScore">0</span></div>
+        <div>Timer: <span id="timer">00:00</span></div>
+      </div>
+      <div class="events" id="events"></div>
+    </div>
 
-<script>
-// DOM
-const video = document.getElementById("videoElement");
-const canvas = document.getElementById("videoCanvas");
-const ctx = canvas.getContext("2d");
-const startBtn = document.getElementById("startBtn");
-const stopBtn = document.getElementById("stopBtn");
-const statusEl = document.getElementById("status");
+    <footer>Publish this folder to GitHub Pages (HTTPS) for camera access on iPhone.</footer>
+  </div>
 
-let detector = null;
-let stream = null;
-let raf = null;
-let modelLoaded = false;
-
-// Sounds
-const whistle = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_d1e1be07f3.mp3?filename=referee-whistle-6047.mp3");
-const goalSound = new Audio("https://cdn.pixabay.com/download/audio/2022/11/01/audio_3f1b3f3b0b.mp3?filename=crowd-cheer-03-12570.mp3");
-
-//---------------------------------------------------------
-// iPHONE CAMERA FIX
-// Must not force "environment", use ideal fallback
-//---------------------------------------------------------
-const CAMERA_CONSTRAINTS = {
-  audio: false,
-  video: {
-    width: { ideal: 640 },
-    height: { ideal: 480 },
-    facingMode: { ideal: "environment" }   // works on iPhone
-  }
-};
-
-//---------------------------------------------------------
-// START CAMERA
-//---------------------------------------------------------
-async function startCamera() {
-  try {
-    statusEl.textContent = "Requesting camera...";
-
-    stream = await navigator.mediaDevices.getUserMedia(CAMERA_CONSTRAINTS);
-
-    video.srcObject = stream;
-    await video.play();
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    statusEl.textContent = "Loading AI Model...";
-    await loadModel();
-
-    statusEl.textContent = "Camera OK — Detecting...";
-    raf = requestAnimationFrame(loop);
-
-  } catch (e) {
-    statusEl.textContent = "Camera error: " + e.message;
-    console.error(e);
-  }
-}
-
-//---------------------------------------------------------
-// STOP CAMERA
-//---------------------------------------------------------
-function stopCamera() {
-  if (raf) cancelAnimationFrame(raf);
-  if (stream) stream.getTracks().forEach(t => t.stop());
-  statusEl.textContent = "Stopped";
-}
-
-//---------------------------------------------------------
-// LOAD MOVENET
-//---------------------------------------------------------
-async function loadModel() {
-  const model = poseDetection.SupportedModels.MoveNet;
-  detector = await poseDetection.createDetector(model, {
-    modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
-  });
-  modelLoaded = true;
-}
-
-//---------------------------------------------------------
-// MAIN LOOP
-//---------------------------------------------------------
-async function loop() {
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const ball = detectWhiteBall(imgData);
-
-  if (modelLoaded) {
-    const poses = await detector.estimatePoses(video);
-
-    if (ball) {
-      drawBall(ball);
-
-      // Check goal: bottom of frame
-      if (ball.y > canvas.height - 80) {
-        triggerGoal();
-      }
-
-      // Check handball
-      poses.forEach(p => {
-        const wristL = p.keypoints.find(k => k.name === "left_wrist");
-        const wristR = p.keypoints.find(k => k.name === "right_wrist");
-
-        [wristL, wristR].forEach(w => {
-          if (w && w.score > 0.4) {
-            if (dist(w.x, w.y, ball.x, ball.y) < 80) {
-              triggerHandball();
-            }
-          }
-        });
-      });
-
-      // Simple foul: 2 players too close
-      if (poses.length >= 2) {
-        const a = poses[0].keypoints.find(k => k.name === "nose");
-        const b = poses[1].keypoints.find(k => k.name === "nose");
-        if (a && b && dist(a.x, a.y, b.x, b.y) < 60) triggerFoul();
-      }
-    }
-  }
-
-  raf = requestAnimationFrame(loop);
-}
-
-//---------------------------------------------------------
-// BALL DETECTION (white brightness)
-//---------------------------------------------------------
-function detectWhiteBall(img) {
-  const w = img.width;
-  const h = img.height;
-  const data = img.data;
-
-  const points = [];
-  for (let y = 0; y < h; y += 3) {
-    for (let x = 0; x < w; x += 3) {
-      const i = (y * w + x) * 4;
-      const r = data[i], g = data[i + 1], b = data[i + 2];
-      const brightness = (r + g + b) / 3;
-      if (brightness > 200 && r > g - 20 && r > b - 20) points.push({ x, y });
-    }
-  }
-
-  if (points.length < 30) return null;
-
-  let sx = 0, sy = 0;
-  points.forEach(p => { sx += p.x; sy += p.y });
-  const cx = sx / points.length;
-  const cy = sy / points.length;
-
-  return { x: cx, y: cy, r: 20 };
-}
-
-//---------------------------------------------------------
-// DRAW BALL
-//---------------------------------------------------------
-function drawBall(b) {
-  ctx.beginPath();
-  ctx.strokeStyle = "white";
-  ctx.lineWidth = 3;
-  ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-  ctx.stroke();
-}
-
-//---------------------------------------------------------
-// EVENTS
-//---------------------------------------------------------
-let lastGoal = 0;
-let lastHand = 0;
-let lastFoul = 0;
-
-function triggerGoal() {
-  if (Date.now() - lastGoal < 2000) return;
-  lastGoal = Date.now();
-  goalSound.play();
-  statusEl.textContent = "GOAL!!!";
-  statusEl.className = "status goal";
-}
-
-function triggerHandball() {
-  if (Date.now() - lastHand < 2000) return;
-  lastHand = Date.now();
-  whistle.play();
-  statusEl.textContent = "HAND BALL!";
-  statusEl.className = "status hand";
-}
-
-function triggerFoul() {
-  if (Date.now() - lastFoul < 2000) return;
-  lastFoul = Date.now();
-  whistle.play();
-  statusEl.textContent = "FOUL!";
-  statusEl.className = "status foul";
-}
-
-//---------------------------------------------------------
-// UTIL
-//---------------------------------------------------------
-function dist(x1, y1, x2, y2) {
-  return Math.hypot(x1 - x2, y1 - y2);
-}
-
-//---------------------------------------------------------
-// BUTTONS
-//---------------------------------------------------------
-startBtn.onclick = () => { startBtn.disabled = true; stopBtn.disabled = false; startCamera(); };
-stopBtn.onclick = () => { startBtn.disabled = false; stopBtn.disabled = true; stopCamera(); };
-
-</script>
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.12.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@1.4.1/dist/pose-detection.min.js"></script>
+  
+  <!-- App JS -->
+  <script src="main.js"></script>
 </body>
 </html>
 
