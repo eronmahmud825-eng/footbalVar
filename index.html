@@ -1,47 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI VAR Football System</title>
-    <link rel="stylesheet" href="style.css" />
-
-    <!-- Tensorflow.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.9.0"></script>
-
-    <!-- Pose detection -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
-
-    <!-- Hand detection -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
-
-    <!-- Ball detection YOLO tiny -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <meta charset="UTF-8">
+    <title>AI Football VAR</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <h1>AI VAR Football System</h1>
+    <h1>AI Football VAR System</h1>
 
-    <div class="scoreboard">
-        Player 1: <span id="p1">0</span>  
-        Player 2: <span id="p2">0</span>
+    <div class="camera-container">
+        <video id="video" autoplay></video>
+        <canvas id="overlay"></canvas>
     </div>
 
-    <video id="camera" autoplay playsinline></video>
-    <canvas id="output"></canvas>
+    <div class="scoreboard">
+        <p id="score">Player1: 0 | Player2: 0</p>
+        <p id="event">Waiting for ball...</p>
+    </div>
 
-    <div id="decision">Waiting...</div>
+    <audio id="whistle" src="sounds/whistle.mp3"></audio>
 
-    <button id="start">Start VAR</button>
-    <button id="stop">Stop</button>
-
-    <script src="script.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
 
 
-
-
-</html>
 
 
