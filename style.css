@@ -1,35 +1,20 @@
-body {
-    text-align: center;
-    font-family: Arial, sans-serif;
-    background: #222;
-    color: #fff;
-}
+:root{--bg:#071026;--card:#0f1720;--accent:#06b6d4;--good:#10b981;--bad:#ef4444}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,var(--bg),#020206);color:#e6eef6;font-family:Arial,Helvetica,sans-serif}
+.container{max-width:900px;margin:14px auto;padding:12px}
+h1{margin:0 0 6px;font-size:1.2rem}
+.muted{color:#a9bed6;margin-top:0}
+.controls{display:flex;gap:8px;margin:10px 0}
+button{background:var(--accent);border:none;color:#002;padding:10px 14px;border-radius:8px;cursor:pointer}
+.video-wrap{position:relative;max-width:720px}
+video,canvas{width:100%;border-radius:10px;background:#000;display:block}
+.status{margin-top:10px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02)}
+.sidebar{margin-top:12px}
+.scoreboard{display:flex;gap:18px;align-items:center}
+.events{margin-top:8px;max-height:220px;overflow:auto;font-size:0.9rem}
+footer{margin-top:10px;color:#9fb0c8}
 
-h1 {
-    margin-top: 20px;
-}
 
-.camera-container {
-    position: relative;
-    display: inline-block;
-}
-
-video, canvas {
-    width: 640px;
-    height: 480px;
-    border: 2px solid #0f0;
-}
-
-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-.scoreboard {
-    margin-top: 20px;
-    font-size: 24px;
-}
 
 
 
