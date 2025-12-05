@@ -1,167 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Football Video Analyzer</title>
-
-    <style>
-        body {
-            background: #0f1824;
-            color: white;
-            font-family: Arial;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: auto;
-        }
-
-        video {
-            width: 100%;
-            border: 3px solid #3fa9f5;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-
-        .events {
-            margin-top: 20px;
-            padding: 15px;
-            background: #162230;
-            border-radius: 8px;
-        }
-
-        .event-item {
-            background: #233040;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 6px;
-            border-left: 4px solid #3fa9f5;
-        }
-
-        .screenshot {
-            width: 160px;
-            border-radius: 6px;
-            margin-top: 5px;
-            border: 2px solid #3fa9f5;
-        }
-
-        button {
-            padding: 10px 20px;
-            background: #3fa9f5;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background: #5fc3ff;
-        }
-    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Football Quiz Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
 </head>
 
-<body>
-<div class="container">
-    <h1>⚽ Automatic Football Video Analyzer</h1>
+<body class="bg-dark text-white">
 
-    <input type="file" id="videoInput" accept="video/*"><br>
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="card p-4 shadow-lg bg-secondary text-white w-100" style="max-width: 380px;">
+            <h2 class="text-center mb-3">Football Quiz Login</h2>
 
-    <video id="video" controls></video>
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" id="username" required>
+                </div>
 
-    <button onclick="startAnalysis()">Start Analyzing</button>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" required>
+                </div>
 
-    <div class="events" id="eventsList">
-        <h3>Detected Events:</h3>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" required>
+                </div>
+
+                <button class="btn btn-warning w-100" type="submit">Start Quiz</button>
+            </form>
+        </div>
     </div>
-</div>
 
-<script>
-let video = document.getElementById("video");
-let eventsList = document.getElementById("eventsList");
-
-let goalkeeperColor = "yellow"; // demo logic
-let eventCounter = 0;
-
-// Load video
-document.getElementById("videoInput").addEventListener("change", function () {
-    let file = this.files[0];
-    if (file) {
-        video.src = URL.createObjectURL(file);
-    }
-});
-
-// MAIN FUNCTION
-function startAnalysis() {
-    if (!video.src) {
-        alert("Please upload a video first!");
-        return;
-    }
-
-    let interval = 2000; // scan every 2 seconds
-    let duration = video.duration * 1000;
-
-    let t = 0;
-    let scanner = setInterval(() => {
-        if (t >= duration) {
-            clearInterval(scanner);
-            alert("Analysis completed!");
-            return;
-        }
-
-        video.currentTime = t / 1000;
-
-        // Simulate detection
-        simulateDetection(video.currentTime);
-
-        t += interval;
-
-    }, interval);
-}
-
-// DEMO: Random event generator
-function simulateDetection(time) {
-
-    // 30% chance of event
-    if (Math.random() < 0.7) return;
-
-    let eventType = Math.random() < 0.5 ? "Handball" : "Foul";
-
-    // Ignore goalkeeper handball
-    if (eventType === "Handball" && goalkeeperColor === "yellow") {
-        console.log("Goalkeeper hand ignored.");
-        return;
-    }
-
-    createScreenshot(eventType, time);
-}
-
-function createScreenshot(eventType, time) {
-    let canvas = document.createElement("canvas");
-    let ctx = canvas.getContext("2d");
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    let imageURL = canvas.toDataURL("image/png");
-
-    eventCounter++;
-
-    // Add to event list
-    let div = document.createElement("div");
-    div.className = "event-item";
-    div.innerHTML = `
-        <b>${eventCounter}. ${eventType}</b><br>
-        Time: ${time.toFixed(2)} seconds<br>
-        <img src="${imageURL}" class="screenshot">
-    `;
-    eventsList.appendChild(div);
-}
-</script>
+    <script src="script.js"></script>
 </body>
+
 </html>
 
 
