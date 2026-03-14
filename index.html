@@ -1,44 +1,368 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Football Quiz Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dominoes Aznif</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: #2e2e2e;
+    --accent: #f5c842;
+    --text: #f0ece0;
+    --muted: #777;
+    --p1: #f5c842;
+    --p2: #3ecf8e;
+    --p3: #e05fff;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:
+      repeating-linear-gradient(0deg,transparent,transparent 39px,#ffffff05 39px,#ffffff05 40px),
+      repeating-linear-gradient(90deg,transparent,transparent 39px,#ffffff05 39px,#ffffff05 40px);
+    pointer-events:none; z-index:0;
+  }
+  .container { position:relative; z-index:1; max-width:960px; margin:0 auto; padding:20px 12px; }
+
+  header { text-align:center; margin-bottom:24px; }
+  .domino-icon { font-size:36px; display:block; margin-bottom:4px; filter:drop-shadow(0 0 18px var(--accent)); }
+  header h1 {
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(42px,10vw,90px);
+    letter-spacing:5px; line-height:1;
+    background:linear-gradient(135deg,var(--accent) 0%,#fff8e0 60%,var(--accent) 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  header p { color:var(--muted); font-size:11px; letter-spacing:3px; text-transform:uppercase; margin-top:4px; }
+
+  /* ── TOP ROW: always 2 columns, even on mobile ── */
+  .top-row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .top-row .player-card {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* ── BOTTOM ROW: Lawin centered ── */
+  .bottom-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .bottom-row .player-card {
+    width: 50%;
+    min-width: 160px;
+  }
+
+  /* ── CARD ── */
+  .player-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 12px 14px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+  .player-card::before { content:''; position:absolute; top:0;left:0;right:0; height:3px; }
+  .player-card.p1::before { background:var(--p1); }
+  .player-card.p2::before { background:var(--p2); }
+  .player-card.p3::before { background:var(--p3); }
+  .player-card.winner { transform:scale(1.02); box-shadow:0 0 30px rgba(245,200,66,0.3); border-color:var(--accent); }
+
+  .winner-badge { display:none; position:absolute; top:10px; right:10px; font-size:10px; font-weight:700; letter-spacing:1px; color:var(--accent); }
+  .player-card.winner .winner-badge { display:block; }
+
+  .player-avatar {
+    width:40px; height:40px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Bebas Neue',sans-serif; font-size:17px;
+    margin-bottom:8px; letter-spacing:1px; flex-shrink:0;
+  }
+  .p1 .player-avatar { background:rgba(245,200,66,.15); color:var(--p1); border:2px solid rgba(245,200,66,.3); }
+  .p2 .player-avatar { background:rgba(62,207,142,.15); color:var(--p2); border:2px solid rgba(62,207,142,.3); }
+  .p3 .player-avatar { background:rgba(224,95,255,.15); color:var(--p3); border:2px solid rgba(224,95,255,.3); }
+
+  .player-name { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:2px; line-height:1; }
+  .p1 .player-name { color:var(--p1); }
+  .p2 .player-name { color:var(--p2); }
+  .p3 .player-name { color:var(--p3); }
+
+  .total-score { font-family:'Bebas Neue',sans-serif; font-size:52px; line-height:1; margin:4px 0 2px; letter-spacing:-1px; }
+  .score-label { font-size:9px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; }
+
+  /* ── POINT BUTTONS ── */
+  .point-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  /* last button (+35) spans full width */
+  .point-buttons .pt-btn:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .pt-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: 1px;
+    padding: 8px 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    width: 100%;
+  }
+  .p1 .pt-btn:hover, .p1 .pt-btn:active { background:rgba(245,200,66,.25); border-color:var(--p1); color:var(--p1); }
+  .p2 .pt-btn:hover, .p2 .pt-btn:active { background:rgba(62,207,142,.25); border-color:var(--p2); color:var(--p2); }
+  .p3 .pt-btn:hover, .p3 .pt-btn:active { background:rgba(224,95,255,.25); border-color:var(--p3); color:var(--p3); }
+  .pt-btn:active { transform:scale(0.93); }
+
+  /* ── HISTORY ── */
+  .history-section { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; margin-bottom:20px; }
+  .history-header { padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .section-title { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:3px; color:var(--muted); display:flex; align-items:center; gap:8px; }
+  .section-title span { color:var(--accent); }
+  .clear-btn { background:transparent; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:11px; padding:5px 12px; cursor:pointer; transition:all 0.2s; }
+  .clear-btn:hover { border-color:#e05555; color:#e05555; }
+
+  table { width:100%; border-collapse:collapse; }
+  thead tr { background:var(--surface2); }
+  th { padding:9px 14px; text-align:left; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); font-weight:500; }
+  th.p1c{color:var(--p1);} th.p2c{color:var(--p2);} th.p3c{color:var(--p3);}
+  td { padding:10px 14px; font-size:13px; border-bottom:1px solid var(--border); }
+  tr:last-child td { border-bottom:none; }
+  .entry-num { font-family:'Bebas Neue',sans-serif; font-size:15px; color:var(--muted); }
+  .score-cell { font-weight:700; font-size:14px; }
+  .score-cell.p1c{color:var(--p1);} .score-cell.p2c{color:var(--p2);} .score-cell.p3c{color:var(--p3);}
+  .added { font-size:12px; opacity:.6; font-weight:400; }
+  .undo-btn { background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:4px 7px; border-radius:6px; transition:all 0.15s; }
+  .undo-btn:hover { color:#e05555; background:rgba(224,85,85,.1); }
+
+  .empty-state { text-align:center; padding:36px 20px; color:var(--muted); }
+  .empty-state .di { font-size:34px; margin-bottom:8px; display:block; opacity:.3; }
+  .empty-state p { font-size:12px; letter-spacing:1px; }
+
+  footer { text-align:center; color:var(--muted); font-size:10px; letter-spacing:2px; margin-top:4px; opacity:.4; }
+
+  .toast {
+    position:fixed; bottom:24px; left:50%;
+    transform:translateX(-50%) translateY(100px);
+    background:var(--surface2); border:1px solid var(--accent);
+    color:var(--accent); padding:10px 24px; border-radius:50px;
+    font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:2px;
+    transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index:999;
+    white-space: nowrap;
+  }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+  @keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.08)} 100%{transform:scale(1)} }
+  .pop { animation:pop 0.28s ease; }
+</style>
 </head>
+<body>
+<div class="container">
 
-<body class="bg-dark text-white">
+  <header>
+    <span class="domino-icon">🁣</span>
+    <h1>DOMINOES AZNIF</h1>
+    <p>3 Players · Highest Score Wins 🏆</p>
+  </header>
 
-    <div class="container d-flex justify-content-center align-items-center vh-100">
-        <div class="card p-4 shadow-lg bg-secondary text-white w-100" style="max-width: 380px;">
-            <h2 class="text-center mb-3">Football Quiz Login</h2>
+  <!-- ROW 1: ERON + ARIN side by side (always) -->
+  <div class="top-row">
 
-            <form id="loginForm">
-                <div class="mb-3">
-                    <label class="form-label">Name</label>
-                    <input type="text" class="form-control" id="username" required>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" required>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" required>
-                </div>
-
-                <button class="btn btn-warning w-100" type="submit">Start Quiz</button>
-            </form>
-        </div>
+    <div class="player-card p1" id="card-0">
+      <div class="winner-badge">👑 WIN</div>
+      <div class="player-avatar">ER</div>
+      <div class="player-name">ERON</div>
+      <div class="total-score" id="total-0">0</div>
+      <div class="score-label">Total Points</div>
+      <div class="point-buttons">
+        <button class="pt-btn" onclick="addPoints(0,5)">+5</button>
+        <button class="pt-btn" onclick="addPoints(0,10)">+10</button>
+        <button class="pt-btn" onclick="addPoints(0,15)">+15</button>
+        <button class="pt-btn" onclick="addPoints(0,20)">+20</button>
+        <button class="pt-btn" onclick="addPoints(0,25)">+25</button>
+        <button class="pt-btn" onclick="addPoints(0,30)">+30</button>
+        <button class="pt-btn" onclick="addPoints(0,35)">+35</button>
+      </div>
     </div>
 
-    <script src="script.js"></script>
+    <div class="player-card p2" id="card-1">
+      <div class="winner-badge">👑 WIN</div>
+      <div class="player-avatar">AR</div>
+      <div class="player-name">ARIN</div>
+      <div class="total-score" id="total-1">0</div>
+      <div class="score-label">Total Points</div>
+      <div class="point-buttons">
+        <button class="pt-btn" onclick="addPoints(1,5)">+5</button>
+        <button class="pt-btn" onclick="addPoints(1,10)">+10</button>
+        <button class="pt-btn" onclick="addPoints(1,15)">+15</button>
+        <button class="pt-btn" onclick="addPoints(1,20)">+20</button>
+        <button class="pt-btn" onclick="addPoints(1,25)">+25</button>
+        <button class="pt-btn" onclick="addPoints(1,30)">+30</button>
+        <button class="pt-btn" onclick="addPoints(1,35)">+35</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW 2: LAWIN centered below -->
+  <div class="bottom-row">
+    <div class="player-card p3" id="card-2">
+      <div class="winner-badge">👑 WIN</div>
+      <div class="player-avatar">LW</div>
+      <div class="player-name">LAWIN</div>
+      <div class="total-score" id="total-2">0</div>
+      <div class="score-label">Total Points</div>
+      <div class="point-buttons">
+        <button class="pt-btn" onclick="addPoints(2,5)">+5</button>
+        <button class="pt-btn" onclick="addPoints(2,10)">+10</button>
+        <button class="pt-btn" onclick="addPoints(2,15)">+15</button>
+        <button class="pt-btn" onclick="addPoints(2,20)">+20</button>
+        <button class="pt-btn" onclick="addPoints(2,25)">+25</button>
+        <button class="pt-btn" onclick="addPoints(2,30)">+30</button>
+        <button class="pt-btn" onclick="addPoints(2,35)">+35</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="history-section">
+    <div class="history-header">
+      <div class="section-title">📋 <span>History</span></div>
+      <button class="clear-btn" onclick="clearAll()">🗑 Clear All</button>
+    </div>
+    <div id="table-wrapper">
+      <div class="empty-state" id="empty-state">
+        <span class="di">🁣</span>
+        <p>No points yet — tap a button above!</p>
+      </div>
+      <table id="history-table" style="display:none">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th class="p1c">Eron</th>
+            <th class="p2c">Arin</th>
+            <th class="p3c">Lawin</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>AZNIF DOMINOES · HIGHEST SCORE WINS</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const names = ['Eron', 'Arin', 'Lawin'];
+  let totals = JSON.parse(localStorage.getItem('aznif_v3_totals') || '[0,0,0]');
+  let history = JSON.parse(localStorage.getItem('aznif_v3_history') || '[]');
+
+  function save() {
+    localStorage.setItem('aznif_v3_totals', JSON.stringify(totals));
+    localStorage.setItem('aznif_v3_history', JSON.stringify(history));
+  }
+
+  function addPoints(playerIdx, pts) {
+    totals[playerIdx] += pts;
+    history.push({ player: playerIdx, pts: pts, snap: [...totals] });
+    save();
+    render();
+    showToast(names[playerIdx] + ' +' + pts);
+  }
+
+  function undoEntry(idx) {
+    history.splice(idx, 1);
+    totals = [0, 0, 0];
+    history.forEach(h => totals[h.player] += h.pts);
+    let running = [0,0,0];
+    history.forEach(h => { running[h.player] += h.pts; h.snap = [...running]; });
+    save(); render();
+    showToast('Undone!');
+  }
+
+  function clearAll() {
+    if (!history.length) return;
+    if (confirm('Clear all scores?')) {
+      totals = [0,0,0]; history = [];
+      save(); render();
+      showToast('Game Reset!');
+    }
+  }
+
+  function render() {
+    totals.forEach((t, i) => {
+      const el = document.getElementById('total-' + i);
+      el.textContent = t;
+      el.classList.remove('pop');
+      void el.offsetWidth;
+      el.classList.add('pop');
+    });
+
+    [0,1,2].forEach(i => document.getElementById('card-' + i).classList.remove('winner'));
+    if (totals.some(t => t > 0)) {
+      document.getElementById('card-' + totals.indexOf(Math.max(...totals))).classList.add('winner');
+    }
+
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = '';
+
+    if (!history.length) {
+      document.getElementById('empty-state').style.display = '';
+      document.getElementById('history-table').style.display = 'none';
+    } else {
+      document.getElementById('empty-state').style.display = 'none';
+      document.getElementById('history-table').style.display = 'table';
+      [...history].reverse().forEach((h, ri) => {
+        const actualIdx = history.length - 1 - ri;
+        const cells = [0,1,2].map(i => {
+          const c = ['p1c','p2c','p3c'][i];
+          return i === h.player
+            ? `<td class="score-cell ${c}"><b>+${h.pts}</b> <span class="added">= ${h.snap[i]}</span></td>`
+            : `<td class="score-cell ${c}" style="opacity:.4">${h.snap[i]}</td>`;
+        }).join('');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="entry-num">#${actualIdx+1}</td>${cells}<td><button class="undo-btn" onclick="undoEntry(${actualIdx})">↩</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  render();
+</script>
 </body>
-
 </html>
-
 
