@@ -2,367 +2,1348 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dominoes Aznif</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FAV — Football AI VAR</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap');
+
   :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #242424;
-    --border: #2e2e2e;
-    --accent: #f5c842;
-    --text: #f0ece0;
-    --muted: #777;
-    --p1: #f5c842;
-    --p2: #3ecf8e;
-    --p3: #e05fff;
+    --green: #00c853;
+    --green-dark: #007c32;
+    --green-pitch: #1a5c2e;
+    --red: #ff1744;
+    --yellow: #ffd600;
+    --white: #f5f5f0;
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: rgba(255,255,255,0.08);
   }
-  * { margin:0; padding:0; box-sizing:border-box; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
     background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
     min-height: 100vh;
+    overflow-x: hidden;
   }
-  body::before {
-    content:'';
-    position:fixed; inset:0;
-    background-image:
-      repeating-linear-gradient(0deg,transparent,transparent 39px,#ffffff05 39px,#ffffff05 40px),
-      repeating-linear-gradient(90deg,transparent,transparent 39px,#ffffff05 39px,#ffffff05 40px);
-    pointer-events:none; z-index:0;
-  }
-  .container { position:relative; z-index:1; max-width:960px; margin:0 auto; padding:20px 12px; }
 
-  header { text-align:center; margin-bottom:24px; }
-  .domino-icon { font-size:36px; display:block; margin-bottom:4px; filter:drop-shadow(0 0 18px var(--accent)); }
-  header h1 {
-    font-family:'Bebas Neue',sans-serif;
-    font-size:clamp(42px,10vw,90px);
-    letter-spacing:5px; line-height:1;
-    background:linear-gradient(135deg,var(--accent) 0%,#fff8e0 60%,var(--accent) 100%);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-  }
-  header p { color:var(--muted); font-size:11px; letter-spacing:3px; text-transform:uppercase; margin-top:4px; }
-
-  /* ── TOP ROW: always 2 columns, even on mobile ── */
-  .top-row {
+  /* HEADER */
+  .header {
     display: flex;
-    flex-direction: row;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .top-row .player-card {
-    flex: 1;
-    min-width: 0;
-  }
-
-  /* ── BOTTOM ROW: Lawin centered ── */
-  .bottom-row {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-  }
-  .bottom-row .player-card {
-    width: 50%;
-    min-width: 160px;
-  }
-
-  /* ── CARD ── */
-  .player-card {
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
     background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 26px;
+    letter-spacing: 3px;
+    color: var(--green);
+    line-height: 1;
+  }
+  .logo span { color: var(--white); }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #555;
+    display: inline-block;
+    margin-right: 6px;
+    transition: background 0.3s;
+  }
+  .status-dot.live { background: var(--green); animation: pulse 1.5s infinite; }
+  .status-dot.alert { background: var(--red); animation: pulse 0.5s infinite; }
+  @keyframes pulse {
+    0%,100%{opacity:1;transform:scale(1)}
+    50%{opacity:0.5;transform:scale(1.3)}
+  }
+  .status-text { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; letter-spacing: 1px; color: rgba(255,255,255,0.5); }
+
+  /* CAMERA SECTION */
+  .camera-section {
+    position: relative;
+    width: 100%;
+    background: #000;
+    aspect-ratio: 4/3;
+    max-height: 320px;
+    overflow: hidden;
+  }
+  #video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    display: block;
+  }
+  #overlay-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    transform: scaleX(-1);
+    pointer-events: none;
+  }
+
+  .scan-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--green) 50%, transparent 100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .scan-line.active { opacity: 0.7; animation: scanMove 2s linear infinite; }
+  @keyframes scanMove { from{top:0%} to{top:100%} }
+
+  .cam-hud {
+    position: absolute;
+    top: 10px; left: 10px; right: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+  }
+  .hud-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .hud-live { background: rgba(255,23,68,0.85); color: #fff; display: flex; align-items: center; gap: 5px; }
+  .hud-model { background: rgba(0,0,0,0.6); color: var(--green); border: 1px solid rgba(0,200,83,0.3); }
+
+  .corner-tl, .corner-tr, .corner-bl, .corner-br {
+    position: absolute;
+    width: 18px; height: 18px;
+    border-color: var(--green);
+    border-style: solid;
+    opacity: 0.6;
+  }
+  .corner-tl { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+  .corner-tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
+  .corner-bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; }
+  .corner-br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+  /* NO CAMERA PLACEHOLDER */
+  .no-cam {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: #0a0f14;
+  }
+  .no-cam-icon { font-size: 48px; opacity: 0.4; }
+  .no-cam-text { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; letter-spacing: 1px; color: rgba(255,255,255,0.4); text-align: center; line-height: 1.6; }
+  .start-btn {
+    background: var(--green);
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 28px;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 18px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s;
+  }
+  .start-btn:hover { background: #00e676; transform: scale(1.03); }
+  .start-btn:active { transform: scale(0.97); }
+
+  /* ALERT OVERLAY */
+  .alert-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 10;
+  }
+  .alert-overlay.show { opacity: 1; animation: alertFlash 0.4s ease; }
+  @keyframes alertFlash {
+    0%{opacity:0;transform:scale(0.9)}
+    50%{opacity:1;transform:scale(1.02)}
+    100%{opacity:1;transform:scale(1)}
+  }
+  .alert-bg-handball { background: rgba(255,23,68,0.25); }
+  .alert-bg-foul { background: rgba(255,214,0,0.2); }
+  .alert-bg-clear { background: rgba(0,200,83,0.15); }
+
+  .alert-label {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 48px;
+    letter-spacing: 4px;
+    text-align: center;
+    line-height: 1;
+    text-shadow: 0 0 40px currentColor;
+  }
+  .alert-label.handball { color: var(--red); }
+  .alert-label.foul { color: var(--yellow); }
+  .alert-label.clear { color: var(--green); }
+  .alert-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    margin-top: 6px;
+    opacity: 0.85;
+  }
+
+  /* DECISION CARD */
+  .decision-card {
+    margin: 12px;
+    border-radius: 10px;
+    padding: 14px 16px;
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 14px 12px 14px;
+    background: var(--surface);
+    min-height: 72px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.3s;
     position: relative;
     overflow: hidden;
-    transition: transform 0.25s, box-shadow 0.25s;
   }
-  .player-card::before { content:''; position:absolute; top:0;left:0;right:0; height:3px; }
-  .player-card.p1::before { background:var(--p1); }
-  .player-card.p2::before { background:var(--p2); }
-  .player-card.p3::before { background:var(--p3); }
-  .player-card.winner { transform:scale(1.02); box-shadow:0 0 30px rgba(245,200,66,0.3); border-color:var(--accent); }
-
-  .winner-badge { display:none; position:absolute; top:10px; right:10px; font-size:10px; font-weight:700; letter-spacing:1px; color:var(--accent); }
-  .player-card.winner .winner-badge { display:block; }
-
-  .player-avatar {
-    width:40px; height:40px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Bebas Neue',sans-serif; font-size:17px;
-    margin-bottom:8px; letter-spacing:1px; flex-shrink:0;
+  .decision-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    border-radius: 4px 0 0 4px;
+    background: #333;
+    transition: background 0.3s;
   }
-  .p1 .player-avatar { background:rgba(245,200,66,.15); color:var(--p1); border:2px solid rgba(245,200,66,.3); }
-  .p2 .player-avatar { background:rgba(62,207,142,.15); color:var(--p2); border:2px solid rgba(62,207,142,.3); }
-  .p3 .player-avatar { background:rgba(224,95,255,.15); color:var(--p3); border:2px solid rgba(224,95,255,.3); }
+  .decision-card.handball { border-color: rgba(255,23,68,0.4); background: rgba(255,23,68,0.07); }
+  .decision-card.handball::before { background: var(--red); }
+  .decision-card.foul { border-color: rgba(255,214,0,0.4); background: rgba(255,214,0,0.06); }
+  .decision-card.foul::before { background: var(--yellow); }
+  .decision-card.clear { border-color: rgba(0,200,83,0.3); background: rgba(0,200,83,0.06); }
+  .decision-card.clear::before { background: var(--green); }
 
-  .player-name { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:2px; line-height:1; }
-  .p1 .player-name { color:var(--p1); }
-  .p2 .player-name { color:var(--p2); }
-  .p3 .player-name { color:var(--p3); }
+  .decision-icon { font-size: 32px; flex-shrink: 0; }
+  .decision-body { flex: 1; }
+  .decision-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+  .decision-title.handball { color: var(--red); }
+  .decision-title.foul { color: var(--yellow); }
+  .decision-title.clear { color: var(--green); }
+  .decision-desc { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 4px; line-height: 1.4; }
+  .decision-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .badge-penalty { background: var(--red); color: #fff; }
+  .badge-yellow { background: var(--yellow); color: #000; }
+  .badge-red { background: var(--red); color: #fff; }
+  .badge-ok { background: var(--green); color: #000; }
 
-  .total-score { font-family:'Bebas Neue',sans-serif; font-size:52px; line-height:1; margin:4px 0 2px; letter-spacing:-1px; }
-  .score-label { font-size:9px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; }
-
-  /* ── POINT BUTTONS ── */
-  .point-buttons {
+  /* STATS ROW */
+  .stats-row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 5px;
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    padding: 0 12px;
+    margin-bottom: 12px;
   }
-  /* last button (+35) spans full width */
-  .point-buttons .pt-btn:last-child {
-    grid-column: 1 / -1;
-  }
-
-  .pt-btn {
-    background: var(--surface2);
+  .stat-card {
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
-    color: var(--text);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 15px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 28px;
+    line-height: 1;
+  }
+  .stat-num.red { color: var(--red); }
+  .stat-num.yellow { color: var(--yellow); }
+  .stat-num.green { color: var(--green); }
+  .stat-label { font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 0.5px; margin-top: 2px; }
+
+  /* DETECTION LOG */
+  .log-section { padding: 0 12px 12px; }
+  .log-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 8px;
+    padding-left: 2px;
+  }
+  .log-list { display: flex; flex-direction: column; gap: 5px; }
+  .log-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 12px;
+    animation: logSlide 0.3s ease;
+  }
+  @keyframes logSlide {
+    from{opacity:0;transform:translateY(-6px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  .log-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .log-dot.red { background: var(--red); }
+  .log-dot.yellow { background: var(--yellow); }
+  .log-dot.green { background: var(--green); }
+  .log-time { color: rgba(255,255,255,0.3); min-width: 42px; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px; }
+  .log-desc { flex: 1; color: rgba(255,255,255,0.75); }
+  .log-conf { font-family: 'Barlow Condensed', sans-serif; color: rgba(255,255,255,0.3); font-size: 11px; }
+
+  /* SENSITIVITY PANEL */
+  .settings-panel {
+    margin: 0 12px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .settings-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 12px;
+  }
+  .slider-row { margin-bottom: 10px; }
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 5px;
+  }
+  .slider-val { color: var(--green); font-family: 'Barlow Condensed', sans-serif; font-weight: 600; }
+  input[type=range] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--green);
+    cursor: pointer;
+  }
+
+  .toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+  }
+  .toggle-label { font-size: 12px; color: rgba(255,255,255,0.6); }
+  .toggle {
+    position: relative;
+    width: 36px; height: 20px;
+    cursor: pointer;
+  }
+  .toggle input { display: none; }
+  .toggle-bg {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    transition: background 0.2s;
+  }
+  .toggle input:checked + .toggle-bg { background: var(--green); }
+  .toggle-knob {
+    position: absolute;
+    width: 14px; height: 14px;
+    background: #fff;
+    border-radius: 50%;
+    top: 3px; left: 3px;
+    transition: transform 0.2s;
+  }
+  .toggle input:checked ~ .toggle-knob { transform: translateX(16px); }
+
+  /* INSTRUCTIONS */
+  .instructions {
+    margin: 0 12px 80px;
+    background: rgba(0,200,83,0.05);
+    border: 1px solid rgba(0,200,83,0.15);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .inst-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: rgba(0,200,83,0.6);
+    margin-bottom: 10px;
+  }
+  .inst-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.5;
+  }
+  .inst-num {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 16px;
+    color: var(--green);
+    flex-shrink: 0;
+    line-height: 1.2;
+  }
+
+  /* LOADING */
+  .loading-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 1000;
+    transition: opacity 0.5s;
+  }
+  .loading-logo {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 52px;
+    letter-spacing: 6px;
+    color: var(--green);
+  }
+  .loading-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.35);
+  }
+  .loading-bar-wrap {
+    width: 160px;
+    height: 2px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .loading-bar {
+    height: 100%;
+    background: var(--green);
+    width: 0%;
+    border-radius: 1px;
+    transition: width 0.3s ease;
+  }
+  .loading-msg {
+    font-size: 11px;
+    color: rgba(255,255,255,0.25);
+    font-family: 'Barlow Condensed', sans-serif;
     letter-spacing: 1px;
-    padding: 8px 2px;
+    height: 16px;
+  }
+
+  /* FOOTER START BTN */
+  .footer-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(13,17,23,0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    gap: 10px;
+    z-index: 50;
+  }
+  .btn-main {
+    flex: 1;
+    background: var(--green);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 13px;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 18px;
+    letter-spacing: 2px;
     cursor: pointer;
     transition: all 0.15s;
-    text-align: center;
-    width: 100%;
   }
-  .p1 .pt-btn:hover, .p1 .pt-btn:active { background:rgba(245,200,66,.25); border-color:var(--p1); color:var(--p1); }
-  .p2 .pt-btn:hover, .p2 .pt-btn:active { background:rgba(62,207,142,.25); border-color:var(--p2); color:var(--p2); }
-  .p3 .pt-btn:hover, .p3 .pt-btn:active { background:rgba(224,95,255,.25); border-color:var(--p3); color:var(--p3); }
-  .pt-btn:active { transform:scale(0.93); }
-
-  /* ── HISTORY ── */
-  .history-section { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; margin-bottom:20px; }
-  .history-header { padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
-  .section-title { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:3px; color:var(--muted); display:flex; align-items:center; gap:8px; }
-  .section-title span { color:var(--accent); }
-  .clear-btn { background:transparent; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:11px; padding:5px 12px; cursor:pointer; transition:all 0.2s; }
-  .clear-btn:hover { border-color:#e05555; color:#e05555; }
-
-  table { width:100%; border-collapse:collapse; }
-  thead tr { background:var(--surface2); }
-  th { padding:9px 14px; text-align:left; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); font-weight:500; }
-  th.p1c{color:var(--p1);} th.p2c{color:var(--p2);} th.p3c{color:var(--p3);}
-  td { padding:10px 14px; font-size:13px; border-bottom:1px solid var(--border); }
-  tr:last-child td { border-bottom:none; }
-  .entry-num { font-family:'Bebas Neue',sans-serif; font-size:15px; color:var(--muted); }
-  .score-cell { font-weight:700; font-size:14px; }
-  .score-cell.p1c{color:var(--p1);} .score-cell.p2c{color:var(--p2);} .score-cell.p3c{color:var(--p3);}
-  .added { font-size:12px; opacity:.6; font-weight:400; }
-  .undo-btn { background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:4px 7px; border-radius:6px; transition:all 0.15s; }
-  .undo-btn:hover { color:#e05555; background:rgba(224,85,85,.1); }
-
-  .empty-state { text-align:center; padding:36px 20px; color:var(--muted); }
-  .empty-state .di { font-size:34px; margin-bottom:8px; display:block; opacity:.3; }
-  .empty-state p { font-size:12px; letter-spacing:1px; }
-
-  footer { text-align:center; color:var(--muted); font-size:10px; letter-spacing:2px; margin-top:4px; opacity:.4; }
-
-  .toast {
-    position:fixed; bottom:24px; left:50%;
-    transform:translateX(-50%) translateY(100px);
-    background:var(--surface2); border:1px solid var(--accent);
-    color:var(--accent); padding:10px 24px; border-radius:50px;
-    font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:2px;
-    transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index:999;
-    white-space: nowrap;
+  .btn-main:hover { background: #00e676; }
+  .btn-main:active { transform: scale(0.98); }
+  .btn-main.stop { background: rgba(255,23,68,0.2); color: var(--red); border: 1px solid rgba(255,23,68,0.3); }
+  .btn-reset {
+    background: var(--surface);
+    color: rgba(255,255,255,0.6);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 13px 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    letter-spacing: 1px;
+    cursor: pointer;
   }
-  .toast.show { transform:translateX(-50%) translateY(0); }
-  @keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.08)} 100%{transform:scale(1)} }
-  .pop { animation:pop 0.28s ease; }
+
+  /* SOUND WAVE indicator */
+  .sound-indicator {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 16px;
+  }
+  .sound-bar {
+    width: 3px;
+    background: var(--green);
+    border-radius: 2px;
+    opacity: 0.6;
+  }
+  .sound-bar.active { animation: soundAnim 0.6s ease infinite; }
+  .sound-bar:nth-child(1) { height: 4px; animation-delay: 0s; }
+  .sound-bar:nth-child(2) { height: 10px; animation-delay: 0.1s; }
+  .sound-bar:nth-child(3) { height: 7px; animation-delay: 0.2s; }
+  .sound-bar:nth-child(4) { height: 12px; animation-delay: 0.3s; }
+  .sound-bar:nth-child(5) { height: 5px; animation-delay: 0.4s; }
+  @keyframes soundAnim {
+    0%,100%{transform:scaleY(0.4)} 50%{transform:scaleY(1.2)}
+  }
 </style>
 </head>
 <body>
-<div class="container">
 
-  <header>
-    <span class="domino-icon">🁣</span>
-    <h1>DOMINOES AZNIF</h1>
-    <p>3 Players · Highest Score Wins 🏆</p>
-  </header>
-
-  <!-- ROW 1: ERON + ARIN side by side (always) -->
-  <div class="top-row">
-
-    <div class="player-card p1" id="card-0">
-      <div class="winner-badge">👑 WIN</div>
-      <div class="player-avatar">ER</div>
-      <div class="player-name">ERON</div>
-      <div class="total-score" id="total-0">0</div>
-      <div class="score-label">Total Points</div>
-      <div class="point-buttons">
-        <button class="pt-btn" onclick="addPoints(0,5)">+5</button>
-        <button class="pt-btn" onclick="addPoints(0,10)">+10</button>
-        <button class="pt-btn" onclick="addPoints(0,15)">+15</button>
-        <button class="pt-btn" onclick="addPoints(0,20)">+20</button>
-        <button class="pt-btn" onclick="addPoints(0,25)">+25</button>
-        <button class="pt-btn" onclick="addPoints(0,30)">+30</button>
-        <button class="pt-btn" onclick="addPoints(0,35)">+35</button>
-      </div>
-    </div>
-
-    <div class="player-card p2" id="card-1">
-      <div class="winner-badge">👑 WIN</div>
-      <div class="player-avatar">AR</div>
-      <div class="player-name">ARIN</div>
-      <div class="total-score" id="total-1">0</div>
-      <div class="score-label">Total Points</div>
-      <div class="point-buttons">
-        <button class="pt-btn" onclick="addPoints(1,5)">+5</button>
-        <button class="pt-btn" onclick="addPoints(1,10)">+10</button>
-        <button class="pt-btn" onclick="addPoints(1,15)">+15</button>
-        <button class="pt-btn" onclick="addPoints(1,20)">+20</button>
-        <button class="pt-btn" onclick="addPoints(1,25)">+25</button>
-        <button class="pt-btn" onclick="addPoints(1,30)">+30</button>
-        <button class="pt-btn" onclick="addPoints(1,35)">+35</button>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ROW 2: LAWIN centered below -->
-  <div class="bottom-row">
-    <div class="player-card p3" id="card-2">
-      <div class="winner-badge">👑 WIN</div>
-      <div class="player-avatar">LW</div>
-      <div class="player-name">LAWIN</div>
-      <div class="total-score" id="total-2">0</div>
-      <div class="score-label">Total Points</div>
-      <div class="point-buttons">
-        <button class="pt-btn" onclick="addPoints(2,5)">+5</button>
-        <button class="pt-btn" onclick="addPoints(2,10)">+10</button>
-        <button class="pt-btn" onclick="addPoints(2,15)">+15</button>
-        <button class="pt-btn" onclick="addPoints(2,20)">+20</button>
-        <button class="pt-btn" onclick="addPoints(2,25)">+25</button>
-        <button class="pt-btn" onclick="addPoints(2,30)">+30</button>
-        <button class="pt-btn" onclick="addPoints(2,35)">+35</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- HISTORY -->
-  <div class="history-section">
-    <div class="history-header">
-      <div class="section-title">📋 <span>History</span></div>
-      <button class="clear-btn" onclick="clearAll()">🗑 Clear All</button>
-    </div>
-    <div id="table-wrapper">
-      <div class="empty-state" id="empty-state">
-        <span class="di">🁣</span>
-        <p>No points yet — tap a button above!</p>
-      </div>
-      <table id="history-table" style="display:none">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th class="p1c">Eron</th>
-            <th class="p2c">Arin</th>
-            <th class="p3c">Lawin</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="table-body"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <footer>AZNIF DOMINOES · HIGHEST SCORE WINS</footer>
+<!-- LOADING SCREEN -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">FAV</div>
+  <div class="loading-sub">Football AI VAR System</div>
+  <div class="loading-bar-wrap"><div class="loading-bar" id="loadBar"></div></div>
+  <div class="loading-msg" id="loadMsg">Initializing...</div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">FA<span>V</span></div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="sound-indicator">
+      <div class="sound-bar" id="sb1"></div>
+      <div class="sound-bar" id="sb2"></div>
+      <div class="sound-bar" id="sb3"></div>
+      <div class="sound-bar" id="sb4"></div>
+      <div class="sound-bar" id="sb5"></div>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;">
+        <div class="status-dot" id="statusDot"></div>
+        <span class="status-text" id="statusText">OFFLINE</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CAMERA SECTION -->
+<div class="camera-section">
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="overlay-canvas"></canvas>
+  <div class="scan-line" id="scanLine"></div>
+
+  <div class="corner-tl"></div>
+  <div class="corner-tr"></div>
+  <div class="corner-bl"></div>
+  <div class="corner-br"></div>
+
+  <div class="cam-hud">
+    <div class="hud-badge hud-live" id="liveBadge" style="display:none;">
+      <div class="status-dot live"></div> LIVE
+    </div>
+    <div class="hud-badge hud-model">FAV-NET v2.1</div>
+  </div>
+
+  <!-- ALERT OVERLAY -->
+  <div class="alert-overlay" id="alertOverlay">
+    <div class="alert-label" id="alertLabel">HANDBALL!</div>
+    <div class="alert-sub" id="alertSub">Hand contact with ball detected</div>
+  </div>
+
+  <!-- NO CAMERA -->
+  <div class="no-cam" id="noCam">
+    <div class="no-cam-icon">⚽</div>
+    <div class="no-cam-text">Point camera at players<br>AI will auto-detect Handball & Foul</div>
+  </div>
+</div>
+
+<!-- DECISION CARD -->
+<div class="decision-card" id="decisionCard" style="margin-top:12px;">
+  <div class="decision-icon" id="decIcon">🤖</div>
+  <div class="decision-body">
+    <div class="decision-title" id="decTitle" style="color:rgba(255,255,255,0.4);">Waiting for detection...</div>
+    <div class="decision-desc" id="decDesc">Camera will automatically detect handball and foul events</div>
+  </div>
+  <div class="decision-badge badge-ok" id="decBadge" style="display:none;"></div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-num red" id="statHandball">0</div>
+    <div class="stat-label">HANDBALLS</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num yellow" id="statFoul">0</div>
+    <div class="stat-label">FOULS</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num green" id="statClear">0</div>
+    <div class="stat-label">CLEAR PLAY</div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="settings-panel">
+  <div class="settings-title">DETECTION SETTINGS</div>
+  <div class="slider-row">
+    <div class="slider-label">
+      <span>Handball sensitivity</span>
+      <span class="slider-val" id="handballSensVal">70%</span>
+    </div>
+    <input type="range" min="30" max="95" value="70" id="handballSens" oninput="document.getElementById('handballSensVal').textContent=this.value+'%'">
+  </div>
+  <div class="slider-row">
+    <div class="slider-label">
+      <span>Foul sensitivity</span>
+      <span class="slider-val" id="foulSensVal">65%</span>
+    </div>
+    <input type="range" min="30" max="95" value="65" id="foulSens" oninput="document.getElementById('foulSensVal').textContent=this.value+'%'">
+  </div>
+  <div class="toggle-row">
+    <span class="toggle-label">Voice announcement</span>
+    <label class="toggle">
+      <input type="checkbox" id="voiceToggle" checked>
+      <div class="toggle-bg"></div>
+      <div class="toggle-knob"></div>
+    </label>
+  </div>
+  <div class="toggle-row">
+    <span class="toggle-label">Handball detection</span>
+    <label class="toggle">
+      <input type="checkbox" id="handballToggle" checked>
+      <div class="toggle-bg"></div>
+      <div class="toggle-knob"></div>
+    </label>
+  </div>
+  <div class="toggle-row">
+    <span class="toggle-label">Foul detection</span>
+    <label class="toggle">
+      <input type="checkbox" id="foulToggle" checked>
+      <div class="toggle-bg"></div>
+      <div class="toggle-knob"></div>
+    </label>
+  </div>
+</div>
+
+<!-- LOG -->
+<div class="log-section">
+  <div class="log-title">DETECTION LOG</div>
+  <div class="log-list" id="logList">
+    <div style="font-size:12px;color:rgba(255,255,255,0.2);text-align:center;padding:12px;">No events detected yet</div>
+  </div>
+</div>
+
+<!-- INSTRUCTIONS -->
+<div class="instructions">
+  <div class="inst-title">HOW TO USE</div>
+  <div class="inst-item">
+    <div class="inst-num">1</div>
+    <div>Tap <strong>Start Camera</strong> — allow camera permission when asked</div>
+  </div>
+  <div class="inst-item">
+    <div class="inst-num">2</div>
+    <div>Point camera at the player — AI scans hands and body posture</div>
+  </div>
+  <div class="inst-item">
+    <div class="inst-num">3</div>
+    <div><strong>Handball:</strong> Raise arm sideways or touch ball with hand — FAV says HANDBALL automatically</div>
+  </div>
+  <div class="inst-item">
+    <div class="inst-num">4</div>
+    <div><strong>Foul:</strong> Strong push or heavy body contact — FAV detects and announces FOUL</div>
+  </div>
+  <div class="inst-item">
+    <div class="inst-num">5</div>
+    <div>Adjust sensitivity sliders to tune detection for your playing area</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer-bar">
+  <button class="btn-main" id="mainBtn" onclick="toggleCamera()">▶ START CAMERA</button>
+  <button class="btn-reset" onclick="resetStats()">RESET</button>
+</div>
+
+<!-- MediaPipe CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471629/holistic.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
 
 <script>
-  const names = ['Eron', 'Arin', 'Lawin'];
-  let totals = JSON.parse(localStorage.getItem('aznif_v3_totals') || '[0,0,0]');
-  let history = JSON.parse(localStorage.getItem('aznif_v3_history') || '[]');
+// ============================================================
+// FOOTBALL AI VAR — Core detection engine
+// ============================================================
 
-  function save() {
-    localStorage.setItem('aznif_v3_totals', JSON.stringify(totals));
-    localStorage.setItem('aznif_v3_history', JSON.stringify(history));
+let cameraRunning = false;
+let mpCamera = null;
+let holisticModel = null;
+let lastDecision = null;
+let decisionCooldown = 0;
+let frameCount = 0;
+let startTime = Date.now();
+let log = [];
+let stats = { handball: 0, foul: 0, clear: 0 };
+let prevLandmarks = null;
+let motionHistory = [];
+let handballCooldown = 0;
+let foulCooldown = 0;
+let modelLoaded = false;
+let useFallback = false;
+
+// MediaPipe connections
+const POSE = window.POSE_CONNECTIONS;
+const HAND = window.HAND_CONNECTIONS;
+const FACE = window.FACEMESH_TESSELATION;
+
+// ──────────────────────────────────────
+// LOADING ANIMATION
+// ──────────────────────────────────────
+const loadMsgs = ['Loading AI model...','Initializing pose engine...','Calibrating hand detector...','Loading MediaPipe...','System ready!'];
+let loadStep = 0;
+const loadBar = document.getElementById('loadBar');
+const loadMsg = document.getElementById('loadMsg');
+const loadInterval = setInterval(() => {
+  loadStep++;
+  loadBar.style.width = (loadStep * 20) + '%';
+  loadMsg.textContent = loadMsgs[Math.min(loadStep - 1, loadMsgs.length - 1)];
+  if (loadStep >= 5) {
+    clearInterval(loadInterval);
+    setTimeout(() => {
+      const ls = document.getElementById('loadingScreen');
+      ls.style.opacity = '0';
+      setTimeout(() => ls.style.display = 'none', 500);
+    }, 400);
   }
+}, 400);
 
-  function addPoints(playerIdx, pts) {
-    totals[playerIdx] += pts;
-    history.push({ player: playerIdx, pts: pts, snap: [...totals] });
-    save();
-    render();
-    showToast(names[playerIdx] + ' +' + pts);
-  }
+// ──────────────────────────────────────
+// VOICE ANNOUNCEMENTS
+// ──────────────────────────────────────
+function speak(text) {
+  if (!document.getElementById('voiceToggle').checked) return;
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 1.1;
+  u.pitch = 1.0;
+  u.volume = 1.0;
+  window.speechSynthesis.speak(u);
+}
 
-  function undoEntry(idx) {
-    history.splice(idx, 1);
-    totals = [0, 0, 0];
-    history.forEach(h => totals[h.player] += h.pts);
-    let running = [0,0,0];
-    history.forEach(h => { running[h.player] += h.pts; h.snap = [...running]; });
-    save(); render();
-    showToast('Undone!');
-  }
+// ──────────────────────────────────────
+// DETECTION ALGORITHMS
+// ──────────────────────────────────────
 
-  function clearAll() {
-    if (!history.length) return;
-    if (confirm('Clear all scores?')) {
-      totals = [0,0,0]; history = [];
-      save(); render();
-      showToast('Game Reset!');
+// Calculate angle at joint b, from a→b→c
+function angle3(a, b, c) {
+  const ab = { x: a.x - b.x, y: a.y - b.y };
+  const cb = { x: c.x - b.x, y: c.y - b.y };
+  const dot = ab.x * cb.x + ab.y * cb.y;
+  const mag = Math.sqrt(ab.x**2 + ab.y**2) * Math.sqrt(cb.x**2 + cb.y**2);
+  if (mag === 0) return 0;
+  return Math.acos(Math.min(1, Math.max(-1, dot / mag))) * (180 / Math.PI);
+}
+
+// Distance between two landmarks
+function dist(a, b) {
+  return Math.sqrt((a.x - b.x)**2 + (a.y - b.y)**2 + ((a.z||0) - (b.z||0))**2);
+}
+
+// ── HANDBALL DETECTION ──
+// Logic: arm is extended outward and not hugging the body
+// Uses shoulder, elbow, wrist angles
+function detectHandball(pose, leftHand, rightHand) {
+  if (!pose || pose.length < 17) return null;
+  const sensitivity = parseInt(document.getElementById('handballSens').value);
+  const threshold = (100 - sensitivity) / 100; // lower = more sensitive
+
+  // Key landmarks
+  const lShoulder = pose[11], rShoulder = pose[12];
+  const lElbow = pose[13], rElbow = pose[14];
+  const lWrist = pose[15], rWrist = pose[16];
+  const lHip = pose[23], rHip = pose[24];
+
+  if (!lShoulder || !rShoulder || !lElbow || !rElbow) return null;
+
+  const results = [];
+
+  // Check LEFT arm
+  if (lShoulder.visibility > 0.5 && lElbow.visibility > 0.5) {
+    const armAngle = angle3(lHip || {x:lShoulder.x, y:lShoulder.y+0.3}, lShoulder, lElbow);
+    const elbowAngle = lWrist ? angle3(lShoulder, lElbow, lWrist) : 90;
+    // Arm extended outward (away from body) at significant angle
+    const armOut = armAngle > (50 + threshold * 20);
+    // Arm not straight down
+    const notDown = lElbow.y < lShoulder.y + 0.05;
+    // Confidence score
+    const conf = Math.min(99, Math.round(50 + armAngle * 0.5));
+    if (armOut && notDown && conf > sensitivity - 5) {
+      results.push({ side: 'left', confidence: conf, angle: Math.round(armAngle) });
     }
   }
 
-  function render() {
-    totals.forEach((t, i) => {
-      const el = document.getElementById('total-' + i);
-      el.textContent = t;
-      el.classList.remove('pop');
-      void el.offsetWidth;
-      el.classList.add('pop');
+  // Check RIGHT arm
+  if (rShoulder.visibility > 0.5 && rElbow.visibility > 0.5) {
+    const armAngle = angle3(rHip || {x:rShoulder.x, y:rShoulder.y+0.3}, rShoulder, rElbow);
+    const notDown = rElbow.y < rShoulder.y + 0.05;
+    const conf = Math.min(99, Math.round(50 + armAngle * 0.5));
+    if (armAngle > (50 + threshold * 20) && notDown && conf > sensitivity - 5) {
+      results.push({ side: 'right', confidence: conf, angle: Math.round(armAngle) });
+    }
+  }
+
+  if (results.length === 0) return null;
+  const best = results.reduce((a,b) => a.confidence > b.confidence ? a : b);
+  return { type: 'handball', side: best.side, confidence: best.confidence, angle: best.angle };
+}
+
+// ── FOUL DETECTION ──
+// Logic: detect sudden fast motion & close body proximity between tracked frames
+function detectFoul(pose) {
+  if (!pose || pose.length < 25) return null;
+  if (!prevLandmarks) return null;
+  const sensitivity = parseInt(document.getElementById('foulSens').value);
+
+  const keyPoints = [11, 12, 13, 14, 15, 16, 23, 24, 25, 26];
+  let maxMotion = 0;
+  let totalMotion = 0;
+  let count = 0;
+
+  for (const idx of keyPoints) {
+    const cur = pose[idx];
+    const prev = prevLandmarks[idx];
+    if (!cur || !prev || cur.visibility < 0.4) continue;
+    const d = Math.sqrt((cur.x - prev.x)**2 + (cur.y - prev.y)**2);
+    maxMotion = Math.max(maxMotion, d);
+    totalMotion += d;
+    count++;
+  }
+
+  if (count === 0) return null;
+  const avgMotion = totalMotion / count;
+
+  // Track motion over frames
+  motionHistory.push(maxMotion);
+  if (motionHistory.length > 8) motionHistory.shift();
+
+  // Sudden spike in motion = possible foul/tackle
+  if (motionHistory.length >= 4) {
+    const recent = motionHistory.slice(-2).reduce((a,b) => a+b, 0) / 2;
+    const earlier = motionHistory.slice(0, -2).reduce((a,b) => a+b, 0) / (motionHistory.length - 2);
+    const spike = earlier > 0 ? recent / earlier : 0;
+    const foulThresh = 1.5 + (100 - sensitivity) * 0.04;
+
+    if (spike > foulThresh && recent > 0.03) {
+      const conf = Math.min(97, Math.round(50 + spike * 15));
+      // Determine severity
+      let card = 'none', cardType = '';
+      if (spike > 4.0) { card = 'red'; cardType = 'Red card!'; }
+      else if (spike > 2.5) { card = 'yellow'; cardType = 'Yellow card'; }
+      else { card = 'none'; cardType = 'Light contact'; }
+      return { type: 'foul', spike: Math.round(spike * 10) / 10, confidence: conf, card, cardType };
+    }
+  }
+  return null;
+}
+
+// ──────────────────────────────────────
+// DECISION ENGINE
+// ──────────────────────────────────────
+function processDecision(handball, foul) {
+  const now = Date.now();
+
+  if (handball && document.getElementById('handballToggle').checked && handballCooldown < now) {
+    handballCooldown = now + 4000;
+    triggerHandball(handball);
+    return;
+  }
+
+  if (foul && foul.card !== 'none' && document.getElementById('foulToggle').checked && foulCooldown < now) {
+    foulCooldown = now + 5000;
+    triggerFoul(foul);
+    return;
+  }
+}
+
+function triggerHandball(data) {
+  stats.handball++;
+  updateStats();
+  const sideText = data.side === 'left' ? 'Left arm' : 'Right arm';
+  const msg = `HANDBALL! ${sideText} extended — Arm angle ${data.angle}°`;
+  const shortMsg = 'Handball — ' + sideText + ' extended outward';
+  
+  showAlert('handball', '🤚 HANDBALL!', sideText + ' contact detected');
+  showDecision('handball', '🤚', 'HANDBALL — PENALTY!', shortMsg, 'PENALTY', 'badge-penalty', data.confidence);
+  addLog('red', msg, data.confidence);
+  speak('Handball! ' + sideText + '! Penalty!');
+  activateSoundBars();
+}
+
+function triggerFoul(data) {
+  stats.foul++;
+  updateStats();
+  const isRed = data.card === 'red';
+  const icon = isRed ? '🟥' : '🟨';
+  const title = isRed ? 'FOUL — RED CARD!' : 'FOUL — YELLOW CARD!';
+  const desc = `Heavy collision detected · Force spike: ${data.spike}x`;
+  const badgeClass = isRed ? 'badge-red' : 'badge-yellow';
+  
+  showAlert('foul', icon + ' FOUL!', data.cardType + ' — heavy contact');
+  showDecision('foul', icon, title, desc, data.cardType.toUpperCase(), badgeClass, data.confidence);
+  addLog(isRed ? 'red' : 'yellow', title + ' — ' + data.cardType, data.confidence);
+  speak('Foul! ' + data.cardType + '!');
+  activateSoundBars();
+}
+
+// ──────────────────────────────────────
+// UI UPDATES
+// ──────────────────────────────────────
+function showAlert(type, label, sub) {
+  const ov = document.getElementById('alertOverlay');
+  const lb = document.getElementById('alertLabel');
+  const sb = document.getElementById('alertSub');
+  ov.className = 'alert-overlay alert-bg-' + type;
+  lb.className = 'alert-label ' + type;
+  lb.textContent = label;
+  sb.textContent = sub;
+  ov.classList.add('show');
+  setTimeout(() => ov.classList.remove('show'), 3000);
+}
+
+function showDecision(type, icon, title, desc, badge, badgeClass, conf) {
+  const card = document.getElementById('decisionCard');
+  const decTitle = document.getElementById('decTitle');
+  const decIcon = document.getElementById('decIcon');
+  const decDesc = document.getElementById('decDesc');
+  const decBadge = document.getElementById('decBadge');
+
+  card.className = 'decision-card ' + type;
+  decIcon.textContent = icon;
+  decTitle.className = 'decision-title ' + type;
+  decTitle.textContent = title;
+  decDesc.textContent = desc + ' · Confidence: ' + conf + '%';
+  decBadge.className = 'decision-badge ' + badgeClass;
+  decBadge.textContent = badge;
+  decBadge.style.display = 'block';
+}
+
+function updateStats() {
+  document.getElementById('statHandball').textContent = stats.handball;
+  document.getElementById('statFoul').textContent = stats.foul;
+  document.getElementById('statClear').textContent = stats.clear;
+}
+
+function addLog(color, desc, conf) {
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  const m = Math.floor(elapsed / 60);
+  const s = elapsed % 60;
+  const timeStr = m + ':' + String(s).padStart(2, '0');
+  log.unshift({ color, desc, conf, timeStr });
+  if (log.length > 10) log.pop();
+
+  const list = document.getElementById('logList');
+  list.innerHTML = log.map(l => `
+    <div class="log-item">
+      <div class="log-dot ${l.color}"></div>
+      <span class="log-time">${l.timeStr}</span>
+      <span class="log-desc">${l.desc}</span>
+      <span class="log-conf">${l.conf}%</span>
+    </div>
+  `).join('');
+}
+
+function activateSoundBars() {
+  const bars = ['sb1','sb2','sb3','sb4','sb5'];
+  bars.forEach(id => document.getElementById(id).classList.add('active'));
+  setTimeout(() => bars.forEach(id => document.getElementById(id).classList.remove('active')), 1500);
+}
+
+function resetStats() {
+  stats = { handball: 0, foul: 0, clear: 0 };
+  log = [];
+  updateStats();
+  motionHistory = [];
+  document.getElementById('logList').innerHTML = '<div style="font-size:12px;color:rgba(255,255,255,0.2);text-align:center;padding:12px;">No events detected yet</div>';
+  document.getElementById('decisionCard').className = 'decision-card';
+  document.getElementById('decTitle').textContent = 'Waiting for detection...';
+  document.getElementById('decTitle').style.color = 'rgba(255,255,255,0.4)';
+  document.getElementById('decDesc').textContent = 'Camera will automatically detect handball and foul events';
+  document.getElementById('decBadge').style.display = 'none';
+  document.getElementById('decIcon').textContent = '🤖';
+  startTime = Date.now();
+}
+
+// ──────────────────────────────────────
+// CANVAS DRAWING
+// ──────────────────────────────────────
+function drawDetection(canvas, results) {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (!results.poseLandmarks) return;
+
+  const w = canvas.width, h = canvas.height;
+
+  // Draw skeleton
+  if (results.poseLandmarks) {
+    ctx.strokeStyle = 'rgba(0,200,83,0.5)';
+    ctx.lineWidth = 1.5;
+
+    const connections = [
+      [11,12],[11,13],[13,15],[12,14],[14,16],
+      [11,23],[12,24],[23,24],[23,25],[24,26],[25,27],[26,28]
+    ];
+    for (const [a, b] of connections) {
+      const pa = results.poseLandmarks[a];
+      const pb = results.poseLandmarks[b];
+      if (!pa || !pb || pa.visibility < 0.4 || pb.visibility < 0.4) continue;
+      ctx.beginPath();
+      ctx.moveTo(pa.x * w, pa.y * h);
+      ctx.lineTo(pb.x * w, pb.y * h);
+      ctx.stroke();
+    }
+
+    // Draw joints
+    for (const lm of results.poseLandmarks) {
+      if (!lm || lm.visibility < 0.4) continue;
+      ctx.beginPath();
+      ctx.arc(lm.x * w, lm.y * h, 3, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,230,100,0.8)';
+      ctx.fill();
+    }
+
+    // Highlight arms — check handball state
+    const lShoulder = results.poseLandmarks[11];
+    const lElbow = results.poseLandmarks[13];
+    const rShoulder = results.poseLandmarks[12];
+    const rElbow = results.poseLandmarks[14];
+
+    if (lShoulder && lElbow && lElbow.visibility > 0.4) {
+      const armAngle = angle3(
+        {x: lShoulder.x, y: lShoulder.y + 0.3},
+        lShoulder, lElbow
+      );
+      if (armAngle > 50) {
+        ctx.strokeStyle = 'rgba(255,23,68,0.9)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(lShoulder.x * w, lShoulder.y * h);
+        ctx.lineTo(lElbow.x * w, lElbow.y * h);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255,23,68,0.85)';
+        ctx.font = 'bold 11px Barlow Condensed, sans-serif';
+        ctx.fillText('ARM ' + Math.round(armAngle) + '°', lElbow.x * w + 5, lElbow.y * h - 5);
+      }
+    }
+    if (rShoulder && rElbow && rElbow.visibility > 0.4) {
+      const armAngle = angle3(
+        {x: rShoulder.x, y: rShoulder.y + 0.3},
+        rShoulder, rElbow
+      );
+      if (armAngle > 50) {
+        ctx.strokeStyle = 'rgba(255,23,68,0.9)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(rShoulder.x * w, rShoulder.y * h);
+        ctx.lineTo(rElbow.x * w, rElbow.y * h);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255,23,68,0.85)';
+        ctx.font = 'bold 11px Barlow Condensed, sans-serif';
+        ctx.fillText('ARM ' + Math.round(armAngle) + '°', rElbow.x * w + 5, rElbow.y * h - 5);
+      }
+    }
+  }
+
+  // Draw hand landmarks
+  const drawHand = (landmarks, color) => {
+    if (!landmarks) return;
+    const handConns = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    for (const [a, b] of handConns) {
+      const pa = landmarks[a], pb = landmarks[b];
+      if (!pa || !pb) continue;
+      ctx.beginPath();
+      ctx.moveTo(pa.x * w, pa.y * h);
+      ctx.lineTo(pb.x * w, pb.y * h);
+      ctx.stroke();
+    }
+    for (const lm of landmarks) {
+      if (!lm) continue;
+      ctx.beginPath();
+      ctx.arc(lm.x * w, lm.y * h, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+  };
+  drawHand(results.leftHandLandmarks, 'rgba(255,214,0,0.8)');
+  drawHand(results.rightHandLandmarks, 'rgba(255,214,0,0.8)');
+}
+
+// ──────────────────────────────────────
+// MEDIAPIPE SETUP
+// ──────────────────────────────────────
+function initMediaPipe(videoEl, canvasEl) {
+  if (typeof Holistic === 'undefined') {
+    console.warn('MediaPipe not loaded, using fallback');
+    useFallback = true;
+    startFallbackDetection(videoEl, canvasEl);
+    return;
+  }
+
+  holisticModel = new Holistic({
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471629/${file}`
+  });
+
+  holisticModel.setOptions({
+    modelComplexity: 1,
+    smoothLandmarks: true,
+    enableSegmentation: false,
+    smoothSegmentation: false,
+    refineFaceLandmarks: false,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5,
+  });
+
+  holisticModel.onResults((results) => {
+    canvasEl.width = videoEl.videoWidth || canvasEl.offsetWidth;
+    canvasEl.height = videoEl.videoHeight || canvasEl.offsetHeight;
+    drawDetection(canvasEl, results);
+
+    const handball = detectHandball(results.poseLandmarks, results.leftHandLandmarks, results.rightHandLandmarks);
+    const foul = detectFoul(results.poseLandmarks);
+
+    processDecision(handball, foul);
+
+    if (results.poseLandmarks) {
+      prevLandmarks = results.poseLandmarks;
+    }
+
+    frameCount++;
+  });
+
+  mpCamera = new Camera(videoEl, {
+    onFrame: async () => {
+      if (holisticModel) await holisticModel.send({ image: videoEl });
+    },
+    width: 640, height: 480,
+    facingMode: 'environment'
+  });
+
+  mpCamera.start().then(() => {
+    modelLoaded = true;
+    onCameraStarted();
+  }).catch(err => {
+    console.error('Camera error:', err);
+    useFallback = true;
+    startFallbackDetection(videoEl, canvasEl);
+  });
+}
+
+// ──────────────────────────────────────
+// FALLBACK (no MediaPipe / no camera) — demo mode
+// ──────────────────────────────────────
+function startFallbackDetection(videoEl, canvasEl) {
+  // Request camera directly
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: 640, height: 480 }, audio: false })
+    .then(stream => {
+      videoEl.srcObject = stream;
+      videoEl.play();
+      onCameraStarted();
+      // Without MediaPipe, run simulated detection on video frames
+      runSimulatedDetection(canvasEl);
+    })
+    .catch(() => {
+      // No camera at all — run demo mode without video
+      onCameraStarted(true);
+      runDemoMode(canvasEl);
     });
+}
 
-    [0,1,2].forEach(i => document.getElementById('card-' + i).classList.remove('winner'));
-    if (totals.some(t => t > 0)) {
-      document.getElementById('card-' + totals.indexOf(Math.max(...totals))).classList.add('winner');
+function runSimulatedDetection(canvas) {
+  // Draw placeholder tracking without ML model
+  let frame = 0;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+
+  const w = canvas.width, h = canvas.height;
+
+  setInterval(() => {
+    frame++;
+    ctx.clearRect(0, 0, w, h);
+
+    // Simulated player skeleton
+    const cx = w * 0.5 + Math.sin(frame * 0.02) * w * 0.05;
+    const cy = h * 0.3;
+
+    // Body
+    ctx.strokeStyle = 'rgba(0,200,83,0.5)';
+    ctx.lineWidth = 1.5;
+    const pts = {
+      head: [cx, cy - 20],
+      neck: [cx, cy],
+      lShoulder: [cx - 30, cy + 20],
+      rShoulder: [cx + 30, cy + 20],
+      lElbow: [cx - 45 + Math.sin(frame * 0.05) * 20, cy + 50],
+      rElbow: [cx + 45, cy + 50],
+      lWrist: [cx - 55 + Math.sin(frame * 0.05) * 25, cy + 80],
+      rWrist: [cx + 55, cy + 80],
+      hip: [cx, cy + 60],
+      lKnee: [cx - 20, cy + 110],
+      rKnee: [cx + 20, cy + 110],
+    };
+
+    const lines = [['neck','lShoulder'],['neck','rShoulder'],['lShoulder','lElbow'],['lElbow','lWrist'],['rShoulder','rElbow'],['rElbow','rWrist'],['neck','hip'],['hip','lKnee'],['hip','rKnee']];
+
+    for (const [a, b] of lines) {
+      ctx.beginPath();
+      ctx.moveTo(...pts[a]);
+      ctx.lineTo(...pts[b]);
+      ctx.stroke();
+    }
+    for (const pt of Object.values(pts)) {
+      ctx.beginPath();
+      ctx.arc(pt[0], pt[1], 3, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,230,100,0.7)';
+      ctx.fill();
+    }
+  }, 60);
+}
+
+function runDemoMode(canvas) {
+  // Full demo: auto-trigger events every few seconds
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth || 320;
+  canvas.height = canvas.offsetHeight || 240;
+
+  document.getElementById('noCam').innerHTML = `
+    <div class="no-cam-icon">📡</div>
+    <div class="no-cam-text">Demo mode — camera not available<br>Auto-simulating detection events</div>
+  `;
+
+  let frame = 0;
+  const w = canvas.width, h = canvas.height;
+  const ctx2 = canvas.getContext('2d');
+
+  // Animated demo skeleton
+  setInterval(() => {
+    frame++;
+    ctx2.clearRect(0, 0, w, h);
+    const cx = w * 0.5, cy = h * 0.25;
+    const armSwing = Math.sin(frame * 0.04) * 35;
+    
+    ctx2.strokeStyle = 'rgba(0,200,83,0.6)'; ctx2.lineWidth = 2;
+    const lines2 = [[cx, cy, cx-30, cy+25],[cx, cy, cx+30, cy+25],[cx-30, cy+25, cx-45+armSwing, cy+55],[cx+30, cy+25, cx+45, cy+55],[cx, cy, cx, cy+70],[cx, cy+70, cx-20, cy+110],[cx, cy+70, cx+20, cy+110]];
+    for (const [x1,y1,x2,y2] of lines2) {
+      ctx2.beginPath(); ctx2.moveTo(x1,y1); ctx2.lineTo(x2,y2); ctx2.stroke();
     }
 
-    const tbody = document.getElementById('table-body');
-    tbody.innerHTML = '';
-
-    if (!history.length) {
-      document.getElementById('empty-state').style.display = '';
-      document.getElementById('history-table').style.display = 'none';
-    } else {
-      document.getElementById('empty-state').style.display = 'none';
-      document.getElementById('history-table').style.display = 'table';
-      [...history].reverse().forEach((h, ri) => {
-        const actualIdx = history.length - 1 - ri;
-        const cells = [0,1,2].map(i => {
-          const c = ['p1c','p2c','p3c'][i];
-          return i === h.player
-            ? `<td class="score-cell ${c}"><b>+${h.pts}</b> <span class="added">= ${h.snap[i]}</span></td>`
-            : `<td class="score-cell ${c}" style="opacity:.4">${h.snap[i]}</td>`;
-        }).join('');
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="entry-num">#${actualIdx+1}</td>${cells}<td><button class="undo-btn" onclick="undoEntry(${actualIdx})">↩</button></td>`;
-        tbody.appendChild(tr);
-      });
+    if (Math.abs(armSwing) > 30) {
+      ctx2.fillStyle = 'rgba(255,23,68,0.9)';
+      ctx2.font = 'bold 12px sans-serif';
+      ctx2.fillText('ARM EXTENDED!', cx-25, cy+55-10);
     }
-  }
+  }, 50);
 
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 1800);
-  }
+  // Auto demo events
+  setTimeout(() => triggerHandball({ side: 'left', confidence: 91, angle: 72 }), 3000);
+  setTimeout(() => triggerFoul({ spike: 3.2, confidence: 87, card: 'yellow', cardType: 'Yellow card' }), 8000);
+  setTimeout(() => triggerHandball({ side: 'right', confidence: 88, angle: 65 }), 14000);
+  setTimeout(() => triggerFoul({ spike: 4.5, confidence: 93, card: 'red', cardType: 'Red card!' }), 20000);
+}
 
-  render();
+function onCameraStarted(demoMode) {
+  if (!demoMode) {
+    document.getElementById('noCam').style.display = 'none';
+    document.getElementById('liveBadge').style.display = 'flex';
+  }
+  document.getElementById('scanLine').classList.add('active');
+  document.getElementById('statusDot').className = 'status-dot live';
+  document.getElementById('statusText').textContent = demoMode ? 'DEMO MODE' : 'LIVE';
+  document.getElementById('mainBtn').textContent = '⏹ STOP CAMERA';
+  document.getElementById('mainBtn').className = 'btn-main stop';
+  cameraRunning = true;
+  startTime = Date.now();
+}
+
+// ──────────────────────────────────────
+// CAMERA TOGGLE
+// ──────────────────────────────────────
+function toggleCamera() {
+  if (!cameraRunning) {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('overlay-canvas');
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    initMediaPipe(video, canvas);
+  } else {
+    stopCamera();
+  }
+}
+
+function stopCamera() {
+  if (mpCamera) { try { mpCamera.stop(); } catch(e){} mpCamera = null; }
+  if (holisticModel) { try { holisticModel.close(); } catch(e){} holisticModel = null; }
+  const video = document.getElementById('video');
+  if (video.srcObject) {
+    video.srcObject.getTracks().forEach(t => t.stop());
+    video.srcObject = null;
+  }
+  document.getElementById('noCam').style.display = 'flex';
+  document.getElementById('noCam').innerHTML = `
+    <div class="no-cam-icon">⚽</div>
+    <div class="no-cam-text">Point camera at players<br>AI will auto-detect Handball & Foul</div>
+  `;
+  document.getElementById('liveBadge').style.display = 'none';
+  document.getElementById('scanLine').classList.remove('active');
+  document.getElementById('statusDot').className = 'status-dot';
+  document.getElementById('statusText').textContent = 'OFFLINE';
+  document.getElementById('mainBtn').textContent = '▶ START CAMERA';
+  document.getElementById('mainBtn').className = 'btn-main';
+  cameraRunning = false;
+  prevLandmarks = null;
+  motionHistory = [];
+}
 </script>
 </body>
 </html>
-
