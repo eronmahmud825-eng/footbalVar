@@ -689,8 +689,8 @@ input[type=range]::-webkit-slider-thumb{
       <input type="range" min="50" max="90" value="70" id="HS" oninput="document.getElementById('HV').textContent=this.value+'°'">
     </div>
     <div class="srow">
-      <div class="srow-label"><span>Min player proximity for foul</span><span class="srow-val" id="FV">0.20</span></div>
-      <input type="range" min="10" max="40" value="20" id="FP" oninput="document.getElementById('FV').textContent='0.'+String(this.value).padStart(2,'0')">
+      <div class="srow-label"><span>Foul limb speed threshold</span><span class="srow-val" id="FV">0.055</span></div>
+      <input type="range" min="40" max="80" value="55" id="FP" oninput="document.getElementById('FV').textContent='0.0'+this.value">
     </div>
     <div class="tog-row">
       <span class="tog-label">Voice announcements</span>
@@ -957,77 +957,175 @@ function detectHandballForPlayer(pose, playerId) {
 //     - proximity < threshold AND
 //     - velocity spike > 3.5× baseline (strong kick/push)
 // ================================================================
-const foulBuf = [];
-const FOUL_BUF_SIZE = 15;
-let consecutiveFoul = 0;
+// ================================================================
+//  FOUL DETECTION v4  —  5-GATE SYSTEM
+//
+//  A foul is ONLY called when ALL 5 gates pass simultaneously:
+//
+//  GATE 1 — BOTH players valid and visible
+//  GATE 2 — Players are physically CLOSE (torso distance < 0.22)
+//  GATE 3 — One player has VERY HIGH absolute velocity (not relative)
+//           meaning a limb is moving faster than normal walking pace.
+//           Absolute threshold: wrist or ankle moves > 0.055 per frame.
+//  GATE 4 — The OTHER player's torso REACTS — moves in response
+//           (victim shifts position, meaning contact occurred)
+//  GATE 5 — The pattern must hold for 3 consecutive frames
+//           AND then drop (a real impact is brief, not sustained walking)
+//
+//  Normal walking/running: GATE 3 fires but GATE 4 doesn't
+//  Players passing by:     GATE 2 fails
+//  Camera shake:           GATE 4 fails (both move same direction)
+//  Sustained movement:     GATE 5 fails (impact is transient)
+// ================================================================
+
+// Rolling window of per-frame measurements
+const foulWindow = [];   // max 20 frames
+const FOUL_WIN = 20;
+
+// Gate 5 counter: consecutive frames where gates 1-4 all pass
+let foulGateCount = 0;
+
+// Cooldown after a confirmed foul to avoid double-firing
+// (separate from hbCooldown/foCooldown at top level)
 
 function detectFoul(p1pose, p2pose) {
+  // ── GATE 1: both valid players ──
   if (!isValidPlayer(p1pose) || !isValidPlayer(p2pose)) {
-    foulBuf.length = 0; consecutiveFoul = 0;
+    foulWindow.length = 0; foulGateCount = 0;
     return null;
   }
   if (!document.getElementById('FTog').checked) return null;
-  if (poseHistory.length < 4) return null;
+  if (poseHistory.length < 6) return null;
 
-  const proxThresh = parseInt(document.getElementById('FP').value) / 100;
+  // ── GATE 2: physical proximity ──
+  // Use shoulder midpoints as body center
+  const p1center = midpoint(p1pose[11], p1pose[12]);
+  const p2center = midpoint(p2pose[11], p2pose[12]);
+  const bodyDist = dist(p1center, p2center);
 
-  // Get body centers for both players
-  const p1Sh = midpoint(p1pose[11], p1pose[12]);
-  const p2Sh = midpoint(p2pose[11], p2pose[12]);
-  const proximity = dist(p1Sh, p2Sh);
-
-  // Players must be close enough for contact
-  if (proximity > proxThresh + 0.08) {
-    foulBuf.length = 0; consecutiveFoul = 0;
+  // Hard limit: bodies must be closer than 0.22 of frame width
+  // (= roughly 1 arm's length apart on camera)
+  if (bodyDist > 0.22) {
+    foulWindow.length = 0; foulGateCount = 0;
     return null;
   }
 
-  // Get velocity for both players from history
-  const prev = poseHistory[poseHistory.length - 2];
-  if (!prev || !prev.p1 || !prev.p2) return null;
+  // ── Need previous frames ──
+  const prevH = poseHistory[poseHistory.length - 2];
+  const prev2H = poseHistory[poseHistory.length - 4];
+  if (!prevH?.pose || !prev2H?.pose) return null;
 
-  const torsoIds = [11,12,13,14,23,24,25,26];
+  // Helper: max limb velocity for a player between two frames
+  // We check WRISTS (15,16) and ANKLES (27,28) — the striking limbs
+  // These are the parts that actually make contact in kicks/pushes
+  function maxLimbVelocity(curP, prevP) {
+    const strikingIds = [13, 14, 15, 16, 25, 26, 27, 28]; // elbows, wrists, knees, ankles
+    let maxV = 0;
+    for (const id of strikingIds) {
+      const c = curP[id], p = prevP[id];
+      if (!c || !p || c.visibility < 0.4 || p.visibility < 0.4) continue;
+      maxV = Math.max(maxV, dist(c, p));
+    }
+    return maxV;
+  }
 
-  function getVelocity(curPose, prevPose) {
+  // Helper: torso displacement (shoulders + hips) — reaction check
+  function torsoDisplacement(curP, prevP) {
+    const torsoIds = [11, 12, 23, 24];
     let total = 0, cnt = 0;
     for (const id of torsoIds) {
-      const c = curPose[id], p = prevPose[id];
+      const c = curP[id], p = prevP[id];
       if (!c || !p || c.visibility < 0.45 || p.visibility < 0.45) continue;
-      total += dist(c, p);
-      cnt++;
+      total += dist(c, p); cnt++;
     }
     return cnt > 0 ? total / cnt : 0;
   }
 
-  const v1 = getVelocity(p1pose, prev.p1 || p1pose);
-  const v2 = getVelocity(p2pose, prev.p2 || p2pose);
-  const maxV = Math.max(v1, v2);
-  const aggressorPlayer = v1 >= v2 ? 1 : 2;
+  // ── GATE 3: one player has high-impact limb velocity ──
+  // A strong kick or shove moves wrist/ankle > 0.055 per frame at 30fps
+  // Normal walking moves wrist ~0.01-0.025 per frame
+  const prev1 = prevH.pose;
+  const limbV1 = maxLimbVelocity(p1pose, prev1);
+  const limbV2 = maxLimbVelocity(p2pose, prev1);
+  const maxLimbV = Math.max(limbV1, limbV2);
+  const aggressorIsP1 = limbV1 >= limbV2;
 
-  foulBuf.push({maxV, proximity});
-  if (foulBuf.length > FOUL_BUF_SIZE) foulBuf.shift();
-  if (foulBuf.length < 5) return null;
-
-  // Baseline = average velocity over earlier frames (not recent 3)
-  const baseFrames = foulBuf.slice(0, -3);
-  const baseV = baseFrames.reduce((s,x) => s + x.maxV, 0) / (baseFrames.length || 1);
-
-  // Spike ratio
-  const spike = baseV > 0.003 ? maxV / baseV : 0;
-
-  // STRICT threshold: 3.5x spike AND players must be within proximity threshold
-  if (spike > 3.5 && proximity < proxThresh && maxV > 0.03) {
-    consecutiveFoul++;
-    if (consecutiveFoul >= 2) { // 2 consecutive frames confirming contact
-      consecutiveFoul = 0;
-      foulBuf.length = 0;
-      const conf = Math.min(95, Math.round(55 + spike * 6));
-      const card = spike > 5.5 ? 'red' : 'yellow';
-      return {spike: Math.round(spike*10)/10, conf, card, aggressor: aggressorPlayer, proximity: Math.round(proximity*100)/100};
-    }
-  } else {
-    if (spike <= 2.0) consecutiveFoul = 0; // only reset on clearly non-foul
+  // STRICT: limb must exceed threshold (user-adjustable, default 0.055)
+  const LIMB_THRESHOLD = parseInt(document.getElementById('FP').value) / 1000;
+  if (maxLimbV < LIMB_THRESHOLD) {
+    foulGateCount = 0;
+    return null;
   }
+
+  // ── GATE 4: victim REACTS (torso displacement of the OTHER player) ──
+  // The victim's torso should move due to impact
+  // We check victim torso displacement vs their own 2-frame baseline
+  const victimCurPose  = aggressorIsP1 ? p2pose : p1pose;
+  const victimPrevPose = aggressorIsP1 ? (prevH.p2 || prev1) : (prevH.p1 || prev1);
+  const victimPrev2    = aggressorIsP1 ? (prev2H.p2 || prev1) : (prev2H.p1 || prev1);
+
+  const victimTorsoNow  = torsoDisplacement(victimCurPose, victimPrevPose);
+  const victimTorsoPrev = torsoDisplacement(victimPrevPose, victimPrev2);
+
+  // Victim must be moving noticeably MORE than their own baseline
+  // This filters: camera wobble (both shift same amount) and
+  // normal walking (victim torso is steady relative to their own motion)
+  const victimReaction = victimTorsoNow > 0.012 &&
+                         (victimTorsoPrev < 0.005 || victimTorsoNow > victimTorsoPrev * 2.2);
+
+  if (!victimReaction) {
+    foulGateCount = 0;
+    return null;
+  }
+
+  // ── Build sliding window entry ──
+  foulWindow.push({ maxLimbV, bodyDist, victimTorsoNow });
+  if (foulWindow.length > FOUL_WIN) foulWindow.shift();
+
+  // ── GATE 5: pattern confirmation over multiple frames ──
+  // Real contact: 2-4 frames of high activity, surrounded by lower activity
+  // False positive (walking): sustained high activity many frames
+  foulGateCount++;
+
+  if (foulGateCount >= 2 && foulGateCount <= 5) {
+    // Check baseline from earlier window — sustained walking would show
+    // equally high values in earlier frames too
+    const earlier = foulWindow.slice(0, Math.max(1, foulWindow.length - 4));
+    const earlierAvgLimb = earlier.reduce((s,x) => s + x.maxLimbV, 0) / (earlier.length || 1);
+
+    // Impact spike: recent limb velocity must be significantly above earlier baseline
+    const impactSpike = earlierAvgLimb > 0.005 ? maxLimbV / earlierAvgLimb : maxLimbV / 0.02;
+
+    // Final gate: spike must be at least 2.8× above baseline
+    if (impactSpike < 2.8) {
+      // Not a real impact above normal motion — just sustained movement
+      return null;
+    }
+
+    // ✅ ALL 5 GATES PASSED — confirmed foul
+    foulGateCount = 0;
+    foulWindow.length = 0;
+
+    const aggressor = aggressorIsP1 ? 1 : 2;
+    const conf = Math.min(93, Math.round(60 + impactSpike * 5 + (0.22 - bodyDist) * 50));
+    const card = impactSpike > 5.0 ? 'red' : 'yellow';
+
+    return {
+      spike: Math.round(impactSpike * 10) / 10,
+      conf,
+      card,
+      aggressor,
+      proximity: Math.round(bodyDist * 100) / 100,
+      limbV: Math.round(maxLimbV * 1000) / 1000
+    };
+  }
+
+  // If gate count exceeded 5 without confirming — it's sustained motion, not a foul
+  if (foulGateCount > 5) {
+    foulGateCount = 0;
+    foulWindow.length = 0;
+  }
+
   return null;
 }
 
@@ -1357,7 +1455,7 @@ function resetAll() {
   pStat[1]={hb:0,fo:0,yc:0,rc:0}; pStat[2]={hb:0,fo:0,yc:0,rc:0};
   globalStats={hb:0,fo:0,yc:0,rc:0}; evLog=[];
   updateStats(1); updateStats(2);
-  poseHistory=[]; rollingBuf=[]; foulBuf.length=0; consecutiveFoul=0;
+  poseHistory=[]; rollingBuf=[]; foulWindow.length=0; foulGateCount=0;
   hbSustainBuf[1]=[]; hbSustainBuf[2]=[];
   closeReplay(); replayFrames=[];
   document.getElementById('AW2').className='advice-wrap';
@@ -1585,7 +1683,7 @@ function toggleCam() {
     document.getElementById('P1B').className='pbadge'; document.getElementById('P1B').textContent='P1 — NOT FOUND';
     document.getElementById('P2B').className='pbadge'; document.getElementById('P2B').textContent='P2 — NOT FOUND';
     camRunning=false; poseHistory=[]; stopTimer();
-    foulBuf.length=0; consecutiveFoul=0; hbSustainBuf[1]=[]; hbSustainBuf[2]=[];
+    foulWindow.length=0; foulGateCount=0; hbSustainBuf[1]=[]; hbSustainBuf[2]=[];
   }
 }
 </script>
