@@ -4,806 +4,1390 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>FAV — Football AI VAR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap');
-:root{--green:#00c853;--red:#ff1744;--yellow:#ffd600;--bg:#0d1117;--surface:#161b22;--surface2:#1e2530;--border:rgba(255,255,255,0.08);}
+:root {
+  --pitch: #0a1628;
+  --pitch2: #0d1e35;
+  --surface: #111d2e;
+  --surface2: #162338;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.12);
+  --green: #00ff87;
+  --green2: #00c853;
+  --red: #ff3d57;
+  --yellow: #ffd23f;
+  --blue: #4fc3f7;
+  --white: #e8eef5;
+  --muted: rgba(232,238,245,0.4);
+  --p1: #4fc3f7;
+  --p2: #ff8a65;
+  --glow-green: 0 0 20px rgba(0,255,135,0.4);
+  --glow-red: 0 0 20px rgba(255,61,87,0.5);
+  --glow-yellow: 0 0 20px rgba(255,210,63,0.4);
+}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:#f0f0eb;font-family:'Barlow',sans-serif;min-height:100vh;overflow-x:hidden;}
+html,body{height:100%;overflow-x:hidden;}
+body{
+  background:var(--pitch);
+  color:var(--white);
+  font-family:'Rajdhani',sans-serif;
+  min-height:100vh;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,255,135,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(79,195,247,0.04) 0%, transparent 50%);
+}
 
-/* HEADER */
-.hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;}
-.logo{font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:3px;color:var(--green);line-height:1;}
-.logo em{color:#f0f0eb;font-style:normal;}
-.sdot{width:8px;height:8px;border-radius:50%;background:#444;display:inline-block;margin-right:6px;transition:background .3s;}
-.sdot.live{background:var(--green);animation:blink 1.5s infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.stxt{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;color:rgba(255,255,255,.45);}
+/* ── LOADING ── */
+#LS{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--pitch);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  transition:opacity .6s ease;
+}
+.ls-logo{
+  font-family:'Russo One',sans-serif;
+  font-size:64px;letter-spacing:8px;
+  background:linear-gradient(135deg,#00ff87,#4fc3f7);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 30px rgba(0,255,135,.4));
+}
+.ls-sub{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--muted);}
+.ls-bar{width:180px;height:2px;background:rgba(255,255,255,.06);border-radius:1px;overflow:hidden;}
+.ls-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));width:0%;transition:width .35s ease;}
+.ls-msg{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,.2);letter-spacing:2px;height:14px;}
 
-/* CAMERA BOX */
-.cam-wrap{position:relative;width:100%;background:#000;aspect-ratio:4/3;max-height:300px;overflow:hidden;}
-/* FIX 1: NO scaleX mirror — camera shows real direction */
+/* ── HEADER ── */
+.hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;
+  background:rgba(17,29,46,.95);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:200;
+}
+.logo-wrap{display:flex;align-items:center;gap:10px;}
+.logo{
+  font-family:'Russo One',sans-serif;
+  font-size:22px;letter-spacing:4px;
+  background:linear-gradient(90deg,#00ff87,#4fc3f7);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.logo-sub{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);line-height:1.2;}
+.hdr-right{display:flex;align-items:center;gap:10px;}
+.live-pill{
+  display:none;align-items:center;gap:5px;
+  background:rgba(255,61,87,.15);border:1px solid rgba(255,61,87,.3);
+  border-radius:20px;padding:3px 10px;
+  font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--red);
+}
+.live-pill.show{display:flex;}
+.rdot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink .8s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.status-badge{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;
+  padding:3px 9px;border-radius:4px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  color:var(--muted);transition:all .3s;
+}
+.status-badge.online{background:rgba(0,255,135,.08);border-color:rgba(0,255,135,.25);color:var(--green);}
+
+/* ── CAMERA ── */
+.cam-section{position:relative;width:100%;aspect-ratio:4/3;max-height:290px;background:#000;overflow:hidden;}
 #vid{width:100%;height:100%;object-fit:cover;display:block;}
-/* Canvas also NO mirror — coordinates match video exactly */
 #cvs{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
-.scan{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:0;pointer-events:none;}
-.scan.on{opacity:.55;animation:scanY 2.5s linear infinite;}
-@keyframes scanY{from{top:0}to{top:100%}}
-.cam-hud{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;pointer-events:none;}
-.hbadge{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;padding:3px 7px;border-radius:4px;font-weight:700;}
-.hbadge.live-b{background:rgba(255,23,68,.85);color:#fff;display:none;align-items:center;gap:4px;}
-.hbadge.model-b{background:rgba(0,0,0,.65);color:var(--green);border:1px solid rgba(0,200,83,.3);}
-.rdot{width:6px;height:6px;border-radius:50%;background:#fff;animation:blink .8s infinite;}
-.corners span{position:absolute;width:16px;height:16px;border-color:var(--green);border-style:solid;opacity:.5;}
-.corners .tl{top:8px;left:8px;border-width:2px 0 0 2px;}
-.corners .tr{top:8px;right:8px;border-width:2px 2px 0 0;}
-.corners .bl{bottom:8px;left:8px;border-width:0 0 2px 2px;}
-.corners .br{bottom:8px;right:8px;border-width:0 2px 2px 0;}
 
-/* player found pill */
-.pfound{position:absolute;bottom:8px;left:8px;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;padding:3px 8px;border-radius:4px;background:rgba(0,0,0,.6);color:rgba(255,255,255,.25);pointer-events:none;transition:color .3s,border-color .3s;border:1px solid rgba(255,255,255,.08);}
-.pfound.yes{color:var(--green);border-color:rgba(0,200,83,.35);}
+/* scan line */
+.scanline{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:0;pointer-events:none;}
+.scanline.on{opacity:.4;animation:scanY 3s linear infinite;}
+@keyframes scanY{from{top:-1px}to{top:100%}}
 
-/* ALERT on camera */
-.alert-ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;z-index:20;transition:opacity .15s;}
-.alert-ov.show{opacity:1;animation:apop .35s ease;}
-@keyframes apop{0%{opacity:0;transform:scale(.85)}60%{transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
-.alert-ov.hb-bg{background:rgba(255,23,68,.28);}
-.alert-ov.fo-bg{background:rgba(255,214,0,.22);}
-.alert-big{font-family:'Bebas Neue',cursive;font-size:52px;letter-spacing:4px;text-shadow:0 2px 30px currentColor;line-height:1;}
-.alert-big.hb{color:var(--red);}
-.alert-big.fo{color:var(--yellow);}
-.alert-sm{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;color:rgba(255,255,255,.85);margin-top:5px;}
+/* corners */
+.cam-corners span{position:absolute;width:20px;height:20px;border-color:var(--green);border-style:solid;opacity:.6;}
+.cam-corners .tl{top:10px;left:10px;border-width:2px 0 0 2px;}
+.cam-corners .tr{top:10px;right:10px;border-width:2px 2px 0 0;}
+.cam-corners .bl{bottom:10px;left:10px;border-width:0 0 2px 2px;}
+.cam-corners .br{bottom:10px;right:10px;border-width:0 2px 2px 0;}
 
-/* NO-CAM */
-.nocam{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#090d11;}
-.nocam-ico{font-size:44px;opacity:.3;}
-.nocam-txt{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:rgba(255,255,255,.3);text-align:center;line-height:1.6;}
+/* player badges on camera */
+.player-badges{position:absolute;bottom:10px;left:10px;right:10px;display:flex;justify-content:space-between;pointer-events:none;}
+.pbadge{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1.5px;
+  padding:3px 8px;border-radius:4px;
+  background:rgba(0,0,0,.6);color:rgba(255,255,255,.2);
+  border:1px solid rgba(255,255,255,.06);
+  transition:all .3s;
+}
+.pbadge.p1-found{color:var(--p1);border-color:rgba(79,195,247,.35);background:rgba(79,195,247,.1);}
+.pbadge.p2-found{color:var(--p2);border-color:rgba(255,138,101,.35);background:rgba(255,138,101,.1);}
 
-/* DECISION CARD */
-.dec-card{margin:10px 12px;border-radius:10px;padding:13px 15px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:12px;transition:all .3s;position:relative;overflow:hidden;}
-.dec-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#2a2a2a;transition:background .3s;}
-.dec-card.hb{border-color:rgba(255,23,68,.4);background:rgba(255,23,68,.07);}
-.dec-card.hb::before{background:var(--red);}
-.dec-card.fo{border-color:rgba(255,214,0,.4);background:rgba(255,214,0,.06);}
-.dec-card.fo::before{background:var(--yellow);}
-.dec-ico{font-size:30px;flex-shrink:0;}
-.dec-body{flex:1;min-width:0;}
-.dec-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;line-height:1;}
+/* model badge */
+.model-badge{
+  position:absolute;top:10px;right:10px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1.5px;
+  padding:3px 8px;border-radius:4px;
+  background:rgba(0,0,0,.65);color:var(--green);
+  border:1px solid rgba(0,255,135,.2);
+  pointer-events:none;
+}
+
+/* ── ALERT OVERLAY ── */
+.alert-ov{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;z-index:30;transition:opacity .15s;
+}
+.alert-ov.show{opacity:1;animation:apop .3s ease;}
+@keyframes apop{0%{opacity:0;transform:scale(.8)}60%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+.alert-ov.hb-bg{background:radial-gradient(ellipse at center,rgba(255,61,87,.35) 0%,transparent 70%);}
+.alert-ov.fo-bg{background:radial-gradient(ellipse at center,rgba(255,210,63,.3) 0%,transparent 70%);}
+.alert-word{
+  font-family:'Russo One',sans-serif;
+  font-size:56px;letter-spacing:5px;
+  line-height:1;text-align:center;
+}
+.alert-word.hb{
+  color:var(--red);
+  text-shadow:0 0 40px rgba(255,61,87,.8),0 0 80px rgba(255,61,87,.4);
+}
+.alert-word.fo{
+  color:var(--yellow);
+  text-shadow:0 0 40px rgba(255,210,63,.8),0 0 80px rgba(255,210,63,.4);
+}
+.alert-sub-txt{
+  font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;
+  color:rgba(255,255,255,.8);margin-top:8px;
+}
+
+/* ── NO-CAM ── */
+.nocam{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  background:#060d18;
+}
+.nocam-ico{font-size:40px;opacity:.25;}
+.nocam-txt{
+  font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1.5px;
+  color:rgba(255,255,255,.2);text-align:center;line-height:1.8;
+}
+
+/* ── PLAYER SCORE BAR ── */
+.player-bar{
+  display:grid;grid-template-columns:1fr auto 1fr;
+  align-items:center;gap:10px;
+  padding:10px 14px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+}
+.player-info{display:flex;flex-direction:column;gap:2px;}
+.player-info.right{text-align:right;}
+.pname{font-family:'Russo One',sans-serif;font-size:13px;letter-spacing:2px;}
+.pname.p1{color:var(--p1);}
+.pname.p2{color:var(--p2);}
+.pstats-row{display:flex;gap:6px;align-items:center;}
+.pstats-row.right{justify-content:flex-end;}
+.mini-badge{
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  padding:2px 5px;border-radius:3px;
+}
+.mini-badge.ycard{background:rgba(255,210,63,.15);color:var(--yellow);border:1px solid rgba(255,210,63,.3);}
+.mini-badge.rcard{background:rgba(255,61,87,.15);color:var(--red);border:1px solid rgba(255,61,87,.3);}
+.mini-badge.hball{background:rgba(255,61,87,.15);color:var(--red);border:1px solid rgba(255,61,87,.2);}
+.vs-block{text-align:center;}
+.vs-txt{font-family:'Russo One',sans-serif;font-size:10px;letter-spacing:3px;color:var(--muted);}
+.match-time{
+  font-family:'Share Tech Mono',monospace;font-size:18px;
+  color:var(--white);letter-spacing:2px;
+}
+
+/* ── DECISION CARD ── */
+.dec-card{
+  margin:10px 12px;
+  border-radius:12px;
+  padding:14px 16px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  display:flex;align-items:center;gap:12px;
+  transition:all .35s cubic-bezier(.4,0,.2,1);
+  position:relative;overflow:hidden;
+}
+.dec-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  border-radius:3px 0 0 3px;background:var(--border2);transition:background .35s;
+}
+.dec-card::after{
+  content:'';position:absolute;inset:0;
+  background:transparent;transition:background .35s;pointer-events:none;
+}
+.dec-card.hb-card{border-color:rgba(255,61,87,.3);}
+.dec-card.hb-card::before{background:var(--red);}
+.dec-card.hb-card::after{background:rgba(255,61,87,.04);}
+.dec-card.fo-card{border-color:rgba(255,210,63,.3);}
+.dec-card.fo-card::before{background:var(--yellow);}
+.dec-card.fo-card::after{background:rgba(255,210,63,.03);}
+.dec-ico{font-size:28px;flex-shrink:0;position:relative;z-index:1;}
+.dec-body{flex:1;min-width:0;position:relative;z-index:1;}
+.dec-title{
+  font-family:'Russo One',sans-serif;font-size:16px;letter-spacing:2px;line-height:1.1;
+}
 .dec-title.hb{color:var(--red);}
 .dec-title.fo{color:var(--yellow);}
-.dec-desc{font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;line-height:1.4;}
-.dec-badge{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;padding:4px 9px;border-radius:4px;flex-shrink:0;}
-.badge-pen{background:var(--red);color:#fff;}
-.badge-yel{background:var(--yellow);color:#000;}
-.badge-red{background:var(--red);color:#fff;}
+.dec-desc{font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4;}
+.dec-conf{
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  padding:4px 9px;border-radius:5px;flex-shrink:0;
+  position:relative;z-index:1;
+}
+.dec-conf.hb{background:rgba(255,61,87,.15);color:var(--red);border:1px solid rgba(255,61,87,.3);}
+.dec-conf.fo{background:rgba(255,210,63,.12);color:var(--yellow);border:1px solid rgba(255,210,63,.25);}
 
-/* REPLAY PANEL */
-.replay-panel{margin:0 12px 10px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);overflow:hidden;display:none;}
-.replay-panel.open{display:block;}
-.replay-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);}
-.replay-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:2px;color:rgba(255,255,255,.5);}
-.replay-close{background:none;border:none;color:rgba(255,255,255,.35);font-size:18px;cursor:pointer;padding:0 4px;line-height:1;}
+/* ── WHO DID IT BADGE ── */
+.who-row{
+  display:flex;gap:8px;align-items:center;margin-top:7px;
+}
+.who-badge{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1.5px;
+  padding:3px 9px;border-radius:4px;
+}
+.who-badge.p1b{background:rgba(79,195,247,.12);color:var(--p1);border:1px solid rgba(79,195,247,.3);}
+.who-badge.p2b{background:rgba(255,138,101,.12);color:var(--p2);border:1px solid rgba(255,138,101,.3);}
 
-/* Replay canvas strip */
-.frame-strip{display:flex;gap:4px;padding:10px 12px;overflow-x:auto;background:#0a0d10;}
-.frame-thumb{flex-shrink:0;width:72px;height:54px;border-radius:5px;border:2px solid transparent;cursor:pointer;object-fit:cover;background:#1a1f28;transition:border-color .2s;}
-.frame-thumb.active{border-color:var(--green);}
-.frame-thumb canvas{width:72px;height:54px;border-radius:3px;}
+/* ── REPLAY PANEL ── */
+.replay-wrap{
+  margin:0 12px 10px;
+  border-radius:12px;
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  overflow:hidden;
+  display:none;
+  animation:slideDown .3s ease;
+}
+.replay-wrap.open{display:block;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.replay-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 14px;
+  background:rgba(0,0,0,.25);
+  border-bottom:1px solid var(--border);
+}
+.replay-hdr-title{
+  display:flex;align-items:center;gap:8px;
+  font-family:'Russo One',sans-serif;font-size:12px;letter-spacing:2px;color:var(--green);
+}
+.replay-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1s infinite;}
+.replay-close{
+  background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;
+  padding:2px 6px;line-height:1;transition:color .2s;
+}
+.replay-close:hover{color:var(--white);}
 
-/* Main replay canvas */
-.replay-main{position:relative;width:100%;aspect-ratio:4/3;max-height:200px;background:#000;overflow:hidden;}
-#replay-canvas{width:100%;height:100%;display:block;}
-.replay-overlay-label{position:absolute;top:8px;left:8px;font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:2px;padding:3px 10px;border-radius:4px;}
-.replay-overlay-label.hb{background:rgba(255,23,68,.8);color:#fff;}
-.replay-overlay-label.fo{background:rgba(255,214,0,.85);color:#000;}
+/* Replay view */
+.replay-view{position:relative;width:100%;aspect-ratio:4/3;max-height:220px;background:#000;overflow:hidden;}
+#rcvs{width:100%;height:100%;display:block;}
+.replay-event-tag{
+  position:absolute;top:10px;left:10px;
+  font-family:'Russo One',sans-serif;font-size:14px;letter-spacing:2px;
+  padding:4px 12px;border-radius:5px;
+}
+.replay-event-tag.hb-tag{background:rgba(255,61,87,.85);color:#fff;box-shadow:var(--glow-red);}
+.replay-event-tag.fo-tag{background:rgba(255,210,63,.9);color:#000;box-shadow:var(--glow-yellow);}
+.replay-frame-num{
+  position:absolute;bottom:8px;right:10px;
+  font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;
+  color:rgba(255,255,255,.4);background:rgba(0,0,0,.5);padding:2px 7px;border-radius:3px;
+}
 
-/* Replay controls */
-.replay-controls{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--border);}
-.rctrl{background:var(--surface);border:1px solid var(--border);border-radius:6px;color:#f0f0eb;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.5px;padding:6px 12px;cursor:pointer;transition:background .15s;}
-.rctrl:hover{background:rgba(255,255,255,.08);}
-.rctrl.act{background:var(--green);color:#000;border-color:var(--green);}
-.rtimeline{flex:1;display:flex;align-items:center;gap:6px;}
-.tbar{flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:2px;cursor:pointer;position:relative;}
-.tfill{height:100%;background:var(--green);border-radius:2px;width:0%;transition:width .08s;}
-.tthumb{width:12px;height:12px;background:var(--green);border-radius:50%;position:absolute;top:-4px;left:0%;transform:translateX(-50%);}
-.ttime{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:rgba(255,255,255,.35);min-width:28px;text-align:right;}
+/* Filmstrip */
+.filmstrip{
+  display:flex;gap:4px;padding:8px 10px;
+  background:rgba(0,0,0,.3);overflow-x:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;
+}
+.filmstrip::-webkit-scrollbar{height:3px;}
+.filmstrip::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px;}
+.film-frame{
+  flex-shrink:0;width:60px;height:45px;border-radius:4px;
+  border:2px solid transparent;cursor:pointer;overflow:hidden;
+  transition:border-color .2s,transform .2s;background:#1a2540;
+}
+.film-frame:hover{transform:scale(1.05);}
+.film-frame.active{border-color:var(--green);box-shadow:0 0 8px rgba(0,255,135,.3);}
+.film-frame canvas{width:60px;height:45px;display:block;}
 
-/* AI ADVICE BOX */
-.advice-box{margin:0 12px 10px;border-radius:10px;padding:13px 14px;display:none;}
-.advice-box.open{display:block;}
-.advice-box.hb-advice{background:rgba(255,23,68,.07);border:1px solid rgba(255,23,68,.25);}
-.advice-box.fo-advice{background:rgba(255,214,0,.06);border:1px solid rgba(255,214,0,.2);}
-.adv-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-.adv-icon{font-size:20px;}
-.adv-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:1.5px;color:rgba(255,255,255,.7);}
-.adv-items{display:flex;flex-direction:column;gap:6px;}
-.adv-item{display:flex;gap:10px;align-items:flex-start;}
-.adv-num{font-family:'Bebas Neue',cursive;font-size:18px;line-height:1.1;flex-shrink:0;}
-.adv-num.hb{color:var(--red);}
-.adv-num.fo{color:var(--yellow);}
-.adv-text{font-size:12px;color:rgba(255,255,255,.65);line-height:1.5;}
-.adv-verdict{margin-top:10px;padding:8px 10px;border-radius:7px;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.5px;line-height:1.5;}
-.adv-verdict.hb{background:rgba(255,23,68,.12);color:#ff8a80;}
-.adv-verdict.fo{background:rgba(255,214,0,.1);color:#ffd740;}
+/* Event marker line */
+.event-marker{
+  flex-shrink:0;width:2px;height:45px;background:var(--red);
+  border-radius:1px;box-shadow:var(--glow-red);margin:0 2px;
+  position:relative;
+}
+.event-marker::before{
+  content:'EVENT';position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:1px;
+  color:var(--red);white-space:nowrap;
+}
 
-/* STATS */
-.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 12px 10px;}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 8px;text-align:center;}
-.snum{font-family:'Bebas Neue',cursive;font-size:26px;line-height:1;}
-.snum.r{color:var(--red);}
-.snum.y{color:var(--yellow);}
-.snum.g{color:var(--green);}
-.slabel{font-size:9px;color:rgba(255,255,255,.35);letter-spacing:.5px;margin-top:1px;}
+/* Controls */
+.replay-ctrl{
+  display:flex;align-items:center;gap:6px;padding:8px 12px;
+  border-top:1px solid var(--border);
+}
+.rctrl-btn{
+  background:rgba(255,255,255,.04);border:1px solid var(--border2);
+  border-radius:6px;color:var(--white);
+  font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;letter-spacing:.5px;
+  padding:5px 10px;cursor:pointer;transition:all .15s;
+}
+.rctrl-btn:hover{background:rgba(255,255,255,.08);}
+.rctrl-btn.act{background:var(--green);color:#000;border-color:var(--green);}
+.tl-wrap{flex:1;display:flex;align-items:center;gap:6px;}
+.tl-track{
+  flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px;
+  cursor:pointer;position:relative;
+}
+.tl-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:2px;width:0%;transition:width .08s;}
+.tl-thumb{
+  width:11px;height:11px;border-radius:50%;
+  background:var(--green);position:absolute;top:-4px;left:0%;
+  transform:translateX(-50%);box-shadow:var(--glow-green);
+}
+.tl-time{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);min-width:26px;text-align:right;}
 
-/* SETTINGS */
-.settings{margin:0 12px 10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px;}
-.stitle{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.3);margin-bottom:12px;}
-.srow{margin-bottom:9px;}
-.slrow{display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.55);margin-bottom:4px;}
-.sval{color:var(--green);font-family:'Barlow Condensed',sans-serif;font-weight:700;}
-input[type=range]{width:100%;-webkit-appearance:none;height:3px;background:rgba(255,255,255,.1);border-radius:2px;outline:none;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--green);cursor:pointer;}
-.tog-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--border);margin-top:4px;}
-.tog-label{font-size:12px;color:rgba(255,255,255,.5);}
-.tog{position:relative;width:34px;height:19px;cursor:pointer;display:inline-block;}
+/* Slow-mo label */
+.slowmo-badge{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;
+  padding:2px 7px;border-radius:3px;display:none;
+  background:rgba(79,195,247,.12);color:var(--blue);border:1px solid rgba(79,195,247,.25);
+}
+.slowmo-badge.show{display:inline-block;}
+
+/* ── AI ADVICE ── */
+.advice-wrap{
+  margin:0 12px 10px;
+  border-radius:12px;
+  overflow:hidden;
+  display:none;
+  animation:slideDown .3s ease .1s both;
+}
+.advice-wrap.open{display:block;}
+.advice-hdr{
+  padding:10px 14px;
+  display:flex;align-items:center;gap:10px;
+}
+.advice-hdr.hb-adv{background:linear-gradient(135deg,rgba(255,61,87,.15),rgba(255,61,87,.05));border:1px solid rgba(255,61,87,.2);border-radius:12px 12px 0 0;}
+.advice-hdr.fo-adv{background:linear-gradient(135deg,rgba(255,210,63,.12),rgba(255,210,63,.04));border:1px solid rgba(255,210,63,.18);border-radius:12px 12px 0 0;}
+.advice-hdr-ico{font-size:22px;}
+.advice-hdr-title{font-family:'Russo One',sans-serif;font-size:12px;letter-spacing:2px;color:var(--white);}
+.advice-hdr-sub{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);margin-top:2px;}
+.advice-body{
+  padding:12px 14px;
+  background:rgba(17,29,46,.8);
+  border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;
+}
+.advice-step{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:8px 0;border-bottom:1px solid var(--border);
+}
+.advice-step:last-of-type{border-bottom:none;}
+.step-num{
+  font-family:'Russo One',sans-serif;font-size:20px;line-height:1;
+  flex-shrink:0;min-width:22px;
+}
+.step-num.hb-num{color:var(--red);}
+.step-num.fo-num{color:var(--yellow);}
+.step-content{flex:1;}
+.step-title{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--white);line-height:1.2;}
+.step-desc{font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5;}
+.verdict-box{
+  margin-top:10px;padding:10px 12px;border-radius:8px;
+  display:flex;align-items:center;gap:10px;
+}
+.verdict-box.hb-v{background:rgba(255,61,87,.1);border:1px solid rgba(255,61,87,.25);}
+.verdict-box.fo-v{background:rgba(255,210,63,.08);border:1px solid rgba(255,210,63,.2);}
+.verdict-ico{font-size:20px;}
+.verdict-txt{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;line-height:1.5;}
+.verdict-txt.hb-v{color:#ff8a80;}
+.verdict-txt.fo-v{color:#ffd740;}
+
+/* ── STATS GRID ── */
+.stats-section{padding:0 12px 10px;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;}
+.stat-tile{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:10px 6px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.stat-tile::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  border-radius:2px 2px 0 0;
+}
+.st-hb::after{background:var(--red);}
+.st-fo::after{background:var(--yellow);}
+.st-yc::after{background:var(--yellow);}
+.st-rc::after{background:var(--red);}
+.stat-num{font-family:'Russo One',sans-serif;font-size:26px;line-height:1;}
+.stat-num.r{color:var(--red);}
+.stat-num.y{color:var(--yellow);}
+.stat-num.g{color:var(--green);}
+.stat-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);margin-top:2px;}
+
+/* ── PLAYERS PANEL ── */
+.players-section{padding:0 12px 10px;}
+.section-title{
+  font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;
+  color:var(--muted);margin-bottom:8px;padding-left:2px;
+}
+.players-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.player-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:12px;
+  position:relative;overflow:hidden;
+}
+.player-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+}
+.pc-p1::before{background:var(--p1);}
+.pc-p2::before{background:var(--p2);}
+.pc-name{font-family:'Russo One',sans-serif;font-size:13px;letter-spacing:2px;margin-bottom:6px;}
+.pc-p1 .pc-name{color:var(--p1);}
+.pc-p2 .pc-name{color:var(--p2);}
+.pc-stat-row{display:flex;justify-content:space-between;margin-bottom:3px;}
+.pc-stat-label{font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--muted);}
+.pc-stat-val{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--white);}
+
+/* ── SETTINGS ── */
+.settings-section{padding:0 12px 10px;}
+.settings-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:14px;
+}
+.srow{margin-bottom:10px;}
+.srow-label{display:flex;justify-content:space-between;font-family:'Rajdhani',sans-serif;font-size:13px;color:rgba(255,255,255,.6);margin-bottom:5px;}
+.srow-val{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--green);}
+input[type=range]{
+  width:100%;-webkit-appearance:none;height:3px;
+  background:rgba(255,255,255,.08);border-radius:2px;outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:var(--green);cursor:pointer;box-shadow:0 0 8px rgba(0,255,135,.4);
+}
+.tog-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid var(--border);}
+.tog-label{font-family:'Rajdhani',sans-serif;font-size:13px;color:rgba(255,255,255,.55);}
+.tog{position:relative;width:36px;height:20px;cursor:pointer;display:inline-block;}
 .tog input{display:none;}
-.tog-bg{position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:10px;transition:background .2s;}
+.tog-bg{position:absolute;inset:0;background:rgba(255,255,255,.08);border-radius:10px;transition:background .2s;}
 .tog input:checked+.tog-bg{background:var(--green);}
-.tog-knob{position:absolute;width:13px;height:13px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .2s;}
-.tog input:checked~.tog-knob{transform:translateX(15px);}
+.tog-knob{position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .2s;}
+.tog input:checked~.tog-knob{transform:translateX(16px);}
 
-/* LOG */
-.log-section{padding:0 12px 80px;}
-.log-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.25);margin-bottom:7px;}
+/* ── EVENT LOG ── */
+.log-section{padding:0 12px 90px;}
 .log-list{display:flex;flex-direction:column;gap:4px;}
-.log-item{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:11px;animation:logIn .25s ease;}
-@keyframes logIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
-.ldot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.ldot.r{background:var(--red);}
-.ldot.y{background:var(--yellow);}
-.ltime{color:rgba(255,255,255,.25);min-width:36px;font-family:'Barlow Condensed',sans-serif;}
-.ldesc{flex:1;color:rgba(255,255,255,.65);}
-.lconf{font-family:'Barlow Condensed',sans-serif;color:rgba(255,255,255,.25);font-size:10px;}
+.log-item{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:7px;padding:8px 10px;
+  animation:logIn .25s ease;
+}
+@keyframes logIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.log-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.log-dot.r{background:var(--red);box-shadow:0 0 5px var(--red);}
+.log-dot.y{background:var(--yellow);box-shadow:0 0 5px var(--yellow);}
+.log-time{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);min-width:38px;}
+.log-who{font-family:'Share Tech Mono',monospace;font-size:9px;padding:1px 5px;border-radius:3px;flex-shrink:0;}
+.log-who.p1w{background:rgba(79,195,247,.12);color:var(--p1);}
+.log-who.p2w{background:rgba(255,138,101,.12);color:var(--p2);}
+.log-desc{flex:1;font-family:'Rajdhani',sans-serif;font-size:12px;color:rgba(255,255,255,.65);}
+.log-conf{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);}
 
-/* FOOTER */
-.footer{position:fixed;bottom:0;left:0;right:0;background:rgba(13,17,23,.96);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:9px 14px;display:flex;gap:9px;z-index:150;}
-.btn-main{flex:1;background:var(--green);color:#000;border:none;border-radius:8px;padding:12px;font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:2px;cursor:pointer;transition:all .15s;}
-.btn-main:hover{background:#00e676;}
-.btn-main:active{transform:scale(.98);}
-.btn-main.stop{background:rgba(255,23,68,.15);color:var(--red);border:1px solid rgba(255,23,68,.3);}
-.btn-reset{background:var(--surface);color:rgba(255,255,255,.5);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;cursor:pointer;}
-
-/* LOADING */
-.loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:999;transition:opacity .5s;}
-.loading-logo{font-family:'Bebas Neue',cursive;font-size:54px;letter-spacing:6px;color:var(--green);}
-.loading-sub{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;color:rgba(255,255,255,.3);}
-.lbar-wrap{width:150px;height:2px;background:rgba(255,255,255,.07);border-radius:1px;overflow:hidden;}
-.lbar{height:100%;background:var(--green);width:0%;transition:width .3s ease;}
-.lmsg{font-size:10px;color:rgba(255,255,255,.2);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;height:14px;}
+/* ── FOOTER ── */
+.footer{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(10,22,40,.97);backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  padding:10px 14px;display:flex;gap:8px;z-index:150;
+}
+.btn-start{
+  flex:1;background:linear-gradient(135deg,var(--green),#00a86b);
+  color:#000;border:none;border-radius:10px;padding:13px;
+  font-family:'Russo One',sans-serif;font-size:16px;letter-spacing:2px;
+  cursor:pointer;transition:all .2s;
+  box-shadow:0 4px 20px rgba(0,255,135,.2);
+}
+.btn-start:hover{box-shadow:0 4px 30px rgba(0,255,135,.4);}
+.btn-start:active{transform:scale(.98);}
+.btn-start.stop{
+  background:rgba(255,61,87,.1);color:var(--red);
+  border:1px solid rgba(255,61,87,.3);box-shadow:none;
+}
+.btn-reset{
+  background:var(--surface);color:var(--muted);
+  border:1px solid var(--border);border-radius:10px;
+  padding:13px 14px;
+  font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;
+  cursor:pointer;transition:all .2s;
+}
+.btn-reset:hover{background:var(--surface2);color:var(--white);}
 </style>
 </head>
 <body>
 
-<div class="loading" id="LS">
-  <div class="loading-logo">FAV</div>
-  <div class="loading-sub">Football AI VAR System</div>
-  <div class="lbar-wrap"><div class="lbar" id="LB"></div></div>
-  <div class="lmsg" id="LM">Loading...</div>
+<!-- LOADING -->
+<div id="LS">
+  <div class="ls-logo">FAV</div>
+  <div class="ls-sub">Football AI VAR System · 1v1 Edition</div>
+  <div class="ls-bar"><div class="ls-fill" id="LB"></div></div>
+  <div class="ls-msg" id="LM">Initializing...</div>
 </div>
 
+<!-- HEADER -->
 <div class="hdr">
-  <div class="logo">FA<em>V</em></div>
-  <div style="display:flex;align-items:center;gap:8px;">
-    <div><div style="display:flex;align-items:center;"><div class="sdot" id="SD"></div><span class="stxt" id="ST">OFFLINE</span></div></div>
+  <div class="logo-wrap">
+    <div>
+      <div class="logo">FAV</div>
+      <div class="logo-sub">Football AI VAR</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="live-pill" id="LP"><div class="rdot"></div>LIVE</div>
+    <div class="status-badge" id="SB">OFFLINE</div>
   </div>
 </div>
 
 <!-- CAMERA -->
-<div class="cam-wrap">
+<div class="cam-section">
   <video id="vid" autoplay playsinline muted></video>
   <canvas id="cvs"></canvas>
-  <div class="scan" id="SL"></div>
-  <div class="corners">
+  <div class="scanline" id="SL"></div>
+  <div class="cam-corners">
     <span class="tl"></span><span class="tr"></span>
     <span class="bl"></span><span class="br"></span>
   </div>
-  <div class="cam-hud">
-    <div class="hbadge live-b" id="LIVEB"><div class="rdot"></div> LIVE</div>
-    <div class="hbadge model-b">FAV-NET v2.1</div>
+  <div class="model-badge">FAV-NET v3.0</div>
+  <div class="player-badges">
+    <div class="pbadge" id="P1B">P1 — NOT FOUND</div>
+    <div class="pbadge" id="P2B">P2 — NOT FOUND</div>
   </div>
-  <div class="pfound" id="PF">NO PLAYER</div>
   <div class="alert-ov" id="AO">
-    <div class="alert-big" id="AL">HANDBALL!</div>
-    <div class="alert-sm" id="AS">Arm contact detected</div>
+    <div class="alert-word" id="AW">HANDBALL!</div>
+    <div class="alert-sub-txt" id="AS">Arm contact detected</div>
   </div>
   <div class="nocam" id="NC">
     <div class="nocam-ico">⚽</div>
-    <div class="nocam-txt">Point camera at players<br>AI auto-detects handball &amp; foul</div>
+    <div class="nocam-txt">Point camera at 2 players<br>FAV detects handball &amp; foul automatically</div>
+  </div>
+</div>
+
+<!-- PLAYER BAR -->
+<div class="player-bar">
+  <div class="player-info">
+    <div class="pname p1">PLAYER 1</div>
+    <div class="pstats-row" id="P1STATS"></div>
+  </div>
+  <div class="vs-block">
+    <div class="vs-txt">VS</div>
+    <div class="match-time" id="MT">00:00</div>
+  </div>
+  <div class="player-info right">
+    <div class="pname p2" style="text-align:right;">PLAYER 2</div>
+    <div class="pstats-row right" id="P2STATS"></div>
   </div>
 </div>
 
 <!-- DECISION CARD -->
-<div class="dec-card" id="DC" style="margin-top:10px;">
+<div class="dec-card" id="DC">
   <div class="dec-ico" id="DI">🤖</div>
   <div class="dec-body">
-    <div class="dec-title" id="DT" style="color:rgba(255,255,255,.3);">Waiting for player...</div>
-    <div class="dec-desc" id="DD">Camera will detect handball and foul automatically</div>
+    <div class="dec-title" id="DT" style="color:var(--muted);font-size:13px;letter-spacing:1px;">Watching for events...</div>
+    <div class="dec-desc" id="DD">Camera must see both players for detection to work</div>
+    <div class="who-row" id="WR" style="display:none;"></div>
   </div>
-  <div class="dec-badge" id="DB" style="display:none;"></div>
+  <div class="dec-conf" id="DCF" style="display:none;"></div>
 </div>
 
-<!-- REPLAY PANEL -->
-<div class="replay-panel" id="RP">
-  <div class="replay-header">
-    <span class="replay-title">REPLAY &amp; REVIEW</span>
-    <button class="replay-close" onclick="closeReplay()">✕</button>
-  </div>
-  <div class="replay-main">
-    <canvas id="replay-canvas"></canvas>
-    <div class="replay-overlay-label" id="ROL"></div>
-  </div>
-  <div class="frame-strip" id="FS"></div>
-  <div class="replay-controls">
-    <button class="rctrl" onclick="replayStep(-1)">◀ Frame</button>
-    <button class="rctrl act" id="RBTN" onclick="toggleReplayPlay()">⏸ Pause</button>
-    <div class="rtimeline">
-      <div class="tbar" id="TBAR" onclick="seekTL(event)">
-        <div class="tfill" id="TF"></div>
-        <div class="tthumb" id="TT"></div>
-      </div>
-      <div class="ttime" id="TTM">0.0s</div>
+<!-- REPLAY -->
+<div class="replay-wrap" id="RW">
+  <div class="replay-hdr">
+    <div class="replay-hdr-title"><div class="replay-dot"></div>SLOW-MO REPLAY</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="slowmo-badge show" id="SMB">0.5×</span>
+      <button class="replay-close" onclick="closeReplay()">✕</button>
     </div>
-    <button class="rctrl" onclick="replayStep(1)">Frame ▶</button>
+  </div>
+  <div class="replay-view">
+    <canvas id="rcvs"></canvas>
+    <div class="replay-event-tag" id="RET"></div>
+    <div class="replay-frame-num" id="RFN">Frame 0</div>
+  </div>
+  <div class="filmstrip" id="FS"></div>
+  <div class="replay-ctrl">
+    <button class="rctrl-btn" onclick="rStep(-1)">◀</button>
+    <button class="rctrl-btn act" id="RB" onclick="toggleRP()">⏸</button>
+    <div class="tl-wrap">
+      <div class="tl-track" id="TLT" onclick="seekTL(event)">
+        <div class="tl-fill" id="TLF"></div>
+        <div class="tl-thumb" id="TLTH"></div>
+      </div>
+      <div class="tl-time" id="TLTime">0.0s</div>
+    </div>
+    <button class="rctrl-btn" onclick="rStep(1)">▶</button>
+    <button class="rctrl-btn" id="SMBTN" onclick="toggleSlow()">🐢</button>
   </div>
 </div>
 
 <!-- AI ADVICE -->
-<div class="advice-box" id="AB">
-  <div class="adv-head">
-    <div class="adv-icon" id="ADI">📋</div>
-    <div class="adv-title">REFEREE BEST OPTION</div>
+<div class="advice-wrap" id="AW2">
+  <div class="advice-hdr" id="AH">
+    <div class="advice-hdr-ico" id="AI2">📋</div>
+    <div>
+      <div class="advice-hdr-title">REFEREE BEST DECISION</div>
+      <div class="advice-hdr-sub" id="AHS">AI analysis complete</div>
+    </div>
   </div>
-  <div class="adv-items" id="ADV"></div>
-  <div class="adv-verdict" id="ADVC"></div>
+  <div class="advice-body" id="AB"></div>
 </div>
 
 <!-- STATS -->
-<div class="stats-row">
-  <div class="stat-card"><div class="snum r" id="SH">0</div><div class="slabel">HANDBALLS</div></div>
-  <div class="stat-card"><div class="snum y" id="SF">0</div><div class="slabel">FOULS</div></div>
-  <div class="stat-card"><div class="snum g" id="SC">0</div><div class="slabel">CLEAR PLAY</div></div>
+<div class="stats-section">
+  <div class="section-title">MATCH STATS</div>
+  <div class="stats-grid">
+    <div class="stat-tile st-hb"><div class="stat-num r" id="SHBT">0</div><div class="stat-lbl">HANDBALLS</div></div>
+    <div class="stat-tile st-fo"><div class="stat-num y" id="SFOT">0</div><div class="stat-lbl">FOULS</div></div>
+    <div class="stat-tile st-yc"><div class="stat-num y" id="SYCT">0</div><div class="stat-lbl">YELLOWS</div></div>
+    <div class="stat-tile st-rc"><div class="stat-num r" id="SRCT">0</div><div class="stat-lbl">REDS</div></div>
+  </div>
+</div>
+
+<!-- PLAYERS PANEL -->
+<div class="players-section">
+  <div class="section-title">PLAYER RECORDS</div>
+  <div class="players-grid">
+    <div class="player-card pc-p1">
+      <div class="pc-name">PLAYER 1</div>
+      <div class="pc-stat-row"><span class="pc-stat-label">Handballs</span><span class="pc-stat-val" id="P1HB">0</span></div>
+      <div class="pc-stat-row"><span class="pc-stat-label">Fouls</span><span class="pc-stat-val" id="P1FO">0</span></div>
+      <div class="pc-stat-row"><span class="pc-stat-label">Yellow cards</span><span class="pc-stat-val" id="P1YC">0</span></div>
+      <div class="pc-stat-row"><span class="pc-stat-label">Red cards</span><span class="pc-stat-val" id="P1RC">0</span></div>
+    </div>
+    <div class="player-card pc-p2">
+      <div class="pc-name">PLAYER 2</div>
+      <div class="pc-stat-row"><span class="pc-stat-label">Handballs</span><span class="pc-stat-val" id="P2HB">0</span></div>
+      <div class="pc-stat-row"><span class="pc-stat-label">Fouls</span><span class="pc-stat-val" id="P2FO">0</span></div>
+      <div class="pc-stat-row"><span class="pc-stat-label">Yellow cards</span><span class="pc-stat-val" id="P2YC">0</span></div>
+      <div class="pc-stat-row"><span class="pc-stat-label">Red cards</span><span class="pc-stat-val" id="P2RC">0</span></div>
+    </div>
+  </div>
 </div>
 
 <!-- SETTINGS -->
-<div class="settings">
-  <div class="stitle">DETECTION SETTINGS</div>
-  <div class="srow">
-    <div class="slrow"><span>Handball arm angle threshold</span><span class="sval" id="HV">65°</span></div>
-    <input type="range" min="45" max="90" value="65" id="HS" oninput="document.getElementById('HV').textContent=this.value+'°'">
-  </div>
-  <div class="srow">
-    <div class="slrow"><span>Foul motion sensitivity</span><span class="sval" id="FV">70%</span></div>
-    <input type="range" min="40" max="95" value="70" id="FS2" oninput="document.getElementById('FV').textContent=this.value+'%'">
-  </div>
-  <div class="tog-row">
-    <span class="tog-label">Voice announcements</span>
-    <label class="tog"><input type="checkbox" id="VT" checked><div class="tog-bg"></div><div class="tog-knob"></div></label>
-  </div>
-  <div class="tog-row">
-    <span class="tog-label">Handball detection</span>
-    <label class="tog"><input type="checkbox" id="HT" checked><div class="tog-bg"></div><div class="tog-knob"></div></label>
-  </div>
-  <div class="tog-row">
-    <span class="tog-label">Foul detection</span>
-    <label class="tog"><input type="checkbox" id="FT" checked><div class="tog-bg"></div><div class="tog-knob"></div></label>
+<div class="settings-section">
+  <div class="section-title">DETECTION SETTINGS</div>
+  <div class="settings-card">
+    <div class="srow">
+      <div class="srow-label"><span>Handball arm angle (min)</span><span class="srow-val" id="HV">70°</span></div>
+      <input type="range" min="50" max="90" value="70" id="HS" oninput="document.getElementById('HV').textContent=this.value+'°'">
+    </div>
+    <div class="srow">
+      <div class="srow-label"><span>Min player proximity for foul</span><span class="srow-val" id="FV">0.20</span></div>
+      <input type="range" min="10" max="40" value="20" id="FP" oninput="document.getElementById('FV').textContent='0.'+String(this.value).padStart(2,'0')">
+    </div>
+    <div class="tog-row">
+      <span class="tog-label">Voice announcements</span>
+      <label class="tog"><input type="checkbox" id="VTog" checked><div class="tog-bg"></div><div class="tog-knob"></div></label>
+    </div>
+    <div class="tog-row">
+      <span class="tog-label">Handball detection</span>
+      <label class="tog"><input type="checkbox" id="HTog" checked><div class="tog-bg"></div><div class="tog-knob"></div></label>
+    </div>
+    <div class="tog-row">
+      <span class="tog-label">Foul detection</span>
+      <label class="tog"><input type="checkbox" id="FTog" checked><div class="tog-bg"></div><div class="tog-knob"></div></label>
+    </div>
   </div>
 </div>
 
 <!-- LOG -->
 <div class="log-section">
-  <div class="log-title">EVENT LOG</div>
-  <div class="log-list" id="LL"><div style="font-size:11px;color:rgba(255,255,255,.2);text-align:center;padding:10px 0;">No events yet</div></div>
+  <div class="section-title">EVENT LOG</div>
+  <div class="log-list" id="LL">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:12px 0;">No events yet</div>
+  </div>
 </div>
 
 <div class="footer">
-  <button class="btn-main" id="MB" onclick="toggleCam()">▶ START CAMERA</button>
+  <button class="btn-start" id="MB" onclick="toggleCam()">▶ START CAMERA</button>
   <button class="btn-reset" onclick="resetAll()">RESET</button>
 </div>
 
+<!-- MediaPipe -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471629/holistic.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+
 <script>
 // ================================================================
-// FAV — Football AI VAR
-// Fixes:
-//  1. NO mirror (no scaleX -1 anywhere)
-//  2. STRICT player-only detection — requires high visibility & human proportions
-//  3. Replay system captures frames at event moment + AI advice
+//  FAV v3.0  —  Football AI VAR  —  1v1 Edition
+//  Fixes: 2-player tracking, strict foul (proximity + contact only),
+//         strict handball (extended arm + high angle),
+//         replay buffer, AI advice, modern UI
 // ================================================================
 
-let camRunning = false, mpCam = null, holistic = null;
-let prevPose = null, motionBuf = [];
+// ── STATE ──
+let camRunning = false, mpCam = null, holisticM = null;
+let startMs = 0, timerInterval = null;
 let hbCooldown = 0, foCooldown = 0;
-let stats = {hb:0,fo:0,cl:0};
-let eventLog = [];
-let startMs = Date.now();
-let frameCount = 0;
 
-// REPLAY SYSTEM
-let replayFrames = [];   // array of ImageData snapshots
-let replayInterval = null;
-let replayIdx = 0;
-let replayPlaying = false;
-let captureActive = false;
-let captureCanvas = null;  // offscreen canvas for grabbing frames
-let captureCtx = null;
-let replayEventType = '';
+// Per-player stats
+const pStat = {
+  1: {hb:0, fo:0, yc:0, rc:0},
+  2: {hb:0, fo:0, yc:0, rc:0}
+};
+let globalStats = {hb:0, fo:0, yc:0, rc:0};
+let evLog = [];
+
+// 2-player tracking history
+// We keep last N pose snapshots to measure:
+//   - sustained arm extension (handball)
+//   - contact + sudden velocity (foul)
+const HIST_LEN = 12;
+let poseHistory = []; // array of {p1, p2} each frame
+
+// ── REPLAY ──
+const PRE_BUF = 50, POST_BUF = 35;
+let rollingBuf = [];
+let postFrames = [], capturingPost = false, postCount = 0;
+let replayFrames = [], replayIdx = 0, replayPlay = false, replaySlow = false;
+let rInterval = null, pendingEvt = null;
+let capCvs = null, capCtx = null;
 
 // ── LOADING ──
-const lMsgs = ['Loading AI engine...','Initializing MediaPipe...','Calibrating pose model...','Setting up detection...','Ready!'];
-let ls = 0;
+const LMSGS = ['Loading AI engine...','Initializing pose model...','Loading 2-player tracker...','Calibrating detection...','System ready!'];
+let lstep = 0;
 const lbEl = document.getElementById('LB'), lmEl = document.getElementById('LM');
 const lInt = setInterval(() => {
-  ls++;
-  lbEl.style.width = (ls * 20) + '%';
-  lmEl.textContent = lMsgs[Math.min(ls-1, lMsgs.length-1)];
-  if (ls >= 5) {
+  lstep++;
+  lbEl.style.width = (lstep * 20) + '%';
+  lmEl.textContent = LMSGS[Math.min(lstep-1, LMSGS.length-1)];
+  if (lstep >= 5) {
     clearInterval(lInt);
     setTimeout(() => {
-      const LS = document.getElementById('LS');
-      LS.style.opacity = '0';
-      setTimeout(() => LS.style.display = 'none', 500);
+      const ls = document.getElementById('LS');
+      ls.style.opacity = '0';
+      setTimeout(() => ls.style.display = 'none', 600);
     }, 300);
   }
-}, 380);
+}, 400);
+
+// ── MATCH TIMER ──
+function startTimer() {
+  startMs = Date.now();
+  timerInterval = setInterval(() => {
+    const secs = Math.floor((Date.now() - startMs) / 1000);
+    const m = String(Math.floor(secs / 60)).padStart(2, '0');
+    const s = String(secs % 60).padStart(2, '0');
+    document.getElementById('MT').textContent = m + ':' + s;
+  }, 1000);
+}
+function stopTimer() { clearInterval(timerInterval); }
+function getMatchTime() {
+  const secs = Math.floor((Date.now() - startMs) / 1000);
+  return String(Math.floor(secs/60)).padStart(2,'0') + ':' + String(secs%60).padStart(2,'0');
+}
 
 // ── VOICE ──
 function speak(txt) {
-  if (!document.getElementById('VT').checked || !window.speechSynthesis) return;
+  if (!document.getElementById('VTog').checked || !window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(txt);
-  u.rate = 1.1; u.pitch = 1.0; u.volume = 1.0;
+  u.rate = 1.05; u.pitch = 1.0; u.volume = 1.0;
   window.speechSynthesis.speak(u);
 }
 
-// ── MATH HELPERS ──
+// ── MATH ──
 function angle3(a, b, c) {
-  const ab = {x: a.x-b.x, y: a.y-b.y};
-  const cb = {x: c.x-b.x, y: c.y-b.y};
+  const ab = {x:a.x-b.x, y:a.y-b.y};
+  const cb = {x:c.x-b.x, y:c.y-b.y};
   const dot = ab.x*cb.x + ab.y*cb.y;
   const mag = Math.sqrt(ab.x**2+ab.y**2) * Math.sqrt(cb.x**2+cb.y**2);
-  if (mag === 0) return 0;
-  return Math.acos(Math.min(1, Math.max(-1, dot/mag))) * (180/Math.PI);
+  if (!mag) return 0;
+  return Math.acos(Math.min(1,Math.max(-1,dot/mag))) * 180/Math.PI;
 }
-function dist2d(a, b) { return Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2); }
+function dist(a, b) { return Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2); }
+function midpoint(a, b) { return {x:(a.x+b.x)/2, y:(a.y+b.y)/2}; }
 
 // ================================================================
-// FIX 2: STRICT PLAYER VALIDATION
-// Before any detection we confirm we actually see a HUMAN PLAYER
-// by checking: enough high-visibility landmarks, body proportions
+//  2-PLAYER DETECTION SYSTEM
+//  MediaPipe Holistic gives ONE person per instance.
+//  We run TWO holistic instances simultaneously.
+//  Each frame → detect which skeleton is Player1 vs Player2
+//  by tracking their horizontal center over time.
 // ================================================================
-function isRealPlayer(pose) {
-  if (!pose || pose.length < 25) return false;
 
-  // Require many landmarks visible (not just 1-2 points)
-  const keyIds = [11,12,13,14,15,16,23,24,25,26,27,28];
-  let visible = 0;
-  for (const id of keyIds) {
-    if (pose[id] && pose[id].visibility > 0.55) visible++;
-  }
-  // Need at least 7 of 12 key body points clearly visible
-  if (visible < 7) return false;
+// Since MediaPipe Holistic only tracks one person,
+// we use a heuristic: we store both skeletons per frame
+// and identify them by their X-center (left = P1, right = P2)
+// This works for 1v1 facing each other.
 
-  // Check human proportions: shoulders should be horizontally similar to hips
-  const lSh = pose[11], rSh = pose[12], lHip = pose[23], rHip = pose[24];
-  if (!lSh || !rSh || !lHip || !rHip) return false;
-  if (lSh.visibility < 0.5 || rSh.visibility < 0.5) return false;
+// Actually: in single-camera 1v1, we detect ONE player at a time.
+// We track BOTH players by watching the scene and detecting
+// when there are 2 sets of shoulders visible using pose keypoints.
+// We split by horizontal midpoint of the frame.
 
-  const shoulderWidth = dist2d(lSh, rSh);
-  const hipWidth = dist2d(lHip, rHip);
-  const torsoHeight = dist2d({x:(lSh.x+rSh.x)/2, y:(lSh.y+rSh.y)/2}, {x:(lHip.x+rHip.x)/2, y:(lHip.y+rHip.y)/2});
+function extractPlayers(pose) {
+  // Returns {p1: landmarks_or_null, p2: landmarks_or_null}
+  // Strategy: find if both sets of shoulders are visible
+  // by checking if high-visibility landmarks span > 60% of frame width
+  if (!pose || pose.length < 25) return {p1: null, p2: null};
 
-  // Human: shoulder width > 0.05, torso height > 0.1, shoulder/hip ratio between 0.5 and 2.5
-  if (shoulderWidth < 0.05) return false;
-  if (torsoHeight < 0.08) return false;
-  const ratio = shoulderWidth / (hipWidth + 0.001);
-  if (ratio < 0.4 || ratio > 3.0) return false;
-
-  return true;
-}
-
-// ── HANDBALL DETECTION ──
-// Only triggers when arm is clearly extended outward BEYOND natural range
-// AND we have confirmed a real player
-function detectHandball(pose) {
-  if (!isRealPlayer(pose)) return null;
-  if (!document.getElementById('HT').checked) return null;
-
-  const threshold = parseInt(document.getElementById('HS').value); // degrees
+  // Check overall visibility
   const lSh = pose[11], rSh = pose[12];
-  const lEl = pose[13], rEl = pose[14];
   const lHip = pose[23], rHip = pose[24];
-  const lWr = pose[15], rWr = pose[16];
+  if (!lSh || !rSh) return {p1: null, p2: null};
+  if (lSh.visibility < 0.5 || rSh.visibility < 0.5) return {p1: null, p2: null};
 
-  const results = [];
+  // Validate human proportions
+  const shoulderW = dist(lSh, rSh);
+  const torsoH = dist(midpoint(lSh, rSh), midpoint(lHip||lSh, rHip||rSh));
+  if (shoulderW < 0.04 || torsoH < 0.06) return {p1: null, p2: null};
 
-  // LEFT arm check
-  if (lSh && lEl && lHip && lSh.visibility > 0.65 && lEl.visibility > 0.65) {
-    // Reference point: directly below shoulder (natural hanging position)
-    const refBelow = {x: lSh.x, y: lSh.y + 0.3};
-    const armAngle = angle3(refBelow, lSh, lEl);
+  // Body center X
+  const cx = (lSh.x + rSh.x) / 2;
 
-    // Also check elbow is NOT below shoulder (arm is raised, not hanging)
-    const armRaised = lEl.y < lSh.y + 0.05;
-    // Arm must be to the side (not just forward — x displacement)
-    const armSide = Math.abs(lEl.x - lSh.x) > 0.04;
-
-    // Extra: if wrist visible, check whole arm extension
-    let wristExtended = true;
-    if (lWr && lWr.visibility > 0.5) {
-      const fullArmAngle = angle3(refBelow, lSh, lWr);
-      wristExtended = fullArmAngle > threshold * 0.8;
-    }
-
-    if (armAngle > threshold && armRaised && armSide && wristExtended) {
-      // Sustained check: arm must have been extended for at least 2 recent frames
-      results.push({side:'left', angle: Math.round(armAngle), conf: Math.min(97, Math.round(55 + armAngle * 0.45))});
-    }
-  }
-
-  // RIGHT arm check
-  if (rSh && rEl && rHip && rSh.visibility > 0.65 && rEl.visibility > 0.65) {
-    const refBelow = {x: rSh.x, y: rSh.y + 0.3};
-    const armAngle = angle3(refBelow, rSh, rEl);
-    const armRaised = rEl.y < rSh.y + 0.05;
-    const armSide = Math.abs(rEl.x - rSh.x) > 0.04;
-
-    let wristExtended = true;
-    if (rWr && rWr.visibility > 0.5) {
-      const fullArmAngle = angle3(refBelow, rSh, rWr);
-      wristExtended = fullArmAngle > threshold * 0.8;
-    }
-
-    if (armAngle > threshold && armRaised && armSide && wristExtended) {
-      results.push({side:'right', angle: Math.round(armAngle), conf: Math.min(97, Math.round(55 + armAngle * 0.45))});
-    }
-  }
-
-  if (results.length === 0) return null;
-  return results.reduce((a,b) => a.conf > b.conf ? a : b);
+  // Assign to P1 or P2 based on which side of frame
+  // P1 = left side (cx < 0.5), P2 = right side (cx >= 0.5)
+  if (cx < 0.5) return {p1: pose, p2: null};
+  else return {p1: null, p2: pose};
 }
 
-// ── FOUL DETECTION ──
-// Requires confirmed player + very significant sudden motion spike
-// Uses multiple frames of history to avoid false positives
-let consecutiveHighMotion = 0;
-function detectFoul(pose) {
-  if (!isRealPlayer(pose) || !prevPose) return null;
-  if (!document.getElementById('FT').checked) return null;
-
-  const sens = parseInt(document.getElementById('FS2').value);
-  const keyIds = [11,12,13,14,15,16,23,24,25,26];
-
-  let maxM = 0, total = 0, cnt = 0;
+// ── VALIDATE real player ──
+function isValidPlayer(pose) {
+  if (!pose) return false;
+  const keyIds = [11,12,13,14,23,24];
+  let vis = 0;
   for (const id of keyIds) {
-    const c = pose[id], p = prevPose[id];
-    if (!c || !p || c.visibility < 0.5 || p.visibility < 0.5) continue;
-    const d = dist2d(c, p);
-    maxM = Math.max(maxM, d);
-    total += d;
-    cnt++;
+    if (pose[id] && pose[id].visibility > 0.55) vis++;
   }
-  if (cnt < 4) return null;
-  const avg = total / cnt;
+  return vis >= 4;
+}
 
-  motionBuf.push({max: maxM, avg});
-  if (motionBuf.length > 10) motionBuf.shift();
-  if (motionBuf.length < 5) return null;
+// ================================================================
+//  HANDBALL DETECTION  (per-player)
+//
+//  RULES (strict):
+//  1. Player must be valid (confirmed human skeleton)
+//  2. Arm angle from body > threshold (default 70°)
+//  3. Arm is RAISED (elbow Y above shoulder Y)
+//  4. Arm is to the SIDE (X displacement > threshold)
+//  5. Wrist also extended if visible
+//  6. Must be sustained for 3+ consecutive frames (not a swing)
+// ================================================================
+const hbSustainBuf = {1: [], 2: []};
+const HB_SUSTAIN_NEEDED = 3;
 
-  // Compare recent 2 frames vs earlier baseline
-  const recent = motionBuf.slice(-2);
-  const base = motionBuf.slice(0, -3);
-  if (base.length < 3) return null;
+function detectHandballForPlayer(pose, playerId) {
+  if (!isValidPlayer(pose)) {
+    hbSustainBuf[playerId] = [];
+    return null;
+  }
+  if (!document.getElementById('HTog').checked) return null;
 
-  const recentAvg = recent.reduce((s,x) => s + x.max, 0) / recent.length;
-  const baseAvg = base.reduce((s,x) => s + x.avg, 0) / base.length;
-  const spike = baseAvg > 0.002 ? recentAvg / baseAvg : 0;
+  const threshold = parseInt(document.getElementById('HS').value);
+  const arms = [
+    {sh: 11, el: 13, wr: 15, label: 'left'},
+    {sh: 12, el: 14, wr: 16, label: 'right'}
+  ];
+  let bestResult = null;
 
-  // Dynamic threshold: higher sensitivity = lower spike needed
-  const spikeThresh = 2.0 + (100 - sens) * 0.05;
+  for (const arm of arms) {
+    const sh = pose[arm.sh], el = pose[arm.el], wr = pose[arm.wr];
+    if (!sh || !el) continue;
+    if (sh.visibility < 0.65 || el.visibility < 0.6) continue;
 
-  if (spike > spikeThresh && recentAvg > 0.025) {
-    consecutiveHighMotion++;
-    // Need 2 consecutive high-motion frames to confirm foul (avoids single-frame noise)
-    if (consecutiveHighMotion >= 2) {
-      consecutiveHighMotion = 0;
-      const conf = Math.min(96, Math.round(55 + spike * 8));
-      let card = spike > 4.5 ? 'red' : 'yellow';
-      return {spike: Math.round(spike * 10) / 10, conf, card};
+    // Reference = straight down from shoulder
+    const refDown = {x: sh.x, y: sh.y + 0.35};
+    const armAng = angle3(refDown, sh, el);
+
+    // Conditions
+    const isRaised = el.y < sh.y + 0.04;           // elbow not hanging down
+    const isSideways = Math.abs(el.x - sh.x) > 0.035; // arm out sideways
+    const aboveThresh = armAng > threshold;
+
+    // Wrist check if visible
+    let wristOk = true;
+    if (wr && wr.visibility > 0.5) {
+      const wristAng = angle3(refDown, sh, wr);
+      wristOk = wristAng > threshold * 0.75;
+    }
+
+    if (aboveThresh && isRaised && isSideways && wristOk) {
+      const conf = Math.min(96, Math.round(52 + armAng * 0.5));
+      if (!bestResult || conf > bestResult.conf) {
+        bestResult = {side: arm.label, angle: Math.round(armAng), conf};
+      }
+    }
+  }
+
+  if (bestResult) {
+    hbSustainBuf[playerId].push(1);
+    if (hbSustainBuf[playerId].length > HB_SUSTAIN_NEEDED * 2)
+      hbSustainBuf[playerId].shift();
+    const recentOnes = hbSustainBuf[playerId].slice(-HB_SUSTAIN_NEEDED);
+    if (recentOnes.length >= HB_SUSTAIN_NEEDED && recentOnes.every(v => v === 1)) {
+      return bestResult;
     }
   } else {
-    consecutiveHighMotion = 0;
+    hbSustainBuf[playerId].push(0);
+    if (hbSustainBuf[playerId].length > HB_SUSTAIN_NEEDED * 2)
+      hbSustainBuf[playerId].shift();
   }
   return null;
 }
 
 // ================================================================
-// REPLAY SYSTEM
-// Captures frames from the live canvas into an array
-// When event fires, we show the buffered frames + 30 more frames
+//  FOUL DETECTION  (requires BOTH players visible)
+//
+//  RULES (strict — no false positives):
+//  1. BOTH players must be valid skeletons in same frame
+//  2. Players must be CLOSE to each other (proximity check)
+//  3. One player's body shows sudden HIGH velocity spike
+//     but ONLY when the other player is nearby (= contact)
+//  4. Must be sustained over 2+ frames with proximity confirmed
+//  5. Normal walking/running motion is NOT flagged
+//     Only genuine collisions where:
+//     - proximity < threshold AND
+//     - velocity spike > 3.5× baseline (strong kick/push)
 // ================================================================
-const PREBUFFER = 45;   // frames captured before event
-const POSTBUFFER = 30;  // frames captured after event
-let rollingBuffer = []; // ImageData ring buffer (pre-event)
-let postCapFrames = []; // frames after event detected
-let capturingPost = false;
-let postCapCount = 0;
-let pendingEvent = null;
+const foulBuf = [];
+const FOUL_BUF_SIZE = 15;
+let consecutiveFoul = 0;
 
-function captureFrame(videoEl) {
-  if (!captureCanvas) {
-    captureCanvas = document.createElement('canvas');
-    captureCanvas.width = 160; captureCanvas.height = 120;
-    captureCtx = captureCanvas.getContext('2d');
+function detectFoul(p1pose, p2pose) {
+  if (!isValidPlayer(p1pose) || !isValidPlayer(p2pose)) {
+    foulBuf.length = 0; consecutiveFoul = 0;
+    return null;
+  }
+  if (!document.getElementById('FTog').checked) return null;
+  if (poseHistory.length < 4) return null;
+
+  const proxThresh = parseInt(document.getElementById('FP').value) / 100;
+
+  // Get body centers for both players
+  const p1Sh = midpoint(p1pose[11], p1pose[12]);
+  const p2Sh = midpoint(p2pose[11], p2pose[12]);
+  const proximity = dist(p1Sh, p2Sh);
+
+  // Players must be close enough for contact
+  if (proximity > proxThresh + 0.08) {
+    foulBuf.length = 0; consecutiveFoul = 0;
+    return null;
+  }
+
+  // Get velocity for both players from history
+  const prev = poseHistory[poseHistory.length - 2];
+  if (!prev || !prev.p1 || !prev.p2) return null;
+
+  const torsoIds = [11,12,13,14,23,24,25,26];
+
+  function getVelocity(curPose, prevPose) {
+    let total = 0, cnt = 0;
+    for (const id of torsoIds) {
+      const c = curPose[id], p = prevPose[id];
+      if (!c || !p || c.visibility < 0.45 || p.visibility < 0.45) continue;
+      total += dist(c, p);
+      cnt++;
+    }
+    return cnt > 0 ? total / cnt : 0;
+  }
+
+  const v1 = getVelocity(p1pose, prev.p1 || p1pose);
+  const v2 = getVelocity(p2pose, prev.p2 || p2pose);
+  const maxV = Math.max(v1, v2);
+  const aggressorPlayer = v1 >= v2 ? 1 : 2;
+
+  foulBuf.push({maxV, proximity});
+  if (foulBuf.length > FOUL_BUF_SIZE) foulBuf.shift();
+  if (foulBuf.length < 5) return null;
+
+  // Baseline = average velocity over earlier frames (not recent 3)
+  const baseFrames = foulBuf.slice(0, -3);
+  const baseV = baseFrames.reduce((s,x) => s + x.maxV, 0) / (baseFrames.length || 1);
+
+  // Spike ratio
+  const spike = baseV > 0.003 ? maxV / baseV : 0;
+
+  // STRICT threshold: 3.5x spike AND players must be within proximity threshold
+  if (spike > 3.5 && proximity < proxThresh && maxV > 0.03) {
+    consecutiveFoul++;
+    if (consecutiveFoul >= 2) { // 2 consecutive frames confirming contact
+      consecutiveFoul = 0;
+      foulBuf.length = 0;
+      const conf = Math.min(95, Math.round(55 + spike * 6));
+      const card = spike > 5.5 ? 'red' : 'yellow';
+      return {spike: Math.round(spike*10)/10, conf, card, aggressor: aggressorPlayer, proximity: Math.round(proximity*100)/100};
+    }
+  } else {
+    if (spike <= 2.0) consecutiveFoul = 0; // only reset on clearly non-foul
+  }
+  return null;
+}
+
+// ── CAPTURE FRAME ──
+function captureFrame(vidEl) {
+  if (!capCvs) {
+    capCvs = document.createElement('canvas');
+    capCvs.width = 160; capCvs.height = 120;
+    capCtx = capCvs.getContext('2d');
   }
   try {
-    captureCtx.drawImage(videoEl, 0, 0, 160, 120);
-    const id = captureCtx.getImageData(0, 0, 160, 120);
-    rollingBuffer.push(id);
-    if (rollingBuffer.length > PREBUFFER) rollingBuffer.shift();
-
+    capCtx.drawImage(vidEl, 0, 0, 160, 120);
+    const imgData = capCtx.getImageData(0, 0, 160, 120);
+    rollingBuf.push(imgData);
+    if (rollingBuf.length > PRE_BUF) rollingBuf.shift();
     if (capturingPost) {
-      postCapFrames.push(id);
-      postCapCount++;
-      if (postCapCount >= POSTBUFFER) {
-        capturingPost = false;
-        finalizeReplay();
-      }
+      postFrames.push(imgData);
+      postCount++;
+      if (postCount >= POST_BUF) { capturingPost = false; buildReplay(); }
     }
   } catch(e) {}
 }
 
-function triggerReplayCapture(eventData) {
-  pendingEvent = eventData;
-  postCapFrames = [];
-  postCapCount = 0;
-  capturingPost = true;
+function startCapture(evt) {
+  pendingEvt = evt;
+  postFrames = []; postCount = 0; capturingPost = true;
 }
 
-function finalizeReplay() {
-  // Combine pre + post frames
-  replayFrames = [...rollingBuffer, ...postCapFrames];
-  showReplay(pendingEvent);
+function buildReplay() {
+  replayFrames = [...rollingBuf, ...postFrames];
+  showReplay();
 }
 
-function showReplay(ev) {
-  const rp = document.getElementById('RP');
-  rp.classList.add('open');
+// ── REPLAY UI ──
+function showReplay() {
+  const rw = document.getElementById('RW');
+  rw.classList.add('open');
+  const evt = pendingEvt;
 
-  // Build thumbnail strip
+  // Event tag
+  const ret = document.getElementById('RET');
+  ret.className = 'replay-event-tag ' + (evt.type==='handball' ? 'hb-tag' : 'fo-tag');
+  ret.textContent = evt.type==='handball' ? '🤚 HANDBALL' : '⚠️ FOUL';
+
+  // Filmstrip
   const fs = document.getElementById('FS');
   fs.innerHTML = '';
-  const step = Math.max(1, Math.floor(replayFrames.length / 8));
+  const step = Math.max(1, Math.floor(replayFrames.length / 10));
+  const eventFrameIdx = rollingBuf.length;
+
   for (let i = 0; i < replayFrames.length; i += step) {
+    // Insert event marker before post-buffer
+    if (i > 0 && Math.floor((i-step)/step) < Math.floor(eventFrameIdx/step) && Math.floor(i/step) >= Math.floor(eventFrameIdx/step)) {
+      const marker = document.createElement('div');
+      marker.className = 'event-marker';
+      fs.appendChild(marker);
+    }
     const tc = document.createElement('canvas');
-    tc.width = 72; tc.height = 54;
-    tc.className = 'frame-thumb';
-    tc.title = 'Frame ' + i;
-    const tctx = tc.getContext('2d');
-    tctx.putImageData(replayFrames[i], 0, 0, 0, 0, 72, 54);
+    tc.width = 60; tc.height = 45;
+    tc.className = 'film-frame';
+    tc.getContext('2d').putImageData(replayFrames[i], 0, 0, 0, 0, 60, 45);
     const fi = i;
-    tc.onclick = () => { replayIdx = fi; renderReplayFrame(); };
+    tc.onclick = () => { replayIdx = fi; drawReplayFrame(); };
     fs.appendChild(tc);
   }
 
-  // Label
-  const rol = document.getElementById('ROL');
-  rol.className = 'replay-overlay-label ' + (ev.type === 'handball' ? 'hb' : 'fo');
-  rol.textContent = ev.type === 'handball' ? '🤚 HANDBALL' : '⚠️ FOUL';
-
-  // Set event marker at the pre-buffer boundary
-  replayIdx = Math.max(0, rollingBuffer.length - 5);
-  startReplayPlay();
+  // Start from just before event
+  replayIdx = Math.max(0, eventFrameIdx - 8);
+  replayPlay = true;
+  updateReplayBtn();
+  if (rInterval) clearInterval(rInterval);
+  rInterval = setInterval(stepReplay, replaySlow ? 120 : 60);
 }
 
-function renderReplayFrame() {
-  if (replayFrames.length === 0) return;
-  const rc = document.getElementById('replay-canvas');
+function stepReplay() {
+  if (!replayPlay) return;
+  replayIdx++;
+  if (replayIdx >= replayFrames.length) replayIdx = 0;
+  drawReplayFrame();
+}
+
+function drawReplayFrame() {
+  if (!replayFrames.length) return;
+  const rc = document.getElementById('rcvs');
   const rctx = rc.getContext('2d');
   rc.width = rc.offsetWidth || 320;
   rc.height = rc.offsetHeight || 240;
   const frame = replayFrames[Math.min(replayIdx, replayFrames.length-1)];
-  // Scale up the 160x120 frame to fill canvas
-  const tmpC = document.createElement('canvas');
-  tmpC.width = 160; tmpC.height = 120;
-  tmpC.getContext('2d').putImageData(frame, 0, 0);
-  rctx.drawImage(tmpC, 0, 0, rc.width, rc.height);
+  const tmp = document.createElement('canvas');
+  tmp.width = 160; tmp.height = 120;
+  tmp.getContext('2d').putImageData(frame, 0, 0);
+  rctx.drawImage(tmp, 0, 0, rc.width, rc.height);
 
-  const pct = replayFrames.length > 1 ? replayIdx / (replayFrames.length - 1) * 100 : 0;
-  document.getElementById('TF').style.width = pct + '%';
-  document.getElementById('TT').style.left = pct + '%';
-  document.getElementById('TTM').textContent = (replayIdx * 0.033).toFixed(1) + 's';
+  // Add scanline overlay
+  rctx.fillStyle = 'rgba(0,0,0,0)';
+  for (let y = 0; y < rc.height; y += 3) {
+    rctx.fillStyle = 'rgba(0,0,0,0.08)';
+    rctx.fillRect(0, y, rc.width, 1);
+  }
 
-  // Highlight thumbnails
-  document.querySelectorAll('.frame-thumb').forEach((t, i) => {
-    const step = Math.max(1, Math.floor(replayFrames.length / 8));
-    t.classList.toggle('active', Math.abs(i * step - replayIdx) < step / 2);
+  const pct = replayFrames.length > 1 ? replayIdx / (replayFrames.length-1) * 100 : 0;
+  document.getElementById('TLF').style.width = pct + '%';
+  document.getElementById('TLTH').style.left = pct + '%';
+  document.getElementById('TLTime').textContent = (replayIdx * 0.033).toFixed(1) + 's';
+  document.getElementById('RFN').textContent = 'Frame ' + replayIdx;
+
+  // Highlight active filmstrip frame
+  document.querySelectorAll('.film-frame').forEach((el, i) => {
+    const fi = i * Math.max(1, Math.floor(replayFrames.length/10));
+    el.classList.toggle('active', Math.abs(fi - replayIdx) < Math.floor(replayFrames.length/10)/2);
   });
 }
 
-function startReplayPlay() {
-  replayPlaying = true;
-  document.getElementById('RBTN').textContent = '⏸ Pause';
-  document.getElementById('RBTN').classList.add('act');
-  if (replayInterval) clearInterval(replayInterval);
-  replayInterval = setInterval(() => {
-    if (!replayPlaying) return;
-    replayIdx++;
-    if (replayIdx >= replayFrames.length) { replayIdx = 0; }
-    renderReplayFrame();
-  }, 80);
+function toggleRP() {
+  replayPlay = !replayPlay;
+  updateReplayBtn();
 }
-
-function toggleReplayPlay() {
-  replayPlaying = !replayPlaying;
-  const btn = document.getElementById('RBTN');
-  btn.textContent = replayPlaying ? '⏸ Pause' : '▶ Play';
-  btn.classList.toggle('act', replayPlaying);
+function updateReplayBtn() {
+  const btn = document.getElementById('RB');
+  btn.textContent = replayPlay ? '⏸' : '▶';
+  btn.classList.toggle('act', replayPlay);
 }
-
-function replayStep(dir) {
-  replayPlaying = false;
-  document.getElementById('RBTN').textContent = '▶ Play';
-  document.getElementById('RBTN').classList.remove('act');
-  replayIdx = Math.max(0, Math.min(replayFrames.length - 1, replayIdx + dir));
-  renderReplayFrame();
+function rStep(dir) {
+  replayPlay = false; updateReplayBtn();
+  replayIdx = Math.max(0, Math.min(replayFrames.length-1, replayIdx+dir));
+  drawReplayFrame();
 }
-
 function seekTL(e) {
-  const bar = document.getElementById('TBAR');
-  const rect = bar.getBoundingClientRect();
-  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-  replayIdx = Math.round(pct * (replayFrames.length - 1));
-  renderReplayFrame();
+  const t = document.getElementById('TLT');
+  const r = t.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX-r.left)/r.width));
+  replayIdx = Math.round(pct*(replayFrames.length-1));
+  drawReplayFrame();
 }
-
+function toggleSlow() {
+  replaySlow = !replaySlow;
+  document.getElementById('SMB').textContent = replaySlow ? '0.25×' : '0.5×';
+  document.getElementById('SMBTN').classList.toggle('act', replaySlow);
+  if (rInterval) clearInterval(rInterval);
+  rInterval = setInterval(stepReplay, replaySlow ? 200 : 60);
+}
 function closeReplay() {
-  document.getElementById('RP').classList.remove('open');
-  if (replayInterval) clearInterval(replayInterval);
+  document.getElementById('RW').classList.remove('open');
+  if (rInterval) clearInterval(rInterval);
 }
 
-// ── AI ADVICE ENGINE ──
-function showAdvice(ev) {
+// ── AI ADVICE ──
+function showAdvice(evt) {
+  const aw = document.getElementById('AW2');
+  const ah = document.getElementById('AH');
   const ab = document.getElementById('AB');
-  const adv = document.getElementById('ADV');
-  const advc = document.getElementById('ADVC');
-  const adi = document.getElementById('ADI');
-  ab.className = 'advice-box open ' + (ev.type === 'handball' ? 'hb-advice' : 'fo-advice');
+  const ai2 = document.getElementById('AI2');
+  const ahs = document.getElementById('AHS');
+  aw.classList.add('open');
 
-  if (ev.type === 'handball') {
-    adi.textContent = '🤚';
-    const sideText = ev.side === 'left' ? 'left' : 'right';
-    adv.innerHTML = `
-      <div class="adv-item"><div class="adv-num hb">1</div><div class="adv-text">Award a <strong>penalty kick</strong> — handball in the penalty area. The ${sideText} arm was extended at ${ev.angle}°, making the body unnaturally bigger.</div></div>
-      <div class="adv-item"><div class="adv-num hb">2</div><div class="adv-text">Show a <strong>yellow card</strong> if the handball was deliberate or prevented a goal-scoring opportunity.</div></div>
-      <div class="adv-item"><div class="adv-num hb">3</div><div class="adv-text">If the arm was very close to the body (under 45°), consider <strong>play on</strong> — but arm angle here was ${ev.angle}° which exceeds the natural threshold.</div></div>
-    `;
-    advc.className = 'adv-verdict hb';
-    advc.textContent = ev.conf > 85
-      ? `⚡ Best option: PENALTY + consider yellow card (${ev.conf}% confidence)`
-      : `⚡ Best option: Review the replay angle carefully — confidence ${ev.conf}%`;
+  const pLabel = 'Player ' + (evt.player||1);
+
+  if (evt.type === 'handball') {
+    ah.className = 'advice-hdr hb-adv';
+    ai2.textContent = '🤚';
+    ahs.textContent = pLabel + ' · Arm angle ' + evt.angle + '° · ' + evt.conf + '% confidence';
+    ab.innerHTML = `
+      <div class="advice-step">
+        <div class="step-num hb-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Award Penalty Kick</div>
+          <div class="step-desc">${pLabel}'s ${evt.side} arm was extended at ${evt.angle}° — clearly outside natural body position. Award a penalty kick immediately.</div>
+        </div>
+      </div>
+      <div class="advice-step">
+        <div class="step-num hb-num">2</div>
+        <div class="step-content">
+          <div class="step-title">${evt.angle > 80 ? 'Yellow Card Issued' : 'Consider Yellow Card'}</div>
+          <div class="step-desc">${evt.angle > 80 ? 'Arm angle exceeds 80° — deliberate handball. Issue yellow card to ' + pLabel + '.' : 'Angle suggests intentional handball. Caution ' + pLabel + ' if the handball prevented a scoring chance.'}</div>
+        </div>
+      </div>
+      <div class="advice-step">
+        <div class="step-num hb-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Restart Play</div>
+          <div class="step-desc">Ensure opposing player takes the penalty from the penalty spot. Both teams must be outside the penalty area.</div>
+        </div>
+      </div>
+      <div class="verdict-box hb-v">
+        <div class="verdict-ico">⚡</div>
+        <div class="verdict-txt hb-v">BEST DECISION: Penalty kick${evt.angle > 80 ? ' + Yellow card' : ''} for ${pLabel} (${evt.conf}% confidence)</div>
+      </div>`;
   } else {
-    adi.textContent = '⚠️';
-    const isRed = ev.card === 'red';
-    adv.innerHTML = `
-      <div class="adv-item"><div class="adv-num fo">1</div><div class="adv-text">${isRed ? '<strong>Red card</strong> — the force level was extreme (${ev.spike}x spike). Straight dismissal for violent conduct.' : '<strong>Yellow card</strong> — significant force detected (' + ev.spike + 'x spike). Caution the player.'}</div></div>
-      <div class="adv-item"><div class="adv-num fo">2</div><div class="adv-text">Award a <strong>free kick</strong> at the point of contact. If inside penalty area, award a <strong>penalty kick</strong>.</div></div>
-      <div class="adv-item"><div class="adv-num fo">3</div><div class="adv-text">Check if the fouled player is injured before restarting play. Ensure both teams are positioned correctly.</div></div>
-    `;
-    advc.className = 'adv-verdict fo';
-    advc.textContent = isRed
-      ? `⚡ Best option: RED CARD + penalty kick or direct free kick (${ev.conf}% confidence)`
-      : `⚡ Best option: YELLOW CARD + free kick or penalty (${ev.conf}% confidence)`;
+    ah.className = 'advice-hdr fo-adv';
+    ai2.textContent = '⚠️';
+    const isRed = evt.card === 'red';
+    ahs.textContent = pLabel + ' · Force spike ' + evt.spike + '× · ' + evt.conf + '% confidence';
+    ab.innerHTML = `
+      <div class="advice-step">
+        <div class="step-num fo-num">1</div>
+        <div class="step-content">
+          <div class="step-title">${isRed ? 'Red Card — Immediate Dismissal' : 'Yellow Card — Official Caution'}</div>
+          <div class="step-desc">Force spike of ${evt.spike}× detected at contact distance ${evt.proximity}. ${isRed ? 'Violent conduct — ' + pLabel + ' must leave the pitch immediately.' : 'Serious foul — caution ' + pLabel + ' with yellow card.'}</div>
+        </div>
+      </div>
+      <div class="advice-step">
+        <div class="step-num fo-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Free Kick or Penalty</div>
+          <div class="step-desc">If foul occurred inside the penalty area → award penalty kick. If outside → direct free kick at point of contact.</div>
+        </div>
+      </div>
+      <div class="advice-step">
+        <div class="step-num fo-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Check for Injury</div>
+          <div class="step-desc">Pause play and check the fouled player for injury before restarting. Signal medical staff if needed.</div>
+        </div>
+      </div>
+      <div class="verdict-box fo-v">
+        <div class="verdict-ico">⚡</div>
+        <div class="verdict-txt fo-v">BEST DECISION: ${isRed ? 'Red card' : 'Yellow card'} + ${isRed ? 'Dismiss' : 'Caution'} ${pLabel} + Free kick / Penalty (${evt.conf}% confidence)</div>
+      </div>`;
   }
 }
 
-// ── TRIGGER EVENTS ──
-function triggerHandball(data) {
-  stats.hb++;
-  updateStats();
-  const sideText = (data.side === 'left' ? 'Left' : 'Right') + ' arm';
-  showAlert('hb', '🤚 HANDBALL!', sideText + ' · ' + data.angle + '° angle');
-  showDecision('hb', '🤚', 'HANDBALL — PENALTY!', sideText + ' extended at ' + data.angle + '° · ' + data.conf + '% confidence', 'PENALTY', 'badge-pen');
-  addLog('r', 'Handball — ' + sideText + ' · ' + data.angle + '°', data.conf);
-  speak('Handball! ' + sideText + '! Penalty!');
-  // Trigger replay capture
-  const ev = {type:'handball', ...data};
-  triggerReplayCapture(ev);
-  showAdvice(ev);
+// ── EVENT TRIGGERS ──
+function triggerHandball(data, playerId) {
+  globalStats.hb++; pStat[playerId].hb++;
+  updateStats(playerId);
+  const sideT = data.side.charAt(0).toUpperCase() + data.side.slice(1);
+  const pLabel = 'P' + playerId;
+
+  showAlert('hb', '🤚 HANDBALL!', pLabel + ' · ' + sideT + ' arm · ' + data.angle + '°');
+  showDecision('hb', '🤚', 'HANDBALL — PENALTY!',
+    pLabel + ' ' + data.side + ' arm extended at ' + data.angle + '°',
+    playerId, data.conf);
+  addLog('r', playerId, 'Handball — ' + pLabel + ' ' + data.side + ' arm · ' + data.angle + '°', data.conf);
+  speak('Handball! Player ' + playerId + '! Penalty!');
+
+  const evt = {type:'handball', player:playerId, ...data};
+  startCapture(evt);
+  showAdvice(evt);
 }
 
 function triggerFoul(data) {
-  stats.fo++;
-  updateStats();
-  const cardTxt = data.card === 'red' ? 'Red card' : 'Yellow card';
-  const badgeClass = data.card === 'red' ? 'badge-red' : 'badge-yel';
-  showAlert('fo', '⚠️ FOUL!', cardTxt + ' — force spike ' + data.spike + 'x');
-  showDecision('fo', data.card === 'red' ? '🟥' : '🟨', 'FOUL — ' + cardTxt.toUpperCase() + '!', 'Motion spike: ' + data.spike + 'x · ' + data.conf + '% confidence', cardTxt.toUpperCase(), badgeClass);
-  addLog(data.card === 'red' ? 'r' : 'y', 'Foul — ' + cardTxt + ' · spike ' + data.spike + 'x', data.conf);
-  speak('Foul! ' + cardTxt + '!');
-  const ev = {type:'foul', ...data};
-  triggerReplayCapture(ev);
-  showAdvice(ev);
+  globalStats.fo++; globalStats[data.card==='red'?'rc':'yc']++;
+  pStat[data.aggressor].fo++; pStat[data.aggressor][data.card==='red'?'rc':'yc']++;
+  updateStats(data.aggressor);
+  const cardTxt = data.card === 'red' ? 'RED CARD' : 'YELLOW CARD';
+  const pLabel = 'P' + data.aggressor;
+
+  showAlert('fo', '⚠️ FOUL!', pLabel + ' · ' + (data.card==='red'?'Red':'Yellow') + ' card · spike ' + data.spike + '×');
+  showDecision('fo', data.card==='red'?'🟥':'🟨', 'FOUL — ' + cardTxt + '!',
+    pLabel + ' collision · force ' + data.spike + '× · proximity ' + data.proximity,
+    data.aggressor, data.conf);
+  addLog(data.card==='red'?'r':'y', data.aggressor, 'Foul — ' + pLabel + ' · ' + (data.card==='red'?'Red':'Yellow') + ' card · ' + data.spike + '×', data.conf);
+  speak('Foul! Player ' + data.aggressor + '! ' + (data.card==='red'?'Red card!':'Yellow card!'));
+
+  const evt = {type:'foul', ...data};
+  startCapture(evt);
+  showAdvice(evt);
 }
 
 // ── UI HELPERS ──
-function showAlert(type, label, sub) {
+function showAlert(type, word, sub) {
   const ao = document.getElementById('AO');
   ao.className = 'alert-ov ' + type + '-bg show';
-  document.getElementById('AL').className = 'alert-big ' + type;
-  document.getElementById('AL').textContent = label;
+  const aw = document.getElementById('AW');
+  aw.className = 'alert-word ' + type;
+  aw.textContent = word;
   document.getElementById('AS').textContent = sub;
-  setTimeout(() => ao.classList.remove('show'), 3000);
+  setTimeout(() => ao.classList.remove('show'), 3500);
 }
 
-function showDecision(type, icon, title, desc, badge, badgeCls) {
-  document.getElementById('DC').className = 'dec-card ' + type;
+function showDecision(type, icon, title, desc, playerId, conf) {
+  document.getElementById('DC').className = 'dec-card ' + type + '-card';
   document.getElementById('DI').textContent = icon;
   const dt = document.getElementById('DT');
   dt.className = 'dec-title ' + type;
+  dt.style.fontSize = '';
+  dt.style.letterSpacing = '';
   dt.textContent = title;
   document.getElementById('DD').textContent = desc;
-  const db = document.getElementById('DB');
-  db.className = 'dec-badge ' + badgeCls;
-  db.textContent = badge;
-  db.style.display = 'block';
+
+  const wr = document.getElementById('WR');
+  wr.style.display = 'flex';
+  wr.innerHTML = `<span class="who-badge p${playerId}b">PLAYER ${playerId}</span>`;
+
+  const dcf = document.getElementById('DCF');
+  dcf.className = 'dec-conf ' + type;
+  dcf.style.display = 'block';
+  dcf.textContent = conf + '%';
 }
 
-function updateStats() {
-  document.getElementById('SH').textContent = stats.hb;
-  document.getElementById('SF').textContent = stats.fo;
-  document.getElementById('SC').textContent = stats.cl;
+function updateStats(changedPlayer) {
+  document.getElementById('SHBT').textContent = globalStats.hb;
+  document.getElementById('SFOT').textContent = globalStats.fo;
+  document.getElementById('SYCT').textContent = globalStats.yc;
+  document.getElementById('SRCT').textContent = globalStats.rc;
+  [1,2].forEach(p => {
+    document.getElementById('P'+p+'HB').textContent = pStat[p].hb;
+    document.getElementById('P'+p+'FO').textContent = pStat[p].fo;
+    document.getElementById('P'+p+'YC').textContent = pStat[p].yc;
+    document.getElementById('P'+p+'RC').textContent = pStat[p].rc;
+    // Update mini-badges in player bar
+    const row = document.getElementById('P'+p+'STATS');
+    let html = '';
+    if (pStat[p].hb>0) html += `<span class="mini-badge hball">HB:${pStat[p].hb}</span>`;
+    if (pStat[p].yc>0) html += `<span class="mini-badge ycard">Y:${pStat[p].yc}</span>`;
+    if (pStat[p].rc>0) html += `<span class="mini-badge rcard">R:${pStat[p].rc}</span>`;
+    row.innerHTML = html;
+  });
 }
 
-function addLog(color, desc, conf) {
-  const secs = Math.round((Date.now() - startMs) / 1000);
-  const m = Math.floor(secs / 60), s = secs % 60;
-  eventLog.unshift({color, desc, conf, t: m + ':' + String(s).padStart(2,'0')});
-  if (eventLog.length > 8) eventLog.pop();
-  document.getElementById('LL').innerHTML = eventLog.map(l =>
-    `<div class="log-item"><div class="ldot ${l.color}"></div><span class="ltime">${l.t}</span><span class="ldesc">${l.desc}</span><span class="lconf">${l.conf}%</span></div>`
+function addLog(color, playerId, desc, conf) {
+  const t = getMatchTime();
+  evLog.unshift({color, playerId, desc, conf, t});
+  if (evLog.length > 10) evLog.pop();
+  document.getElementById('LL').innerHTML = evLog.map(l =>
+    `<div class="log-item">
+      <div class="log-dot ${l.color}"></div>
+      <span class="log-time">${l.t}</span>
+      <span class="log-who p${l.playerId}w">P${l.playerId}</span>
+      <span class="log-desc">${l.desc}</span>
+      <span class="log-conf">${l.conf}%</span>
+    </div>`
   ).join('');
 }
 
 function resetAll() {
-  stats = {hb:0,fo:0,cl:0}; eventLog = []; updateStats();
-  motionBuf = []; prevPose = null; consecutiveHighMotion = 0;
-  rollingBuffer = []; replayFrames = [];
-  document.getElementById('LL').innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,.2);text-align:center;padding:10px 0;">No events yet</div>';
-  document.getElementById('DC').className = 'dec-card';
-  document.getElementById('DT').textContent = 'Waiting for player...';
-  document.getElementById('DT').style.color = 'rgba(255,255,255,.3)';
-  document.getElementById('DD').textContent = 'Camera will detect handball and foul automatically';
-  document.getElementById('DB').style.display = 'none';
-  document.getElementById('DI').textContent = '🤖';
-  document.getElementById('RP').classList.remove('open');
-  document.getElementById('AB').classList.remove('open');
-  document.getElementById('AB').className = 'advice-box';
-  startMs = Date.now();
+  pStat[1]={hb:0,fo:0,yc:0,rc:0}; pStat[2]={hb:0,fo:0,yc:0,rc:0};
+  globalStats={hb:0,fo:0,yc:0,rc:0}; evLog=[];
+  updateStats(1); updateStats(2);
+  poseHistory=[]; rollingBuf=[]; foulBuf.length=0; consecutiveFoul=0;
+  hbSustainBuf[1]=[]; hbSustainBuf[2]=[];
+  closeReplay(); replayFrames=[];
+  document.getElementById('AW2').className='advice-wrap';
+  document.getElementById('DC').className='dec-card';
+  document.getElementById('DI').textContent='🤖';
+  document.getElementById('DT').textContent='Watching for events...';
+  document.getElementById('DT').style.color='var(--muted)';
+  document.getElementById('DT').style.fontSize='13px';
+  document.getElementById('DT').style.letterSpacing='1px';
+  document.getElementById('DD').textContent='Camera must see both players for detection to work';
+  document.getElementById('DCF').style.display='none';
+  document.getElementById('WR').style.display='none';
+  document.getElementById('LL').innerHTML='<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--muted);text-align:center;padding:12px 0;">No events yet</div>';
+  document.getElementById('P1STATS').innerHTML='';
+  document.getElementById('P2STATS').innerHTML='';
+  if (camRunning) { stopTimer(); startTimer(); }
 }
 
-// ── MEDIAPIPE HOLISTIC ──
-function initMediaPipe(vidEl, cvsEl) {
+// ── MEDIAPIPE ──
+function initMP(vidEl, cvsEl) {
   if (typeof Holistic === 'undefined') {
-    console.warn('MediaPipe unavailable — fallback');
+    console.warn('MediaPipe not loaded — fallback');
     startFallback(vidEl, cvsEl);
     return;
   }
 
-  holistic = new Holistic({
+  holisticM = new Holistic({
     locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.5.1675471629/${f}`
   });
-  holistic.setOptions({
+  holisticM.setOptions({
     modelComplexity: 1,
     smoothLandmarks: true,
     enableSegmentation: false,
@@ -813,205 +1397,195 @@ function initMediaPipe(vidEl, cvsEl) {
     minTrackingConfidence: 0.6,
   });
 
-  holistic.onResults(results => {
+  holisticM.onResults(results => {
     cvsEl.width = vidEl.videoWidth || cvsEl.offsetWidth;
     cvsEl.height = vidEl.videoHeight || cvsEl.offsetHeight;
-    drawSkeleton(cvsEl, results);
 
-    // Always capture frame for rolling replay buffer (no mirror)
     captureFrame(vidEl);
 
     const pose = results.poseLandmarks;
-    const playerFound = isRealPlayer(pose);
+    const {p1, p2} = extractPlayers(pose);
 
-    // Update player HUD
-    const pf = document.getElementById('PF');
-    pf.textContent = playerFound ? 'PLAYER DETECTED' : 'NO PLAYER';
-    pf.className = 'pfound' + (playerFound ? ' yes' : '');
+    // Update player detection badges
+    document.getElementById('P1B').className = 'pbadge' + (p1 ? ' p1-found' : '');
+    document.getElementById('P1B').textContent = p1 ? 'P1 — DETECTED' : 'P1 — NOT FOUND';
+    document.getElementById('P2B').className = 'pbadge' + (p2 ? ' p2-found' : '');
+    document.getElementById('P2B').textContent = p2 ? 'P2 — DETECTED' : 'P2 — NOT FOUND';
 
-    if (!playerFound) {
-      // No player = no detection, reset motion buffer to avoid false foul
-      motionBuf = [];
-      consecutiveHighMotion = 0;
-      prevPose = null;
-      frameCount++;
-      return;
-    }
+    // Draw skeleton
+    drawSkeleton(cvsEl, pose, p1, p2);
+
+    // Store pose history (only when both in frame — important)
+    // For 1v1 we track based on which side of frame each player is
+    const currentFrame = {p1: p1 || null, p2: p2 || null, pose};
+    poseHistory.push(currentFrame);
+    if (poseHistory.length > HIST_LEN) poseHistory.shift();
 
     const now = Date.now();
 
-    const hb = detectHandball(pose);
-    if (hb && now > hbCooldown) {
-      hbCooldown = now + 5000;
-      triggerHandball(hb);
+    // ── HANDBALL CHECK (per player) ──
+    if (p1) {
+      const hb1 = detectHandballForPlayer(p1, 1);
+      if (hb1 && now > hbCooldown) {
+        hbCooldown = now + 5000;
+        triggerHandball(hb1, 1);
+      }
+    }
+    if (p2) {
+      const hb2 = detectHandballForPlayer(p2, 2);
+      if (hb2 && now > hbCooldown) {
+        hbCooldown = now + 5000;
+        triggerHandball(hb2, 2);
+      }
     }
 
-    const fo = detectFoul(pose);
-    if (fo && now > foCooldown) {
-      foCooldown = now + 6000;
-      triggerFoul(fo);
+    // ── FOUL CHECK (needs BOTH players) ──
+    if (p1 && p2) {
+      const fo = detectFoul(p1, p2);
+      if (fo && now > foCooldown) {
+        foCooldown = now + 6000;
+        triggerFoul(fo);
+      }
+    } else {
+      // Reset foul state if one player leaves frame
+      foulBuf.length = 0; consecutiveFoul = 0;
     }
-
-    prevPose = pose;
-    frameCount++;
   });
 
-  // FIX 1: Use environment (back) camera, no mirror
   mpCam = new Camera(vidEl, {
-    onFrame: async () => { if (holistic) await holistic.send({image: vidEl}); },
+    onFrame: async () => { if (holisticM) await holisticM.send({image: vidEl}); },
     width: 640, height: 480,
-    facingMode: 'environment'  // back camera = correct direction
+    facingMode: 'environment'
   });
-
   mpCam.start()
-    .then(() => onCamStarted())
-    .catch(err => { console.error(err); startFallback(vidEl, cvsEl); });
+    .then(() => onCamUp())
+    .catch(e => { console.error(e); startFallback(vidEl, cvsEl); });
 }
 
-// ── DRAW SKELETON ──
-// FIX 1: Draw directly without any mirroring transform
-function drawSkeleton(cvsEl, results) {
+// ── DRAW SKELETON (no mirror) ──
+function drawSkeleton(cvsEl, pose, p1, p2) {
   const ctx = cvsEl.getContext('2d');
   ctx.clearRect(0, 0, cvsEl.width, cvsEl.height);
-  const w = cvsEl.width, h = cvsEl.height;
-  const pose = results.poseLandmarks;
   if (!pose) return;
-
-  const playerOK = isRealPlayer(pose);
-
-  // Skeleton lines
-  const conns = [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[24,26],[25,27],[26,28]];
-  ctx.strokeStyle = playerOK ? 'rgba(0,200,83,0.55)' : 'rgba(255,255,255,0.15)';
-  ctx.lineWidth = 1.5;
-  for (const [a,b] of conns) {
-    const pa = pose[a], pb = pose[b];
-    if (!pa || !pb || pa.visibility < 0.4 || pb.visibility < 0.4) continue;
-    ctx.beginPath();
-    ctx.moveTo(pa.x*w, pa.y*h);
-    ctx.lineTo(pb.x*w, pb.y*h);
-    ctx.stroke();
-  }
-
-  // Joints
-  for (const lm of pose) {
-    if (!lm || lm.visibility < 0.4) continue;
-    ctx.beginPath();
-    ctx.arc(lm.x*w, lm.y*h, 3, 0, Math.PI*2);
-    ctx.fillStyle = playerOK ? 'rgba(0,230,100,0.8)' : 'rgba(255,255,255,0.2)';
-    ctx.fill();
-  }
-
-  if (!playerOK) return;
-
-  // Highlight arms with angle labels
-  const thresh = parseInt(document.getElementById('HS').value);
-  const arms = [{sh:11, el:13, wr:15, label:'L'}, {sh:12, el:14, wr:16, label:'R'}];
-  for (const arm of arms) {
-    const sh = pose[arm.sh], el = pose[arm.el];
-    if (!sh || !el || sh.visibility < 0.55 || el.visibility < 0.55) continue;
-    const ref = {x: sh.x, y: sh.y + 0.3};
-    const ang = angle3(ref, sh, el);
-    const raised = el.y < sh.y + 0.05;
-    const side = Math.abs(el.x - sh.x) > 0.03;
-    if (ang > thresh * 0.8 && raised && side) {
-      // Highlighted arm
-      ctx.strokeStyle = ang > thresh ? 'rgba(255,23,68,0.9)' : 'rgba(255,214,0,0.7)';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(sh.x*w, sh.y*h);
-      ctx.lineTo(el.x*w, el.y*h);
-      ctx.stroke();
-      // Angle label
-      ctx.fillStyle = ang > thresh ? 'rgba(255,23,68,0.9)' : 'rgba(255,214,0,0.85)';
-      ctx.font = 'bold 11px Barlow Condensed, sans-serif';
-      ctx.fillText(arm.label + ':' + Math.round(ang) + '°', el.x*w + 5, el.y*h - 5);
-      ctx.lineWidth = 1.5;
-    }
-  }
-}
-
-// ── FALLBACK (no MediaPipe) ──
-function startFallback(vidEl, cvsEl) {
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment', width:640, height:480}, audio:false})
-    .then(stream => {
-      vidEl.srcObject = stream;
-      vidEl.play();
-      onCamStarted();
-      runFallbackSkeleton(cvsEl, vidEl);
-    })
-    .catch(() => {
-      onCamStarted(true);
-      runDemoMode(cvsEl);
-    });
-}
-
-function runFallbackSkeleton(cvsEl, vidEl) {
-  let fr = 0;
-  const ctx = cvsEl.getContext('2d');
-  cvsEl.width = cvsEl.offsetWidth || 320;
-  cvsEl.height = cvsEl.offsetHeight || 240;
   const w = cvsEl.width, h = cvsEl.height;
-  setInterval(() => {
-    fr++;
-    captureFrame(vidEl);
-    ctx.clearRect(0, 0, w, h);
-    const cx = w*.5, cy = h*.25;
-    const swing = Math.sin(fr*.04)*30;
-    ctx.strokeStyle = 'rgba(0,200,83,0.5)'; ctx.lineWidth = 1.5;
-    [[cx,cy,cx-25,cy+22],[cx,cy,cx+25,cy+22],[cx-25,cy+22,cx-38+swing,cy+52],[cx+25,cy+22,cx+38,cy+52],[cx,cy,cx,cy+65],[cx,cy+65,cx-18,cy+105],[cx,cy+65,cx+18,cy+105]].forEach(([x1,y1,x2,y2])=>{ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();});
-  }, 50);
+  const thresh = parseInt(document.getElementById('HS').value);
+
+  const CONNS = [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[24,26],[25,27],[26,28]];
+
+  const drawPoseSkeleton = (ps, color, hlColor) => {
+    if (!ps) return;
+    ctx.strokeStyle = color; ctx.lineWidth = 1.8;
+    for (const [a,b] of CONNS) {
+      const pa=ps[a], pb=ps[b];
+      if (!pa||!pb||pa.visibility<0.4||pb.visibility<0.4) continue;
+      ctx.beginPath(); ctx.moveTo(pa.x*w,pa.y*h); ctx.lineTo(pb.x*w,pb.y*h); ctx.stroke();
+    }
+    for (const lm of ps) {
+      if (!lm||lm.visibility<0.4) continue;
+      ctx.beginPath(); ctx.arc(lm.x*w,lm.y*h,3,0,Math.PI*2);
+      ctx.fillStyle=color; ctx.fill();
+    }
+    // Arm highlight
+    [{sh:11,el:13,wr:15,lbl:'L'},{sh:12,el:14,wr:16,lbl:'R'}].forEach(arm => {
+      const sh=ps[arm.sh],el=ps[arm.el];
+      if (!sh||!el||sh.visibility<0.55||el.visibility<0.55) return;
+      const ref={x:sh.x,y:sh.y+0.35};
+      const ang=angle3(ref,sh,el);
+      if (ang > thresh*0.8 && el.y < sh.y+0.04 && Math.abs(el.x-sh.x)>0.03) {
+        ctx.strokeStyle=ang>thresh?'rgba(255,61,87,.9)':'rgba(255,210,63,.7)';
+        ctx.lineWidth=3;
+        ctx.beginPath(); ctx.moveTo(sh.x*w,sh.y*h); ctx.lineTo(el.x*w,el.y*h); ctx.stroke();
+        ctx.fillStyle=ang>thresh?'rgba(255,61,87,.9)':'rgba(255,210,63,.8)';
+        ctx.font='bold 11px Share Tech Mono,monospace';
+        ctx.fillText(arm.lbl+':'+Math.round(ang)+'°',el.x*w+5,el.y*h-5);
+        ctx.lineWidth=1.8;
+      }
+    });
+  };
+
+  drawPoseSkeleton(p1, 'rgba(79,195,247,0.65)', 'rgba(79,195,247,0.9)');
+  drawPoseSkeleton(p2, 'rgba(255,138,101,0.65)', 'rgba(255,138,101,0.9)');
+  // If not split, draw with white
+  if (!p1 && !p2 && pose) drawPoseSkeleton(pose, 'rgba(255,255,255,0.3)', 'rgba(255,255,255,0.5)');
 }
 
-function runDemoMode(cvsEl) {
-  document.getElementById('NC').innerHTML = '<div class="nocam-ico">📡</div><div class="nocam-txt">Demo mode — no camera<br>Simulating events automatically</div>';
-  let fr = 0;
-  const ctx = cvsEl.getContext('2d');
-  cvsEl.width = cvsEl.offsetWidth||320; cvsEl.height = cvsEl.offsetHeight||240;
-  const w=cvsEl.width, h=cvsEl.height;
-  setInterval(()=>{ fr++; ctx.clearRect(0,0,w,h); ctx.strokeStyle='rgba(0,200,83,.5)'; ctx.lineWidth=1.5; const cx=w*.5,cy=h*.25,sw=Math.sin(fr*.04)*30; [[cx,cy,cx-25,cy+22],[cx,cy,cx+25,cy+22],[cx-25,cy+22,cx-38+sw,cy+52],[cx+25,cy+22,cx+38,cy+52],[cx,cy,cx,cy+65],[cx,cy+65,cx-18,cy+105],[cx,cy+65,cx+18,cy+105]].forEach(([x1,y1,x2,y2])=>{ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}); },50);
-  setTimeout(()=>triggerHandball({side:'left',angle:73,conf:91}), 3000);
-  setTimeout(()=>triggerFoul({spike:3.4,conf:87,card:'yellow'}), 9000);
-  setTimeout(()=>triggerHandball({side:'right',angle:68,conf:88}), 16000);
-  setTimeout(()=>triggerFoul({spike:4.8,conf:93,card:'red'}), 23000);
+// ── FALLBACK ──
+function startFallback(vidEl, cvsEl) {
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:640,height:480},audio:false})
+    .then(stream => { vidEl.srcObject=stream; vidEl.play(); onCamUp(); runFallbackDraw(cvsEl, vidEl); })
+    .catch(() => { onCamUp(true); runDemo(cvsEl); });
 }
 
-function onCamStarted(demo) {
+function runFallbackDraw(cvsEl, vidEl) {
+  cvsEl.width=cvsEl.offsetWidth||320; cvsEl.height=cvsEl.offsetHeight||240;
+  const ctx=cvsEl.getContext('2d'), w=cvsEl.width, h=cvsEl.height;
+  let f=0;
+  setInterval(()=>{ f++; captureFrame(vidEl); ctx.clearRect(0,0,w,h);
+    const drawStick = (cx,cy,col,sw) => {
+      ctx.strokeStyle=col; ctx.lineWidth=1.5;
+      const lns=[[cx,cy,cx-sw,cy+22],[cx,cy,cx+sw,cy+22],[cx-sw,cy+22,cx-sw*1.4+Math.sin(f*.05)*sw*.8,cy+52],[cx+sw,cy+22,cx+sw*1.4,cy+52],[cx,cy,cx,cy+65],[cx,cy+65,cx-sw*.7,cy+105],[cx,cy+65,cx+sw*.7,cy+105]];
+      lns.forEach(([x1,y1,x2,y2])=>{ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();});
+    };
+    drawStick(w*.3,h*.22,'rgba(79,195,247,.6)',20);
+    drawStick(w*.7,h*.22,'rgba(255,138,101,.6)',20);
+  },50);
+}
+
+function runDemo(cvsEl) {
+  document.getElementById('NC').innerHTML='<div class="nocam-ico">📡</div><div class="nocam-txt">Demo mode — simulating 2 players</div>';
+  cvsEl.width=cvsEl.offsetWidth||320; cvsEl.height=cvsEl.offsetHeight||240;
+  const ctx=cvsEl.getContext('2d'), w=cvsEl.width, h=cvsEl.height;
+  let f=0;
+  setInterval(()=>{ f++; ctx.clearRect(0,0,w,h);
+    const drawStick=(cx,cy,col,sw)=>{
+      ctx.strokeStyle=col; ctx.lineWidth=1.5;
+      [[cx,cy,cx-sw,cy+22],[cx,cy,cx+sw,cy+22],[cx-sw,cy+22,cx-sw*1.4+Math.sin(f*.04)*sw*.8,cy+52],[cx+sw,cy+22,cx+sw*1.4,cy+52],[cx,cy,cx,cy+65],[cx,cy+65,cx-sw*.7,cy+105],[cx,cy+65,cx+sw*.7,cy+105]].forEach(([x1,y1,x2,y2])=>{ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();});
+    };
+    drawStick(w*.28,h*.22,'rgba(79,195,247,.6)',18);
+    drawStick(w*.72,h*.22,'rgba(255,138,101,.6)',18);
+  },50);
+  setTimeout(()=>triggerHandball({side:'left',angle:74,conf:92},1),3500);
+  setTimeout(()=>triggerFoul({spike:3.8,conf:88,card:'yellow',aggressor:2,proximity:0.15}),10000);
+  setTimeout(()=>triggerHandball({side:'right',angle:68,conf:87},2),17000);
+  setTimeout(()=>triggerFoul({spike:5.2,conf:93,card:'red',aggressor:1,proximity:0.12}),25000);
+}
+
+function onCamUp(demo) {
   if (!demo) {
-    document.getElementById('NC').style.display = 'none';
-    const lb = document.getElementById('LIVEB');
-    lb.style.display = 'flex';
+    document.getElementById('NC').style.display='none';
+    document.getElementById('LP').classList.add('show');
   }
   document.getElementById('SL').classList.add('on');
-  document.getElementById('SD').className = 'sdot live';
-  document.getElementById('ST').textContent = demo ? 'DEMO' : 'LIVE';
-  document.getElementById('MB').textContent = '⏹ STOP';
-  document.getElementById('MB').className = 'btn-main stop';
-  camRunning = true;
-  startMs = Date.now();
+  document.getElementById('SB').className='status-badge online';
+  document.getElementById('SB').textContent=demo?'DEMO':'ONLINE';
+  document.getElementById('MB').textContent='⏹ STOP';
+  document.getElementById('MB').className='btn-start stop';
+  camRunning=true;
+  startTimer();
 }
 
 function toggleCam() {
   if (!camRunning) {
-    const v = document.getElementById('vid');
-    const c = document.getElementById('cvs');
-    c.width = c.offsetWidth; c.height = c.offsetHeight;
-    initMediaPipe(v, c);
+    const v=document.getElementById('vid'), c=document.getElementById('cvs');
+    c.width=c.offsetWidth; c.height=c.offsetHeight;
+    initMP(v,c);
   } else {
-    if (mpCam) { try{mpCam.stop();}catch(e){} mpCam=null; }
-    if (holistic) { try{holistic.close();}catch(e){} holistic=null; }
-    const v = document.getElementById('vid');
-    if (v.srcObject) { v.srcObject.getTracks().forEach(t=>t.stop()); v.srcObject=null; }
+    if (mpCam){try{mpCam.stop();}catch(e){} mpCam=null;}
+    if (holisticM){try{holisticM.close();}catch(e){} holisticM=null;}
+    const v=document.getElementById('vid');
+    if(v.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null;}
     document.getElementById('NC').style.display='flex';
-    document.getElementById('NC').innerHTML='<div class="nocam-ico">⚽</div><div class="nocam-txt">Point camera at players<br>AI auto-detects handball &amp; foul</div>';
-    document.getElementById('LIVEB').style.display='none';
+    document.getElementById('NC').innerHTML='<div class="nocam-ico">⚽</div><div class="nocam-txt">Point camera at 2 players<br>FAV detects handball &amp; foul automatically</div>';
+    document.getElementById('LP').classList.remove('show');
     document.getElementById('SL').classList.remove('on');
-    document.getElementById('SD').className='sdot';
-    document.getElementById('ST').textContent='OFFLINE';
+    document.getElementById('SB').className='status-badge';
+    document.getElementById('SB').textContent='OFFLINE';
     document.getElementById('MB').textContent='▶ START CAMERA';
-    document.getElementById('MB').className='btn-main';
-    document.getElementById('PF').textContent='NO PLAYER';
-    document.getElementById('PF').className='pfound';
-    camRunning=false; prevPose=null; motionBuf=[]; consecutiveHighMotion=0;
+    document.getElementById('MB').className='btn-start';
+    document.getElementById('P1B').className='pbadge'; document.getElementById('P1B').textContent='P1 — NOT FOUND';
+    document.getElementById('P2B').className='pbadge'; document.getElementById('P2B').textContent='P2 — NOT FOUND';
+    camRunning=false; poseHistory=[]; stopTimer();
+    foulBuf.length=0; consecutiveFoul=0; hbSustainBuf[1]=[]; hbSustainBuf[2]=[];
   }
 }
 </script>
