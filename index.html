@@ -744,21 +744,35 @@ window.doLogin = async () => {
   const u = val('li-u'), p = val('li-p');
   const err = byId('li-err'); err.classList.add('hidden');
   if (!u||!p){ showErr(err,'Enter username and password'); return; }
-  setLoading('li-btn',true);
+  const btn = byId('li-btn');
+  btn.disabled = true; btn.textContent = 'Please wait…';
   try {
     const uid = 'u_' + u.toLowerCase().replace(/\W/g,'');
     const snap = await userDoc(uid);
-    if (!snap.exists()){ showErr(err,'Username not found.'); return; }
+    if (!snap.exists()){
+      showErr(err,'Username not found.');
+      btn.disabled = false; btn.textContent = 'Enter the Studio';
+      return;
+    }
     const data = snap.data();
     const hash = await hashPass(p);
-    if (data.passHash !== hash){ showErr(err,'Incorrect password.'); return; }
+    if (data.passHash !== hash){
+      showErr(err,'Incorrect password.');
+      btn.disabled = false; btn.textContent = 'Enter the Studio';
+      return;
+    }
     UD = data;
     setSession(uid);
     hideEl('auth');
     if (!UD.onboarded) showScreen('onboarding');
     else bootApp();
-  } catch(e){ showErr(err,'Connection error. Check your internet.'); console.error(e); }
-  finally { setLoading('li-btn',false); }
+  } catch(e){
+    showErr(err, e.code === 'permission-denied'
+      ? 'Permission denied — update your Firestore Rules.'
+      : 'Connection error. Check your internet.');
+    console.error('Login error:', e);
+    btn.disabled = false; btn.textContent = 'Enter the Studio';
+  }
 };
 
 window.doSignup = async () => {
@@ -768,19 +782,29 @@ window.doSignup = async () => {
   if (u.length < 3){ showErr(err,'Username must be 3+ characters'); return; }
   if (p.length < 6){ showErr(err,'Password must be 6+ characters'); return; }
   if (!/^[a-zA-Z0-9_]+$/.test(u)){ showErr(err,'Username: letters, numbers, underscores only'); return; }
-  setLoading('su-btn',true);
+  const btn = byId('su-btn');
+  btn.disabled = true; btn.textContent = 'Please wait…';
   try {
     const uid = 'u_' + u.toLowerCase();
     const snap = await userDoc(uid);
-    if (snap.exists()){ showErr(err,'Username already taken. Choose another.'); return; }
+    if (snap.exists()){
+      showErr(err,'Username already taken. Choose another.');
+      btn.disabled = false; btn.textContent = 'Create My Profile';
+      return;
+    }
     const hash = await hashPass(p);
     UD = { uid, name, username:u.toLowerCase(), passHash:hash, onboarded:false, age:'', weight:'', height:'', goal:'', workouts:[] };
     await writeUser(uid, UD);
     setSession(uid);
     hideEl('auth');
     showScreen('onboarding');
-  } catch(e){ showErr(err,'Signup failed. Check your connection and try again.'); console.error(e); }
-  finally { setLoading('su-btn',false); }
+  } catch(e){
+    showErr(err, e.code === 'permission-denied'
+      ? 'Permission denied — please update your Firestore Rules (see console).'
+      : 'Signup failed: ' + (e.message||'Check your internet connection.'));
+    console.error('Signup error:', e);
+    btn.disabled = false; btn.textContent = 'Create My Profile';
+  }
 };
 
 window.doLogout = () => {
