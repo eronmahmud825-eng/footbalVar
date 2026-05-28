@@ -1,555 +1,1055 @@
-from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import cm
-from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    HRFlowable, PageBreak
-)
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
-from reportlab.platypus.flowables import Flowable
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ERON — Elite Fitness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#060607;
+  --obsidian:#0d0d0f;
+  --carbon:#121214;
+  --surface:#181819;
+  --surface2:#202022;
+  --border:#252527;
+  --border2:#303033;
+  --gold:#c8a84b;
+  --gold2:#e6c96e;
+  --gold3:#f5dfa0;
+  --gold-dim:rgba(200,168,75,0.12);
+  --gold-glow:rgba(200,168,75,0.3);
+  --text:#ede9e1;
+  --text2:#a09890;
+  --text3:#5a5650;
+  --red:#d44;
+  --green:#4a9;
+  --radius:3px;
+  --font-d:'Bebas Neue',sans-serif;
+  --font-s:'Cormorant Garamond',serif;
+  --font-b:'DM Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--text);font-family:var(--font-b);font-size:14px;overflow-x:hidden;min-height:100vh}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--black)}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
+.hidden{display:none!important}
+.screen{position:fixed;inset:0;z-index:50;overflow-y:auto}
 
-# Landscape A4
-W, H = A4[1], A4[0]   # 841.9 x 595.3 pt
+/* ── INTRO ── */
+#intro{background:var(--black);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;z-index:200;overflow:hidden}
+#intro canvas{position:absolute;inset:0;opacity:0.18}
+.i-wrap{position:relative;text-align:center}
+.i-pre{font-family:var(--font-s);font-size:clamp(12px,1.8vw,17px);font-weight:300;letter-spacing:.7em;color:var(--text3);text-transform:uppercase;overflow:hidden}
+.i-pre span{display:block;transform:translateY(110%);animation:up .7s cubic-bezier(.16,1,.3,1) .5s forwards}
+.i-logo{font-family:var(--font-d);font-size:clamp(90px,18vw,220px);line-height:.85;letter-spacing:.04em;overflow:hidden;position:relative}
+.i-logo span{display:block;transform:translateY(110%);animation:up .9s cubic-bezier(.16,1,.3,1) .15s forwards;color:transparent;-webkit-text-stroke:1px rgba(200,168,75,.5)}
+.i-logo-fill{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:clamp(90px,18vw,220px);letter-spacing:.04em;color:var(--gold);clip-path:inset(0 100% 0 0);animation:reveal 1.4s cubic-bezier(.16,1,.3,1) .9s forwards}
+.i-sub{font-family:var(--font-s);font-style:italic;font-size:clamp(11px,1.4vw,15px);letter-spacing:.4em;color:var(--text3);text-transform:uppercase;overflow:hidden;margin-top:4px}
+.i-sub span{display:block;transform:translateY(110%);animation:up .7s cubic-bezier(.16,1,.3,1) .8s forwards}
+.i-line{width:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:expand 1s ease 1.6s forwards;margin:12px auto 0}
+@keyframes up{to{transform:translateY(0)}}
+@keyframes reveal{to{clip-path:inset(0 0% 0 0)}}
+@keyframes expand{to{width:min(360px,60vw)}}
+#intro.out{animation:fadeOut .8s ease forwards}
+@keyframes fadeOut{to{opacity:0;pointer-events:none}}
 
-DARK_BLUE  = colors.HexColor("#0D1B4B")
-MED_BLUE   = colors.HexColor("#1565C0")
-LIGHT_BLUE = colors.HexColor("#E3F2FD")
-ACCENT     = colors.HexColor("#00B0FF")
-ACCENT2    = colors.HexColor("#00E5FF")
-GREEN      = colors.HexColor("#00C853")
-ORANGE     = colors.HexColor("#FF6D00")
-GRAY       = colors.HexColor("#546E7A")
-LIGHT_GRAY = colors.HexColor("#ECEFF1")
-WHITE      = colors.white
-BLACK      = colors.black
+/* ── AUTH ── */
+#auth{background:var(--black);display:flex;min-height:100vh}
+.auth-bg{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+@media(max-width:768px){.auth-bg{display:none}}
+.auth-bg-img{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80') center/cover no-repeat;opacity:.35}
+.auth-bg-overlay{position:absolute;inset:0;background:linear-gradient(135deg,var(--black) 0%,transparent 60%,var(--black) 100%)}
+.auth-bg-text{position:relative;text-align:center;padding:40px}
+.auth-bg-text h1{font-family:var(--font-d);font-size:clamp(60px,9vw,130px);color:transparent;-webkit-text-stroke:1px rgba(200,168,75,.35);letter-spacing:.05em;line-height:.9}
+.auth-bg-text p{font-family:var(--font-s);font-style:italic;font-size:18px;color:rgba(200,168,75,.5);letter-spacing:.3em;margin-top:16px}
+.auth-panel{width:min(480px,100%);background:var(--obsidian);border-left:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;padding:56px 44px}
+.auth-logo{font-family:var(--font-d);font-size:28px;color:var(--gold);letter-spacing:.15em;margin-bottom:6px}
+.auth-tagline{font-family:var(--font-s);font-style:italic;color:var(--text3);font-size:13px;letter-spacing:.2em;margin-bottom:52px}
+.tab-bar{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:36px}
+.tab{padding:10px 22px 10px 0;font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.form{display:flex;flex-direction:column;gap:18px}
+.fg{display:flex;flex-direction:column;gap:7px}
+.fl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-weight:500}
+.fi{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:13px 16px;font-family:var(--font-b);font-size:14px;border-radius:var(--radius);outline:none;width:100%;transition:border-color .2s,background .2s}
+.fi:focus{border-color:var(--gold);background:var(--surface2)}
+.fi::placeholder{color:var(--text3)}
+select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c8a84b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer}
+select.fi option{background:var(--surface2)}
+.btn-p{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--black);border:none;padding:15px 28px;font-family:var(--font-b);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:var(--radius);transition:all .2s;margin-top:4px;position:relative;overflow:hidden}
+.btn-p::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background .2s}
+.btn-p:hover::after{background:rgba(255,255,255,.12)}
+.btn-p:active{transform:scale(.98)}
+.btn-s{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:12px 20px;font-family:var(--font-b);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:var(--radius);transition:all .2s}
+.btn-s:hover{background:var(--gold-dim)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text3);padding:12px 18px;font-family:var(--font-b);font-size:12px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:var(--radius);transition:all .15s}
+.btn-ghost:hover{border-color:var(--text3);color:var(--text)}
+.err{background:rgba(221,68,68,.1);border:1px solid rgba(221,68,68,.3);color:#f88;padding:11px 14px;font-size:13px;border-radius:var(--radius)}
 
-styles = getSampleStyleSheet()
+/* ── ONBOARDING ── */
+#onboarding{background:var(--black);display:flex;align-items:center;justify-content:center;padding:24px;z-index:51}
+#onboarding::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 50%,rgba(200,168,75,.06) 0%,transparent 70%);pointer-events:none}
+.ob-card{width:100%;max-width:540px;background:var(--obsidian);border:1px solid var(--border);padding:52px 44px;position:relative;animation:fadeUp .5s ease forwards}
+.ob-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.ob-step{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;font-weight:500}
+.ob-title{font-family:var(--font-s);font-size:36px;font-weight:300;line-height:1.15;margin-bottom:8px}
+.ob-sub{color:var(--text3);font-size:13px;margin-bottom:36px;line-height:1.65}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.goal-c{border:1px solid var(--border);padding:22px 16px;cursor:pointer;transition:all .2s;text-align:center;background:var(--surface);border-radius:var(--radius);position:relative}
+.goal-c:hover{border-color:var(--gold)}
+.goal-c.sel{border-color:var(--gold);background:var(--gold-dim)}
+.goal-c.sel::after{content:'✓';position:absolute;top:9px;right:11px;color:var(--gold);font-size:11px}
+.goal-icon{font-size:30px;margin-bottom:10px}
+.goal-name{font-weight:600;font-size:13px;letter-spacing:.04em}
+.goal-desc{font-size:11px;color:var(--text3);margin-top:4px}
 
-def ms(name, **kw):
-    return ParagraphStyle(name, **kw)
+/* ── APP SHELL ── */
+#app{background:var(--black);display:flex;flex-direction:column;min-height:100vh;position:relative}
+.app-bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 70% 40% at 85% 10%,rgba(200,168,75,.05) 0%,transparent 60%),radial-gradient(ellipse 40% 30% at 5% 85%,rgba(200,168,75,.04) 0%,transparent 60%)}
 
-# Slide styles
-slide_title   = ms("ST",  fontName="Helvetica-Bold", fontSize=26, textColor=WHITE,
-                   leading=32, spaceAfter=0, alignment=TA_CENTER)
-slide_sub     = ms("SS",  fontName="Helvetica",      fontSize=14, textColor=ACCENT2,
-                   leading=20, spaceAfter=0, alignment=TA_CENTER)
-sec_hdr       = ms("SH",  fontName="Helvetica-Bold", fontSize=18, textColor=WHITE,
-                   leading=24, spaceAfter=0, alignment=TA_CENTER)
-body_s        = ms("BS",  fontName="Helvetica",      fontSize=11, textColor=colors.HexColor("#212121"),
-                   leading=17, spaceAfter=6, alignment=TA_LEFT)
-bullet_s      = ms("BL",  fontName="Helvetica",      fontSize=11, textColor=colors.HexColor("#212121"),
-                   leading=17, spaceAfter=6, leftIndent=16, bulletIndent=4)
-caption_s     = ms("CAP", fontName="Helvetica",      fontSize=8,  textColor=GRAY,
-                   leading=11, alignment=TA_CENTER, spaceAfter=4)
-white_body    = ms("WB",  fontName="Helvetica",      fontSize=12, textColor=WHITE,
-                   leading=18, spaceAfter=6, alignment=TA_CENTER)
-tbl_hdr_s     = ms("TH",  fontName="Helvetica-Bold", fontSize=10, textColor=WHITE,
-                   leading=14, alignment=TA_CENTER)
-tbl_cell_s    = ms("TC",  fontName="Helvetica",      fontSize=9,  textColor=colors.HexColor("#212121"),
-                   leading=13, alignment=TA_CENTER)
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:100;height:64px;background:rgba(6,6,7,.93);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 36px;gap:28px}
+@media(max-width:600px){.topbar{padding:0 20px;gap:16px}}
+.t-logo{font-family:var(--font-d);font-size:24px;color:var(--gold);letter-spacing:.12em;flex-shrink:0;cursor:pointer}
+.t-nav{display:flex;gap:2px;flex:1;padding:0 20px}
+@media(max-width:700px){.t-nav{display:none}}
+.ni{padding:7px 14px;font-size:11px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);cursor:pointer;border-radius:var(--radius);transition:all .18s;white-space:nowrap}
+.ni:hover{color:var(--text);background:var(--surface)}
+.ni.active{color:var(--gold);background:var(--gold-dim)}
+.t-right{display:flex;align-items:center;gap:16px;margin-left:auto}
+.t-date{font-size:11px;color:var(--text3);letter-spacing:.05em}
+@media(max-width:500px){.t-date{display:none}}
+.prof-btn{width:38px;height:38px;background:var(--gold-dim);border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--gold);font-size:15px;font-weight:700;font-family:var(--font-b);transition:background .2s;position:relative;flex-shrink:0}
+.prof-btn:hover{background:rgba(200,168,75,.25)}
 
-SLIDE_NUM = [0]
+/* PROFILE DROPDOWN */
+.pd{position:absolute;top:calc(100% + 14px);right:0;width:290px;background:var(--surface);border:1px solid var(--border2);box-shadow:0 24px 60px rgba(0,0,0,.7);z-index:200;overflow:hidden;border-radius:4px}
+.pd::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.pd-hd{padding:20px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px}
+.pd-av{width:46px;height:46px;background:var(--gold-dim);border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700;color:var(--gold);font-family:var(--font-b);flex-shrink:0}
+.pd-nm{font-weight:600;font-size:15px}
+.pd-gl{font-size:11px;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.pd-stats{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;border-bottom:1px solid var(--border)}
+.pd-sv{font-family:var(--font-d);font-size:24px;color:var(--gold);letter-spacing:.03em;text-align:center}
+.pd-sl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-top:2px;text-align:center}
+.pd-acts{padding:8px}
+.pd-act{padding:10px 14px;font-size:13px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:10px;border-radius:var(--radius);transition:all .15s}
+.pd-act:hover{background:var(--surface2);color:var(--text)}
+.pd-act.danger{color:var(--red)}
+.pd-act.danger:hover{background:rgba(221,68,68,.1)}
 
-# ── Slide background renderer ───────────────────────────────────────
-def draw_slide_bg(canvas, doc, slide_type="content"):
-    SLIDE_NUM[0] += 1
-    n = SLIDE_NUM[0]
+/* MAIN */
+.main{flex:1;position:relative;z-index:1}
 
-    if slide_type == "cover" or n == 1:
-        # deep gradient simulation
-        canvas.setFillColor(DARK_BLUE)
-        canvas.rect(0, 0, W, H, fill=1, stroke=0)
-        # diagonal accent stripe
-        canvas.setFillColor(MED_BLUE)
-        p = canvas.beginPath()
-        p.moveTo(0, H*0.42)
-        p.lineTo(W*0.6, H)
-        p.lineTo(0, H)
-        p.close()
-        canvas.drawPath(p, fill=1, stroke=0)
-        # glowing circles
-        for cx, cy, r, a in [(W*0.82, H*0.72, 140, 0.06), (W*0.12, H*0.25, 80, 0.05)]:
-            canvas.setFillColor(ACCENT)
-            canvas.setFillAlpha(a)
-            canvas.circle(cx, cy, r, fill=1, stroke=0)
-        canvas.setFillAlpha(1)
-        # bottom bar
-        canvas.setFillColor(colors.HexColor("#0A1232"))
-        canvas.rect(0, 0, W, 28, fill=1, stroke=0)
-        canvas.setFillColor(ACCENT); canvas.setFont("Helvetica", 8)
-        canvas.drawCentredString(W/2, 10, "Secondary Storage Systems  •  Computer Science Presentation  •  2026")
+/* ── HOMEPAGE ── */
+.hero{position:relative;min-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+.hero-img{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1800&q=85') center/cover no-repeat;opacity:.28}
+.hero-img2{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,6,7,.3) 0%,rgba(6,6,7,.6) 50%,rgba(6,6,7,1) 100%)}
+.hero-img3{position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,6,7,.9) 0%,transparent 55%)}
+.hero-content{position:relative;z-index:2;padding:80px 64px 60px;display:flex;flex-direction:column;justify-content:center;flex:1}
+@media(max-width:768px){.hero-content{padding:50px 28px 50px}}
+.hero-tag{display:inline-flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:28px;font-weight:500}
+.hero-tag-line{width:36px;height:1px;background:var(--gold)}
+.hero-greeting{font-family:var(--font-s);font-size:clamp(14px,2.5vw,20px);font-weight:300;color:var(--text2);letter-spacing:.05em;margin-bottom:6px}
+.hero-name{font-family:var(--font-d);font-size:clamp(64px,11vw,140px);line-height:.88;letter-spacing:.03em;color:var(--text);margin-bottom:24px;position:relative}
+.hero-name span{color:var(--gold)}
+.hero-desc{font-family:var(--font-s);font-size:clamp(16px,1.8vw,20px);font-weight:300;color:var(--text2);max-width:480px;line-height:1.7;margin-bottom:40px;font-style:italic}
+.hero-goal-pill{display:inline-flex;align-items:center;gap:12px;background:var(--gold-dim);border:1px solid rgba(200,168,75,.4);padding:12px 22px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:600;border-radius:2px;margin-bottom:48px}
+.hero-stats-row{display:flex;gap:0;border-top:1px solid var(--border);padding-top:32px;flex-wrap:wrap}
+.hs{padding:0 32px 0 0;border-right:1px solid var(--border);margin-right:32px}
+.hs:last-child{border-right:none;margin-right:0}
+.hs-v{font-family:var(--font-d);font-size:42px;color:var(--gold);letter-spacing:.02em;line-height:1}
+.hs-l{font-size:11px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-top:4px}
+@media(max-width:480px){.hs{padding:0 20px 0 0;margin-right:20px}.hs-v{font-size:32px}}
 
-    elif slide_type == "section":
-        canvas.setFillColor(MED_BLUE)
-        canvas.rect(0, 0, W, H, fill=1, stroke=0)
-        canvas.setFillColor(colors.HexColor("#1A237E"))
-        canvas.rect(0, 0, W, H*0.18, fill=1, stroke=0)
-        canvas.setFillColor(ACCENT); canvas.rect(0, H*0.18, W, 3, fill=1, stroke=0)
-        canvas.setFillColor(WHITE); canvas.setFillAlpha(0.04)
-        canvas.circle(W*0.85, H*0.6, 180, fill=1, stroke=0)
-        canvas.setFillAlpha(1)
-        canvas.setFillColor(colors.HexColor("#0D1B4B"))
-        canvas.rect(0, 0, W, 22, fill=1, stroke=0)
-        canvas.setFillColor(ACCENT); canvas.setFont("Helvetica", 8)
-        canvas.drawCentredString(W/2, 8, f"Slide {n}")
+/* SECTION */
+.section{padding:72px 64px}
+@media(max-width:768px){.section{padding:48px 28px}}
+.sec-hd{display:flex;align-items:baseline;gap:16px;margin-bottom:36px}
+.sec-hd h2{font-family:var(--font-d);font-size:32px;letter-spacing:.06em}
+.sec-hd-line{flex:1;height:1px;background:var(--border)}
+.sec-hd span{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);white-space:nowrap}
+.sec-hd a{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);cursor:pointer;white-space:nowrap;text-decoration:none}
 
-    else:  # content
-        canvas.setFillColor(WHITE)
-        canvas.rect(0, 0, W, H, fill=1, stroke=0)
-        # header bar
-        canvas.setFillColor(DARK_BLUE)
-        canvas.rect(0, H-46, W, 46, fill=1, stroke=0)
-        canvas.setFillColor(ACCENT); canvas.rect(0, H-48, W, 3, fill=1, stroke=0)
-        # side accent
-        canvas.setFillColor(LIGHT_BLUE)
-        canvas.rect(0, 0, 5, H-48, fill=1, stroke=0)
-        # footer
-        canvas.setFillColor(DARK_BLUE); canvas.rect(0, 0, W, 22, fill=1, stroke=0)
-        canvas.setFillColor(ACCENT); canvas.setFont("Helvetica", 8)
-        canvas.drawString(1.5*cm, 8, "Secondary Storage Systems: HDD vs SSD")
-        canvas.setFillColor(WHITE)
-        canvas.drawRightString(W-1.5*cm, 8, f"Slide {n}")
+/* PROGRAM CARDS */
+.prog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
+@media(max-width:900px){.prog-grid{grid-template-columns:1fr}}
+.prog-card{background:var(--black);position:relative;overflow:hidden;cursor:pointer;aspect-ratio:3/4;display:flex;flex-direction:column;justify-content:flex-end;min-height:320px}
+@media(max-width:900px){.prog-card{aspect-ratio:16/9;min-height:200px}}
+.pc-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.4;transition:opacity .4s,transform .5s}
+.prog-card:hover .pc-bg{opacity:.6;transform:scale(1.04)}
+.pc-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(6,6,7,.95) 0%,rgba(6,6,7,.4) 50%,transparent 100%)}
+.pc-content{position:relative;z-index:2;padding:28px 28px 32px}
+.pc-num{font-size:11px;letter-spacing:.2em;color:var(--gold);margin-bottom:8px;font-weight:500;text-transform:uppercase}
+.pc-title{font-family:var(--font-s);font-size:28px;font-weight:400;line-height:1.15;margin-bottom:8px}
+.pc-desc{font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:20px}
+.pc-arrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.pc-arrow-line{width:0;height:1px;background:var(--gold);transition:width .3s}
+.prog-card:hover .pc-arrow-line{width:28px}
 
-# ── Flowable diagram for Architecture (slide) ──────────────────────
-class SlideArchDiagram(Flowable):
-    def __init__(self, w=680, h=160):
-        super().__init__()
-        self.width  = w
-        self.height = h
+/* NUTRITION GRID */
+.nut-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
+.nut-card{background:var(--surface);border:1px solid var(--border);overflow:hidden;cursor:default;transition:all .25s;border-radius:var(--radius)}
+.nut-card:hover{border-color:rgba(200,168,75,.5);transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.4)}
+.nut-img{height:100px;background-size:cover;background-position:center;position:relative}
+.nut-img::after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,var(--surface) 0%,transparent 60%)}
+.nut-body{padding:12px 14px 16px}
+.nut-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.nut-macro{font-size:11px;color:var(--gold);letter-spacing:.04em}
+.nut-cal{font-size:10px;color:var(--text3);margin-top:2px}
 
-    def draw(self):
-        c = self.canv
-        half = self.width / 2 - 8
+/* RECENT SESSIONS */
+.sess-list{display:flex;flex-direction:column;gap:10px}
+.sess-row{background:var(--surface);border:1px solid var(--border);padding:18px 22px;display:flex;align-items:center;gap:16px;border-radius:var(--radius);transition:border-color .2s}
+.sess-row:hover{border-color:var(--border2)}
+.sess-icon{font-size:24px;flex-shrink:0}
+.sess-info{flex:1;min-width:0}
+.sess-day{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:3px;font-weight:500}
+.sess-name{font-size:14px;font-weight:500}
+.sess-w{font-family:var(--font-d);font-size:28px;color:var(--gold);letter-spacing:.03em;white-space:nowrap}
+.sess-wu{font-size:11px;color:var(--text3)}
+.sess-edit{background:none;border:1px solid var(--border);color:var(--text3);padding:6px 12px;font-size:11px;letter-spacing:.06em;cursor:pointer;border-radius:var(--radius);transition:all .15s;font-family:var(--font-b);white-space:nowrap}
+.sess-edit:hover{border-color:var(--gold);color:var(--gold)}
+.empty-state{background:var(--surface);border:1px solid var(--border);padding:40px;text-align:center;border-radius:var(--radius)}
+.empty-state p{color:var(--text3);font-size:13px;margin-bottom:16px}
+.empty-state a{color:var(--gold);cursor:pointer}
 
-        # HDD
-        c.setFillColor(LIGHT_BLUE)
-        c.roundRect(0, 0, half, self.height, 8, fill=1, stroke=0)
-        c.setFillColor(MED_BLUE); c.setFont("Helvetica-Bold", 12)
-        c.drawCentredString(half/2, self.height-18, "Hard Disk Drive (HDD)")
+/* ── PANELS ── */
+.overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s}
+.overlay.on{opacity:1;pointer-events:auto}
+.panel{position:fixed;top:0;right:0;bottom:0;width:min(660px,100%);background:var(--obsidian);border-left:1px solid var(--border);overflow-y:auto;transform:translateX(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);z-index:301}
+.panel.on{transform:translateX(0)}
+.p-top{position:sticky;top:0;background:rgba(13,13,15,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:22px 30px;display:flex;align-items:center;justify-content:space-between;z-index:1}
+.p-title{font-family:var(--font-d);font-size:26px;letter-spacing:.07em}
+.p-close{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);cursor:pointer;color:var(--text3);font-size:18px;line-height:1;transition:all .2s;border-radius:var(--radius)}
+.p-close:hover{border-color:var(--gold);color:var(--gold)}
+.p-body{padding:30px}
 
-        cx, cy = half/2, self.height/2 - 8
-        for r, col in [(40, colors.HexColor("#90CAF9")),
-                       (28, colors.HexColor("#42A5F5")),
-                       (16, colors.HexColor("#1565C0")),
-                       (5,  colors.HexColor("#0D47A1"))]:
-            c.setFillColor(col)
-            c.circle(cx, cy, r, fill=1, stroke=0)
-        c.setStrokeColor(colors.HexColor("#37474F")); c.setLineWidth(2)
-        c.line(cx+5, cy+5, cx+38, cy+34)
-        c.setFillColor(colors.HexColor("#37474F"))
-        c.circle(cx+38, cy+34, 4, fill=1, stroke=0)
-        c.setFillColor(GRAY); c.setFont("Helvetica", 8)
-        c.drawCentredString(half/2, 10, "Spinning platters + mechanical arm")
+/* WORKOUT PANEL */
+.day-sel{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:22px}
+.d-btn{background:var(--surface);border:1px solid var(--border);padding:10px 4px;text-align:center;cursor:pointer;transition:all .15s;border-radius:var(--radius)}
+.d-btn:hover{border-color:var(--gold)}
+.d-btn.sel{background:var(--gold-dim);border-color:var(--gold);color:var(--gold)}
+.d-nm{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:4px}
+.d-btn.sel .d-nm{color:var(--gold)}
+.d-dt{font-family:var(--font-d);font-size:20px}
+.mus-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px}
+.m-btn{background:var(--surface);border:1px solid var(--border);padding:14px 16px;cursor:pointer;transition:all .15s;border-radius:var(--radius);display:flex;align-items:center;gap:10px}
+.m-btn:hover{border-color:var(--gold)}
+.m-btn.sel{background:var(--gold-dim);border-color:var(--gold)}
+.m-btn.sel .m-name{color:var(--gold)}
+.m-icon{font-size:18px}
+.m-name{font-size:13px;font-weight:500}
+.wi-row{display:flex;gap:10px;margin-top:8px}
+.wi-row .fi{flex:1}
+.wlog{margin-top:30px}
+.wl-row{background:var(--surface);border:1px solid var(--border);padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;gap:14px;border-radius:var(--radius)}
+.wl-left{flex:1;min-width:0}
+.wl-day{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:3px;font-weight:500}
+.wl-mus{font-size:13px;font-weight:500}
+.wl-w{font-family:var(--font-d);font-size:26px;color:var(--gold);letter-spacing:.03em;white-space:nowrap}
+.wl-wu{font-size:10px;color:var(--text3)}
 
-        # SSD
-        sx = half + 16
-        c.setFillColor(colors.HexColor("#E8F5E9"))
-        c.roundRect(sx, 0, half, self.height, 8, fill=1, stroke=0)
-        c.setFillColor(GREEN); c.setFont("Helvetica-Bold", 12)
-        c.drawCentredString(sx + half/2, self.height-18, "Solid State Drive (SSD)")
+/* FOOD GRID IN PANEL */
+.food-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px}
+.fd{background:var(--surface);border:1px solid var(--border);overflow:hidden;transition:all .2s;border-radius:var(--radius)}
+.fd:hover{border-color:rgba(200,168,75,.45);transform:translateY(-2px)}
+.fd-img{height:90px;background-size:cover;background-position:center}
+.fd-body{padding:11px 13px 14px}
+.fd-name{font-size:12px;font-weight:600;line-height:1.3;margin-bottom:3px}
+.fd-pro{font-size:10px;color:var(--gold);letter-spacing:.04em}
+.fd-cal{font-size:10px;color:var(--text3);margin-top:2px}
 
-        chip_colors = [colors.HexColor("#A5D6A7"), colors.HexColor("#66BB6A"),
-                       colors.HexColor("#43A047"), colors.HexColor("#2E7D32")]
-        rows2, cols2 = 3, 4
-        cw2, ch2 = 28, 19
-        gx = sx + (half - cols2*(cw2+4))/2
-        gy = cy - rows2*(ch2+4)/2 + 2
-        for ri in range(rows2):
-            for ci in range(cols2):
-                c.setFillColor(chip_colors[(ri+ci) % 4])
-                c.setStrokeColor(colors.HexColor("#1B5E20")); c.setLineWidth(0.5)
-                c.rect(gx + ci*(cw2+4), gy + ri*(ch2+4), cw2, ch2, fill=1, stroke=1)
-                c.setFillColor(WHITE); c.setFont("Helvetica", 5.5)
-                c.drawCentredString(gx + ci*(cw2+4)+cw2/2, gy + ri*(ch2+4)+7, "NAND")
-        c.setFillColor(GRAY); c.setFont("Helvetica", 8)
-        c.drawCentredString(sx + half/2, 10, "Flash memory chips — no moving parts")
+/* DIET */
+.diet-sec{margin-bottom:26px}
+.diet-sec-t{font-family:var(--font-d);font-size:19px;letter-spacing:.08em;color:var(--gold);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.di{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);padding:12px 16px;margin-bottom:8px;border-radius:var(--radius)}
+.di-icon{font-size:18px;flex-shrink:0}
+.di-name{font-size:13px;font-weight:500}
+.di-note{font-size:11px;color:var(--text3);margin-top:2px}
+.meal-c{background:var(--surface);border:1px solid var(--border);padding:20px 22px;margin-bottom:12px;position:relative;border-radius:var(--radius)}
+.meal-c::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);border-radius:3px 0 0 3px}
+.meal-t{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;font-weight:500}
+.meal-cnt{font-size:14px;color:var(--text2);line-height:1.65}
+.habit-i{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.habit-i:last-child{border-bottom:none}
+.h-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;margin-top:5px;flex-shrink:0}
 
-# ── Performance bar chart (slide) ──────────────────────────────────
-class SlidePerfChart(Flowable):
-    def __init__(self, w=680, h=160):
-        super().__init__()
-        self.width  = w
-        self.height = h
+/* MODAL */
+.modal-ov{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px)}
+.modal-ov.on{opacity:1;pointer-events:auto}
+.modal{background:var(--surface);border:1px solid var(--border2);padding:30px;width:100%;max-width:400px;position:relative;transform:scale(.95);transition:transform .25s;border-radius:4px}
+.modal-ov.on .modal{transform:scale(1)}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.modal-t{font-family:var(--font-d);font-size:24px;letter-spacing:.05em;margin-bottom:22px}
+.modal-acts{display:flex;gap:10px;margin-top:22px}
 
-    def draw(self):
-        c = self.canv
-        hdd_vals  = [150, 120, 15, 6]
-        ssd_vals  = [550, 500, 0.1, 3]
-        max_vals  = [600, 600, 16, 7]
-        labels    = ["Read Speed\n(MB/s)", "Write Speed\n(MB/s)", "Access Time\n(ms, lower=better)", "Power\n(W)"]
-        n = 4; bar_w = 22; gap = (self.width - 70) / n; base = 28; ch2 = self.height - 44
+/* INFO BOX */
+.info{background:rgba(200,168,75,.08);border:1px solid rgba(200,168,75,.22);padding:14px 18px;font-size:13px;color:var(--text2);line-height:1.55;margin-bottom:20px;border-radius:var(--radius)}
+.info strong{color:var(--gold)}
 
-        for i in range(n):
-            xc = 70 + i*gap + gap/2
-            hh = (hdd_vals[i] / max_vals[i]) * ch2
-            sh = (ssd_vals[i] / max_vals[i]) * ch2
-            if i == 2: hh = ch2; sh = 4  # invert: HDD worse
+/* DIVIDER */
+.div{height:1px;background:var(--border);margin:26px 0}
 
-            c.setFillColor(MED_BLUE)
-            c.rect(xc - bar_w - 2, base, bar_w, hh, fill=1, stroke=0)
-            c.setFillColor(colors.HexColor("#00C853"))
-            c.rect(xc + 2, base, bar_w, sh, fill=1, stroke=0)
+/* ERON AI */
+#ai-fab{position:fixed;bottom:30px;right:30px;z-index:200}
+.ai-btn{width:58px;height:58px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 28px var(--gold-glow),0 0 0 1px rgba(200,168,75,.3);transition:all .2s}
+.ai-btn:hover{transform:scale(1.08);box-shadow:0 8px 36px var(--gold-glow)}
+.ai-lbl{position:absolute;bottom:68px;right:0;background:var(--surface);border:1px solid var(--gold);padding:6px 14px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);white-space:nowrap;pointer-events:none;opacity:0;transform:translateY(6px);transition:all .2s;border-radius:var(--radius)}
+#ai-fab:hover .ai-lbl{opacity:1;transform:translateY(0)}
+.ai-box{position:absolute;bottom:70px;right:0;width:330px;background:var(--surface);border:1px solid var(--border2);box-shadow:0 24px 60px rgba(0,0,0,.65);overflow:hidden;transform-origin:bottom right;transform:scale(.8);opacity:0;pointer-events:none;transition:all .28s cubic-bezier(.16,1,.3,1);border-radius:4px}
+.ai-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.ai-box.on{transform:scale(1);opacity:1;pointer-events:auto}
+.ai-hd{background:var(--surface2);padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.ai-av{width:34px;height:34px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px}
+.ai-nm{font-weight:600;font-size:13px}
+.ai-st{font-size:11px;color:var(--green);letter-spacing:.04em}
+.ai-msgs{height:230px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ai-m{max-width:87%}
+.ai-m.ai{align-self:flex-start}
+.ai-m.user{align-self:flex-end}
+.ai-mb{padding:10px 14px;font-size:13px;line-height:1.5;border-radius:3px}
+.ai-m.ai .ai-mb{background:var(--surface2);border:1px solid var(--border);color:var(--text2)}
+.ai-m.user .ai-mb{background:var(--gold-dim);border:1px solid rgba(200,168,75,.3);color:var(--text)}
+.ai-inp-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border)}
+.ai-inp{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;font-family:var(--font-b);font-size:13px;border-radius:3px;outline:none}
+.ai-inp:focus{border-color:var(--gold)}
+.ai-snd{background:var(--gold);border:none;width:36px;height:36px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .15s;flex-shrink:0}
+.ai-snd:hover{background:var(--gold2)}
+.typing{display:flex;gap:4px;padding:10px 14px}
+.typing span{width:6px;height:6px;background:var(--text3);border-radius:50%;animation:bounce 1s ease-in-out infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
 
-            c.setFont("Helvetica-Bold", 7.5)
-            c.setFillColor(MED_BLUE)
-            lbl = str(hdd_vals[i]) if i != 2 else "15ms"
-            c.drawCentredString(xc - bar_w/2 - 2, base + hh + 3, lbl)
-            c.setFillColor(colors.HexColor("#00C853"))
-            lbl2 = str(ssd_vals[i]) if i != 2 else "0.1ms"
-            c.drawCentredString(xc + bar_w/2 + 2, base + sh + 3, lbl2)
+/* TOAST */
+#toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--gold);color:var(--text);padding:12px 26px;font-size:13px;letter-spacing:.05em;z-index:500;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none;border-radius:3px}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
-            c.setFillColor(GRAY); c.setFont("Helvetica", 7)
-            for j, part in enumerate(labels[i].split("\n")):
-                c.drawCentredString(xc, base - 9 - j*8, part)
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--black);z-index:500;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.loader-logo{font-family:var(--font-d);font-size:40px;color:var(--gold);letter-spacing:.15em;animation:pulse 1.5s ease-in-out infinite}
+.loader-bar{width:180px;height:2px;background:var(--border);border-radius:1px;overflow:hidden}
+.loader-fill{height:100%;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:loading 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes loading{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
 
-        c.setStrokeColor(GRAY); c.setLineWidth(0.5)
-        c.line(68, base, self.width - 4, base)
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.fadeUp{animation:fadeUp .45s ease forwards}
+.stagger>*{opacity:0;animation:fadeUp .4s ease forwards}
+.stagger>*:nth-child(1){animation-delay:.04s}
+.stagger>*:nth-child(2){animation-delay:.09s}
+.stagger>*:nth-child(3){animation-delay:.14s}
+.stagger>*:nth-child(4){animation-delay:.19s}
+.stagger>*:nth-child(5){animation-delay:.24s}
+.stagger>*:nth-child(6){animation-delay:.29s}
 
-        lx = 20
-        c.setFillColor(MED_BLUE); c.rect(lx, self.height-20, 12, 10, fill=1, stroke=0)
-        c.setFillColor(BLACK); c.setFont("Helvetica", 8); c.drawString(lx+14, self.height-18, "HDD")
-        c.setFillColor(colors.HexColor("#00C853")); c.rect(lx+40, self.height-20, 12, 10, fill=1, stroke=0)
-        c.setFillColor(BLACK); c.drawString(lx+54, self.height-18, "SSD")
+/* LOADING SPINNER */
+.spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
 
-# ── Slide builder ───────────────────────────────────────────────────
-out = "/mnt/user-data/outputs/HDD_vs_SSD_Presentation.pdf"
-doc = SimpleDocTemplate(out, pagesize=(W, H),
-                        leftMargin=1.6*cm, rightMargin=1.6*cm,
-                        topMargin=0.7*cm, bottomMargin=1.0*cm)
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">ERON</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
 
-story = []
-slide_backgrounds = []  # will be filled per page
+<!-- INTRO -->
+<div id="intro" class="screen hidden">
+  <div class="i-wrap">
+    <div class="i-pre"><span>Direct by</span></div>
+    <div class="i-logo">
+      <span>ERON</span>
+      <div class="i-logo-fill">ERON</div>
+    </div>
+    <div class="i-sub"><span>Elite Fitness Studio</span></div>
+    <div class="i-line"></div>
+  </div>
+</div>
 
-def end_slide():
-    story.append(PageBreak())
+<!-- AUTH -->
+<div id="auth" class="screen hidden">
+  <div class="auth-bg">
+    <div class="auth-bg-img"></div>
+    <div class="auth-bg-overlay"></div>
+    <div class="auth-bg-text">
+      <h1>ERON</h1>
+      <p>Forge Your Legacy</p>
+    </div>
+  </div>
+  <div class="auth-panel">
+    <div class="auth-logo">ERON</div>
+    <div class="auth-tagline">Elite Fitness Studio</div>
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchTab('login')">Sign In</div>
+      <div class="tab" onclick="switchTab('signup')">Sign Up</div>
+    </div>
+    <div id="login-form" class="form">
+      <div class="fg"><label class="fl">Username</label><input class="fi" id="li-u" type="text" placeholder="Your username" autocomplete="username"></div>
+      <div class="fg"><label class="fl">Password</label><input class="fi" id="li-p" type="password" placeholder="Your password" autocomplete="current-password"></div>
+      <div id="li-err" class="err hidden"></div>
+      <button class="btn-p" onclick="doLogin()">Enter the Studio</button>
+    </div>
+    <div id="signup-form" class="form hidden">
+      <div class="fg"><label class="fl">Full Name</label><input class="fi" id="su-n" type="text" placeholder="Your full name"></div>
+      <div class="fg"><label class="fl">Username</label><input class="fi" id="su-u" type="text" placeholder="Choose a username"></div>
+      <div class="fg"><label class="fl">Password</label><input class="fi" id="su-p" type="password" placeholder="Create a password (6+ chars)" autocomplete="new-password"></div>
+      <div id="su-err" class="err hidden"></div>
+      <button class="btn-p" onclick="doSignup()">Create My Profile</button>
+    </div>
+  </div>
+</div>
 
-# Helper
-def h_title(text):
-    story.append(Paragraph(text, sec_hdr))
+<!-- ONBOARDING -->
+<div id="onboarding" class="screen hidden">
+  <div class="ob-card">
+    <div class="ob-step">Profile Setup</div>
+    <div class="ob-title">Let's Personalize<br>Your Journey</div>
+    <div class="ob-sub">Tell us about yourself so we can tailor every workout, meal plan, and recommendation to match your goals.</div>
+    <div class="form">
+      <div class="row2">
+        <div class="fg"><label class="fl">Age</label><input class="fi" id="ob-age" type="number" placeholder="e.g. 25" min="10" max="100"></div>
+        <div class="fg"><label class="fl">Weight (kg)</label><input class="fi" id="ob-wt" type="number" placeholder="e.g. 75" min="30" max="300"></div>
+      </div>
+      <div class="fg"><label class="fl">Height (cm)</label><input class="fi" id="ob-ht" type="number" placeholder="e.g. 175" min="100" max="250"></div>
+      <div class="fg">
+        <label class="fl">Primary Goal</label>
+        <div class="goal-grid">
+          <div class="goal-c" id="gc-loss" onclick="pickGoal('loss')"><div class="goal-icon">🔥</div><div class="goal-name">Weight Loss</div><div class="goal-desc">Burn fat, lean out</div></div>
+          <div class="goal-c" id="gc-gain" onclick="pickGoal('gain')"><div class="goal-icon">💪</div><div class="goal-name">Weight Gain</div><div class="goal-desc">Build muscle & mass</div></div>
+        </div>
+      </div>
+      <div id="ob-err" class="err hidden"></div>
+      <button class="btn-p" onclick="saveOB()">Begin My Training</button>
+    </div>
+  </div>
+</div>
 
-def h_slide_header(text):
-    # Used inside content slides — placed before Spacer(topMargin)
-    story.append(Paragraph(text, ms("SHC", fontName="Helvetica-Bold", fontSize=16,
-                                    textColor=WHITE, leading=20, alignment=TA_CENTER)))
+<!-- APP -->
+<div id="app" class="hidden">
+  <div class="app-bg"></div>
 
-def bp(text, bold=False):
-    prefix = "<b>" if bold else ""
-    suffix = "</b>" if bold else ""
-    story.append(Paragraph(f"➤  {prefix}{text}{suffix}", bullet_s))
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="t-logo" onclick="scrollToTop()">ERON</div>
+    <nav class="t-nav">
+      <div class="ni active" onclick="scrollToTop()">Dashboard</div>
+      <div class="ni" onclick="openPanel('p-workouts')">My Workouts</div>
+      <div class="ni" onclick="openPanel('p-protein')">High-Protein</div>
+      <div class="ni" onclick="openPanel('p-diet')">Diet Foods</div>
+    </nav>
+    <div class="t-right">
+      <div class="t-date" id="t-date"></div>
+      <div class="prof-btn" id="prof-btn" onclick="togglePD()">
+        <span id="prof-init">?</span>
+        <div class="pd hidden" id="pd">
+          <div class="pd-hd">
+            <div class="pd-av" id="pd-av">?</div>
+            <div><div class="pd-nm" id="pd-nm"></div><div class="pd-gl" id="pd-gl"></div></div>
+          </div>
+          <div class="pd-stats">
+            <div><div class="pd-sv" id="pd-age">—</div><div class="pd-sl">Age</div></div>
+            <div><div class="pd-sv" id="pd-wt">—</div><div class="pd-sl">kg</div></div>
+            <div><div class="pd-sv" id="pd-ht">—</div><div class="pd-sl">cm</div></div>
+          </div>
+          <div class="pd-acts">
+            <div class="pd-act" onclick="openEditProfile()">✏️ Edit Profile</div>
+            <div class="pd-act danger" onclick="doLogout()">↩ Sign Out</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
 
-# ── SLIDE 1: COVER ──────────────────────────────────────────────────
-story.append(Spacer(1, 3.2*cm))
-story.append(Paragraph("Secondary Storage Systems", slide_title))
-story.append(Spacer(1, 0.3*cm))
-story.append(Paragraph("HDD vs SSD — Architecture, Performance &amp; Real-World Use", slide_sub))
-story.append(Spacer(1, 0.7*cm))
-story.append(HRFlowable(width="50%", thickness=1.5, color=ACCENT2, spaceAfter=12))
-story.append(Spacer(1, 0.4*cm))
-for line in ["Computer Science Presentation", "Group of 3 Students  •  Deadline: 17 May 2026"]:
-    story.append(Paragraph(line, ms("ci", fontName="Helvetica", fontSize=12, textColor=colors.HexColor("#B3E5FC"),
-                                    leading=18, alignment=TA_CENTER)))
-slide_backgrounds.append("cover")
-end_slide()
+  <!-- MAIN -->
+  <main class="main">
 
-# ── SLIDE 2: AGENDA ─────────────────────────────────────────────────
-story.append(Spacer(1, 0.5*cm))
-story.append(Paragraph("Agenda", ms("AGH", fontName="Helvetica-Bold", fontSize=20,
-                                     textColor=WHITE, leading=26, alignment=TA_CENTER)))
-story.append(Spacer(1, 0.5*cm))
-agenda = [
-    ("01", "Introduction — What is Secondary Storage?"),
-    ("02", "How Does an HDD Work?"),
-    ("03", "How Does an SSD Work?"),
-    ("04", "Architecture Diagram"),
-    ("05", "Performance Comparison"),
-    ("06", "Detailed Specs & Head-to-Head Table"),
-    ("07", "Real-Life Examples"),
-    ("08", "Use Case Recommendations"),
-    ("09", "Future Trends"),
-    ("10", "Conclusion"),
-]
-ag_data = [[Paragraph(f"<b>{n}</b>", ms("AN", fontName="Helvetica-Bold", fontSize=12, textColor=ACCENT2,
-                                         alignment=TA_CENTER)),
-            Paragraph(txt, ms("AT", fontName="Helvetica", fontSize=11, textColor=WHITE, leading=15))]
-           for n, txt in agenda]
-ag_tbl = Table(ag_data, colWidths=[1.6*cm, 18*cm])
-ag_tbl.setStyle(TableStyle([
-    ("ROWBACKGROUNDS", (0,0), (-1,-1), [colors.HexColor("#1A237E"), MED_BLUE]),
-    ("TOPPADDING",    (0,0), (-1,-1), 5),
-    ("BOTTOMPADDING", (0,0), (-1,-1), 5),
-    ("LEFTPADDING",   (0,0), (-1,-1), 8),
-    ("VALIGN",        (0,0), (-1,-1), "MIDDLE"),
-]))
-story.append(ag_tbl)
-slide_backgrounds.append("section")
-end_slide()
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-img"></div>
+      <div class="hero-img2"></div>
+      <div class="hero-img3"></div>
+      <div class="hero-content fadeUp">
+        <div class="hero-tag"><div class="hero-tag-line"></div><span>Elite Training</span></div>
+        <div class="hero-greeting" id="h-greet">Welcome back,</div>
+        <div class="hero-name" id="h-name">Athlete<span>.</span></div>
+        <div class="hero-desc" id="h-desc">Every session brings you closer to the physique you've always imagined.</div>
+        <div class="hero-goal-pill" id="h-goal">🔥 Weight Loss Program</div>
+        <div class="hero-stats-row stagger">
+          <div class="hs"><div class="hs-v" id="hs-wt">—</div><div class="hs-l">Body Weight</div></div>
+          <div class="hs"><div class="hs-v" id="hs-ht">—</div><div class="hs-l">Height</div></div>
+          <div class="hs"><div class="hs-v" id="hs-age">—</div><div class="hs-l">Age</div></div>
+          <div class="hs"><div class="hs-v" id="hs-sess">0</div><div class="hs-l">Sessions</div></div>
+        </div>
+      </div>
+    </section>
 
-# ── SLIDE 3: INTRODUCTION ───────────────────────────────────────────
-story.append(Spacer(1, 0.9*cm))
-story.append(Paragraph("01 | Introduction", ms("SH2", fontName="Helvetica-Bold", fontSize=17,
-                                                textColor=WHITE, leading=22, alignment=TA_LEFT)))
-story.append(Spacer(1, 0.25*cm))
-story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=10))
+    <!-- PROGRAMS -->
+    <section class="section" style="padding-top:0">
+      <div class="sec-hd"><h2>PROGRAMS</h2><div class="sec-hd-line"></div><span>Your Fitness Hub</span></div>
+      <div class="prog-grid">
+        <div class="prog-card" onclick="openPanel('p-workouts')">
+          <div class="pc-bg" style="background-image:url('https://images.unsplash.com/photo-1534367610401-9f5ed68180aa?w=800&q=80')"></div>
+          <div class="pc-overlay"></div>
+          <div class="pc-content">
+            <div class="pc-num">01 — Training</div>
+            <div class="pc-title">My Workouts</div>
+            <div class="pc-desc">Log daily sessions, track muscle groups, and record your personal bests.</div>
+            <div class="pc-arrow">Enter <div class="pc-arrow-line"></div></div>
+          </div>
+        </div>
+        <div class="prog-card" onclick="openPanel('p-protein')">
+          <div class="pc-bg" style="background-image:url('https://images.unsplash.com/photo-1547592180-85f173990554?w=800&q=80')"></div>
+          <div class="pc-overlay"></div>
+          <div class="pc-content">
+            <div class="pc-num">02 — Nutrition</div>
+            <div class="pc-title">High-Protein Foods</div>
+            <div class="pc-desc">Fuel muscle recovery with premium protein sources for maximum growth.</div>
+            <div class="pc-arrow">Explore <div class="pc-arrow-line"></div></div>
+          </div>
+        </div>
+        <div class="prog-card" onclick="openPanel('p-diet')">
+          <div class="pc-bg" style="background-image:url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80')"></div>
+          <div class="pc-overlay"></div>
+          <div class="pc-content">
+            <div class="pc-num">03 — Fat Loss</div>
+            <div class="pc-title">Diet & Weight Loss</div>
+            <div class="pc-desc">Science-backed foods and meal plans to help you shed fat effectively.</div>
+            <div class="pc-arrow">Discover <div class="pc-arrow-line"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-intro_txt = ("Secondary storage is <b>non-volatile memory</b> that retains data permanently without power. "
-             "It stores your OS, apps, and files. Two technologies dominate:")
-story.append(Paragraph(intro_txt, body_s))
-story.append(Spacer(1, 0.2*cm))
+    <!-- RECENT SESSIONS -->
+    <section class="section" style="padding-top:0">
+      <div class="sec-hd"><h2>RECENT SESSIONS</h2><div class="sec-hd-line"></div><a onclick="openPanel('p-workouts')">View All →</a></div>
+      <div id="recent-home"></div>
+    </section>
 
-two_col = [[
-    Paragraph("<b>HDD — Hard Disk Drive</b>", ms("TH2", fontName="Helvetica-Bold", fontSize=12,
-                                                   textColor=MED_BLUE, alignment=TA_CENTER)),
-    Paragraph("<b>SSD — Solid State Drive</b>", ms("TH3", fontName="Helvetica-Bold", fontSize=12,
-                                                    textColor=GREEN, alignment=TA_CENTER)),
-],[
-    Paragraph("• Electromechanical device<br/>• Spinning magnetic platters<br/>• Moving read/write arm<br/>• Invented: 1956<br/>• Low cost, high capacity", body_s),
-    Paragraph("• Semiconductor device<br/>• NAND flash memory chips<br/>• No moving parts<br/>• Invented: 1990s<br/>• Fast, silent, durable", body_s),
-]]
-tc = Table(two_col, colWidths=[10*cm, 10*cm])
-tc.setStyle(TableStyle([
-    ("BACKGROUND",   (0,0), (0,0), LIGHT_BLUE),
-    ("BACKGROUND",   (1,0), (1,0), colors.HexColor("#E8F5E9")),
-    ("BACKGROUND",   (0,1), (0,1), colors.HexColor("#F5F9FF")),
-    ("BACKGROUND",   (1,1), (1,1), colors.HexColor("#F5FFF7")),
-    ("BOX",          (0,0), (-1,-1), 0.7, GRAY),
-    ("INNERGRID",    (0,0), (-1,-1), 0.3, GRAY),
-    ("TOPPADDING",   (0,0), (-1,-1), 8),
-    ("BOTTOMPADDING",(0,0), (-1,-1), 8),
-    ("LEFTPADDING",  (0,0), (-1,-1), 12),
-]))
-story.append(tc)
-slide_backgrounds.append("content")
-end_slide()
+    <!-- NUTRITION PREVIEW -->
+    <section class="section" style="padding-top:0">
+      <div class="sec-hd"><h2>NUTRITION SPOTLIGHT</h2><div class="sec-hd-line"></div><a onclick="openPanel('p-protein')">Full Guide →</a></div>
+      <div class="nut-grid stagger" id="nut-preview"></div>
+    </section>
 
-# ── SLIDE 4: HOW HDD WORKS ──────────────────────────────────────────
-story.append(Spacer(1, 0.9*cm))
-story.append(Paragraph("02 | How Does an HDD Work?", ms("SH3", fontName="Helvetica-Bold", fontSize=17,
-                                                          textColor=WHITE, leading=22)))
-story.append(Spacer(1, 0.2*cm))
-story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=10))
-bp("Data is stored on circular <b>magnetic platters</b> coated with ferromagnetic material.")
-bp("Platters spin at <b>5,400 – 7,200 RPM</b> (server HDDs: up to 15,000 RPM).")
-bp("A <b>read/write head</b> on a mechanical arm floats nm above the surface, magnetising tiny regions.")
-bp("Performance is limited by <b>seek time</b> (arm movement) + <b>rotational latency</b> (waiting for sector).")
-bp("Average access time: <b>5–15 milliseconds</b> — slow compared to SSD.")
-bp("Sequential speeds: <b>80–160 MB/s</b> | Random 4K speeds: <b>~0.5–2 MB/s</b> (very slow).")
-story.append(Spacer(1, 0.2*cm))
-story.append(Paragraph("Key limitation: mechanical parts make HDDs slow for random access and vulnerable to physical shock.",
-                        ms("note", fontName="Helvetica-Oblique", fontSize=10, textColor=ORANGE, leading=14)))
-slide_backgrounds.append("content")
-end_slide()
+  </main>
+</div>
 
-# ── SLIDE 5: HOW SSD WORKS ──────────────────────────────────────────
-story.append(Spacer(1, 0.9*cm))
-story.append(Paragraph("03 | How Does an SSD Work?", ms("SH4", fontName="Helvetica-Bold", fontSize=17, textColor=WHITE)))
-story.append(Spacer(1, 0.2*cm))
-story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=10))
-bp("Data is stored in <b>NAND flash memory cells</b> — transistors that trap electrical charge.")
-bp("<b>No moving parts</b> — data is accessed electronically at near-instant speed.")
-bp("Interfaces: <b>SATA</b> (older, ~500 MB/s) vs <b>NVMe/PCIe</b> (modern, 3,500–7,000+ MB/s).")
-bp("NAND types: <b>SLC</b> (1 bit/cell, fastest), <b>MLC</b> (2), <b>TLC</b> (3), <b>QLC</b> (4 bits/cell, cheapest).")
-bp("Average access time: <b>0.05–0.15 ms</b> — up to <b>100× faster</b> than HDD.")
-bp("Random 4K speeds: <b>300–500 MB/s</b> — massively faster than HDD for OS tasks.")
-story.append(Spacer(1, 0.2*cm))
-story.append(Paragraph("Key advantage: no mechanical delays — the SSD's speed transforms how computers feel to use.",
-                        ms("note2", fontName="Helvetica-Oblique", fontSize=10, textColor=GREEN, leading=14)))
-slide_backgrounds.append("content")
-end_slide()
+<!-- ── PANELS ── -->
+<div class="overlay" id="overlay" onclick="closeAllPanels()"></div>
 
-# ── SLIDE 6: ARCHITECTURE DIAGRAM ──────────────────────────────────
-story.append(Spacer(1, 0.9*cm))
-story.append(Paragraph("04 | Architecture Diagram", ms("SH5", fontName="Helvetica-Bold", fontSize=17, textColor=WHITE)))
-story.append(Spacer(1, 0.2*cm))
-story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=14))
-story.append(SlideArchDiagram(700, 165))
-story.append(Paragraph("Figure 1 — HDD uses spinning platters with a mechanical arm; SSD uses a grid of NAND flash chips.", caption_s))
-slide_backgrounds.append("content")
-end_slide()
+<!-- WORKOUTS -->
+<div class="panel" id="p-workouts">
+  <div class="p-top"><div class="p-title">MY WORKOUTS</div><div class="p-close" onclick="closePanel('p-workouts')">✕</div></div>
+  <div class="p-body">
+    <div class="info"><strong>Log your session.</strong> Select the day, muscle group(s), exercise, and your max weight lifted.</div>
+    <div class="fg" style="margin-bottom:18px">
+      <div class="fl" style="margin-bottom:10px">Select Day</div>
+      <div class="day-sel" id="day-sel"></div>
+    </div>
+    <div class="fg" style="margin-bottom:18px">
+      <div class="fl" style="margin-bottom:10px">Muscle Group Focus</div>
+      <div class="mus-grid">
+        <div class="m-btn" data-m="Chest" onclick="togM(this)"><span class="m-icon">🫁</span><span class="m-name">Chest</span></div>
+        <div class="m-btn" data-m="Back" onclick="togM(this)"><span class="m-icon">🏋️</span><span class="m-name">Back</span></div>
+        <div class="m-btn" data-m="Shoulders" onclick="togM(this)"><span class="m-icon">🦾</span><span class="m-name">Shoulders</span></div>
+        <div class="m-btn" data-m="Legs" onclick="togM(this)"><span class="m-icon">🦵</span><span class="m-name">Legs</span></div>
+        <div class="m-btn" data-m="Shoulders & Legs" onclick="togM(this)"><span class="m-icon">💪</span><span class="m-name">Shoulders & Legs</span></div>
+        <div class="m-btn" data-m="Arms" onclick="togM(this)"><span class="m-icon">💪</span><span class="m-name">Arms</span></div>
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:22px">
+      <label class="fl">Max Weight Lifted (kg) & Exercise</label>
+      <div class="wi-row">
+        <input class="fi" id="w-weight" type="number" placeholder="kg e.g. 80" min="0" max="500">
+        <input class="fi" id="w-exer" type="text" placeholder="Exercise e.g. Bench Press">
+      </div>
+    </div>
+    <button class="btn-p" style="width:100%" onclick="logWorkout()">Log This Session</button>
+    <div class="div"></div>
+    <div class="sec-hd" style="margin-bottom:16px"><h2>SESSION LOG</h2><div class="sec-hd-line"></div></div>
+    <div id="wlog"></div>
+  </div>
+</div>
 
-# ── SLIDE 7: PERFORMANCE CHART ──────────────────────────────────────
-story.append(Spacer(1, 0.9*cm))
-story.append(Paragraph("05 | Performance Comparison", ms("SH6", fontName="Helvetica-Bold", fontSize=17, textColor=WHITE)))
-story.append(Spacer(1, 0.2*cm))
-story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=14))
-story.append(SlidePerfChart(700, 165))
-story.append(Paragraph("Figure 2 — SSD dramatically outperforms HDD in speed and access time; HDD only wins on $/TB.", caption_s))
-slide_backgrounds.append("content")
-end_slide()
+<!-- PROTEIN -->
+<div class="panel" id="p-protein">
+  <div class="p-top"><div class="p-title">HIGH-PROTEIN FOODS</div><div class="p-close" onclick="closePanel('p-protein')">✕</div></div>
+  <div class="p-body">
+    <div class="info"><strong>Power your muscles.</strong> The highest-quality protein sources for growth, recovery, and peak performance.</div>
+    <div class="food-grid stagger" id="food-grid"></div>
+  </div>
+</div>
 
-# ── SLIDE 8: SPECS TABLE ────────────────────────────────────────────
-story.append(Spacer(1, 0.9*cm))
-story.append(Paragraph("06 | Head-to-Head Specification Table", ms("SH7", fontName="Helvetica-Bold", fontSize=17, textColor=WHITE)))
-story.append(Spacer(1, 0.2*cm))
-story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=10))
+<!-- DIET -->
+<div class="panel" id="p-diet">
+  <div class="p-top"><div class="p-title">DIET & WEIGHT LOSS</div><div class="p-close" onclick="closePanel('p-diet')">✕</div></div>
+  <div class="p-body">
+    <div class="info"><strong>High protein, lower calories.</strong> Foods specifically chosen to help you lose fat while preserving muscle mass.</div>
+    <div id="diet-cnt"></div>
+  </div>
+</div>
 
-td = [
-    [Paragraph("<b>Feature</b>", tbl_hdr_s), Paragraph("<b>HDD</b>", tbl_hdr_s),
-     Paragraph("<b>SSD (SATA)</b>", tbl_hdr_s), Paragraph("<b>SSD (NVMe)</b>", tbl_hdr_s)],
-    ["Read Speed",   "80–160 MB/s",   "500–560 MB/s",   "3,500–7,000 MB/s"],
-    ["Write Speed",  "80–120 MB/s",   "450–530 MB/s",   "2,500–6,500 MB/s"],
-    ["Access Time",  "5–15 ms",       "0.1 ms",          "0.05 ms"],
-    ["Power",        "4–9 W",         "2–4 W",           "3–8 W"],
-    ["Shock Resist", "Low ⚠",        "High ✓",          "High ✓"],
-    ["Cost / TB",    "~$20–$30",      "~$60–$80",        "~$80–$120"],
-    ["Best For",     "Bulk archive",  "Everyday laptops","Gaming/workstations"],
-]
-for i in range(1, len(td)):
-    td[i] = [Paragraph(str(x), tbl_cell_s) for x in td[i]]
-td[0] = [Paragraph(str(x.text if hasattr(x,'text') else x), tbl_hdr_s) if not hasattr(x,'text') else x for x in td[0]]
+<!-- EDIT WEIGHT MODAL -->
+<div class="modal-ov" id="m-edit">
+  <div class="modal">
+    <div class="modal-t">EDIT SESSION</div>
+    <div class="fg"><label class="fl">Max Weight (kg)</label><input class="fi" id="m-edit-w" type="number" style="margin-top:7px"></div>
+    <div class="modal-acts"><button class="btn-p" onclick="saveEdit()">Save</button><button class="btn-ghost" onclick="closeModal('m-edit')">Cancel</button></div>
+  </div>
+</div>
 
-tbl2 = Table(td, colWidths=[3.8*cm, 4.8*cm, 4.8*cm, 5.2*cm])
-tbl2.setStyle(TableStyle([
-    ("BACKGROUND",    (0,0), (-1,0),  MED_BLUE),
-    ("ROWBACKGROUNDS",(0,1), (-1,-1), [WHITE, LIGHT_GRAY]),
-    ("BACKGROUND",    (0,3), (-1,3),  LIGHT_BLUE),
-    ("BACKGROUND",    (0,5), (-1,5),  LIGHT_BLUE),
-    ("GRID",          (0,0), (-1,-1), 0.4, GRAY),
-    ("VALIGN",        (0,0), (-1,-1), "MIDDLE"),
-    ("TOPPADDING",    (0,0), (-1,-1), 5),
-    ("BOTTOMPADDING", (0,0), (-1,-1), 5),
-]))
-story.append(tbl2)
-slide_backgrounds.append("content")
-end_slide()
+<!-- EDIT PROFILE MODAL -->
+<div class="modal-ov" id="m-prof">
+  <div class="modal">
+    <div class="modal-t">EDIT PROFILE</div>
+    <div class="fg" style="margin-bottom:12px"><label class="fl">Age</label><input class="fi" id="mp-age" type="number" style="margin-top:7px"></div>
+    <div class="row2" style="margin-bottom:12px">
+      <div class="fg"><label class="fl">Weight (kg)</label><input class="fi" id="mp-wt" type="number" style="margin-top:7px"></div>
+      <div class="fg"><label class="fl">Height (cm)</label><input class="fi" id="mp-ht" type="number" style="margin-top:7px"></div>
+    </div>
+    <div class="fg"><label class="fl">Goal</label>
+      <select class="fi" id="mp-goal" style="margin-top:7px">
+        <option value="loss">Weight Loss</option>
+        <option value="gain">Weight Gain</option>
+      </select>
+    </div>
+    <div class="modal-acts"><button class="btn-p" onclick="saveProfile()">Save Changes</button><button class="btn-ghost" onclick="closeModal('m-prof')">Cancel</button></div>
+  </div>
+</div>
 
-# ── SLIDE 9: REAL-LIFE EXAMPLES ─────────────────────────────────────
-story.append(Spacer(1, 0.9*cm))
-story.append(Paragraph("07 | Real-Life Examples", ms("SH8", fontName="Helvetica-Bold", fontSize=17, textColor=WHITE)))
-story.append(Spacer(1, 0.2*cm))
-story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=10))
+<!-- ERON AI -->
+<div id="ai-fab" class="hidden">
+  <div class="ai-box" id="ai-box">
+    <div class="ai-hd">
+      <div class="ai-av">🤖</div>
+      <div><div class="ai-nm">Eron AI</div><div class="ai-st">● Online</div></div>
+    </div>
+    <div class="ai-msgs" id="ai-msgs"></div>
+    <div class="ai-inp-row">
+      <input class="ai-inp" id="ai-inp" placeholder="Ask your coach…" onkeydown="if(event.key==='Enter')sendAI()">
+      <button class="ai-snd" onclick="sendAI()">➤</button>
+    </div>
+  </div>
+  <div class="ai-lbl">Eron AI Coach</div>
+  <button class="ai-btn" onclick="togAI()">🤖</button>
+</div>
 
-ex_data = [
-    [Paragraph("<b>💻 Student Laptop (SSD)</b>", ms("EH", fontName="Helvetica-Bold", fontSize=10, textColor=WHITE, alignment=TA_CENTER)),
-     Paragraph("<b>🎮 Gaming PC (NVMe SSD)</b>", ms("EH2", fontName="Helvetica-Bold", fontSize=10, textColor=WHITE, alignment=TA_CENTER)),
-     Paragraph("<b>📦 NAS Server (HDD)</b>", ms("EH3", fontName="Helvetica-Bold", fontSize=10, textColor=WHITE, alignment=TA_CENTER))],
-    [Paragraph("Boot in 8s vs 45s on HDD.\nSamsung 970 EVO 1TB NVMe.\nShock-resistant for travel.",
-               ms("EC", fontSize=9, leading=13, spaceAfter=0)),
-     Paragraph("MS Flight Simulator: 70% faster loads.\nPS5 uses 5.5 GB/s custom NVMe.\nHybrid: NVMe + HDD combo.",
-               ms("EC2", fontSize=9, leading=13, spaceAfter=0)),
-     Paragraph("6× 8TB HDDs = 32TB storage ~$500.\nStreams 4K to multiple devices.\nSeagate IronWolf NAS rated 24/7.",
-               ms("EC3", fontSize=9, leading=13, spaceAfter=0))],
-]
-ex_tbl = Table(ex_data, colWidths=[6.4*cm, 7*cm, 6.4*cm])
-ex_tbl.setStyle(TableStyle([
-    ("BACKGROUND",    (0,0), (0,0), MED_BLUE),
-    ("BACKGROUND",    (1,0), (1,0), colors.HexColor("#1B5E20")),
-    ("BACKGROUND",    (2,0), (2,0), ORANGE),
-    ("BACKGROUND",    (0,1), (0,1), LIGHT_BLUE),
-    ("BACKGROUND",    (1,1), (1,1), colors.HexColor("#E8F5E9")),
-    ("BACKGROUND",    (2,1), (2,1), colors.HexColor("#FFF3E0")),
-    ("BOX",           (0,0), (-1,-1), 0.7, GRAY),
-    ("INNERGRID",     (0,0), (-1,-1), 0.3, GRAY),
-    ("TOPPADDING",    (0,0), (-1,-1), 8),
-    ("BOTTOMPADDING", (0,0), (-1,-1), 8),
-    ("LEFTPADDING",   (0,0), (-1,-1), 10),
-    ("VALIGN",        (0,0), (-1,-1), "TOP"),
-]))
-story.append(ex_tbl)
-story.append(Spacer(1, 0.2*cm))
-story.append(Paragraph("Enterprise: AWS/Google use HDDs for cold storage + NVMe SSDs for live databases — both are essential!", 
-                        ms("ent", fontName="Helvetica-Oblique", fontSize=10, textColor=GRAY, leading=14)))
-slide_backgrounds.append("content")
-end_slide()
+<!-- TOAST -->
+<div id="toast"></div>
 
-# ── SLIDE 10: USE CASE GUIDE ────────────────────────────────────────
-story.append(Spacer(1, 0.9*cm))
-story.append(Paragraph("08 | Use Case Recommendations", ms("SH9", fontName="Helvetica-Bold", fontSize=17, textColor=WHITE)))
-story.append(Spacer(1, 0.2*cm))
-story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=10))
+<!-- FIREBASE + APP SCRIPT -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-uc_data = [
-    [Paragraph("<b>✅ Choose SSD When…</b>", ms("UC1", fontName="Helvetica-Bold", fontSize=11, textColor=MED_BLUE)),
-     Paragraph("<b>✅ Choose HDD When…</b>", ms("UC2", fontName="Helvetica-Bold", fontSize=11, textColor=GREEN))],
-    [Paragraph("• Fast boot / app launch needed\n• Laptop (portability, battery, shock)\n• Video editing / 3D rendering\n• Gaming — fast load times\n• Databases / web servers\n• Primary OS drive",
-               ms("UCT", fontSize=10, leading=16)),
-     Paragraph("• Large file archives (movies, backups)\n• NAS / home media server\n• Budget build — max GB/$\n• Secondary 'cold storage' drive\n• Surveillance / CCTV footage\n• Cloud data-centre cold tier",
-               ms("UCT2", fontSize=10, leading=16))],
-]
-uc_tbl = Table(uc_data, colWidths=[10*cm, 10*cm])
-uc_tbl.setStyle(TableStyle([
-    ("BACKGROUND",    (0,0), (0,0), LIGHT_BLUE),
-    ("BACKGROUND",    (1,0), (1,0), colors.HexColor("#E8F5E9")),
-    ("BACKGROUND",    (0,1), (0,1), colors.HexColor("#F5F9FF")),
-    ("BACKGROUND",    (1,1), (1,1), colors.HexColor("#F5FFF7")),
-    ("BOX",           (0,0), (-1,-1), 0.7, GRAY),
-    ("INNERGRID",     (0,0), (-1,-1), 0.3, GRAY),
-    ("TOPPADDING",    (0,0), (-1,-1), 8),
-    ("BOTTOMPADDING", (0,0), (-1,-1), 8),
-    ("LEFTPADDING",   (0,0), (-1,-1), 14),
-    ("VALIGN",        (0,0), (-1,-1), "TOP"),
-]))
-story.append(uc_tbl)
-story.append(Spacer(1, 0.2*cm))
-bp("<b>Hybrid Setup (recommended):</b> NVMe SSD for OS + active files, HDD for bulk storage = best of both worlds.")
-slide_backgrounds.append("content")
-end_slide()
+const firebaseConfig = {
+  apiKey: "AIzaSyBL1RXtI-F7z1Umoijyd2ebfQeZOUSZ7Dw",
+  authDomain: "fitness-f592e.firebaseapp.com",
+  projectId: "fitness-f592e",
+  storageBucket: "fitness-f592e.firebasestorage.app",
+  messagingSenderId: "793601852173",
+  appId: "1:793601852173:web:4413d954bda318aaace644",
+  measurementId: "G-07GSWDFNWD"
+};
 
-# ── SLIDE 11: FUTURE TRENDS ─────────────────────────────────────────
-story.append(Spacer(1, 0.9*cm))
-story.append(Paragraph("09 | Future Trends", ms("SH10", fontName="Helvetica-Bold", fontSize=17, textColor=WHITE)))
-story.append(Spacer(1, 0.2*cm))
-story.append(HRFlowable(width="100%", thickness=1, color=ACCENT, spaceAfter=10))
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
 
-ft_data = [
-    [Paragraph("<b>SSD Trends</b>", ms("FT1", fontName="Helvetica-Bold", fontSize=11, textColor=MED_BLUE, alignment=TA_CENTER)),
-     Paragraph("<b>HDD Trends</b>", ms("FT2", fontName="Helvetica-Bold", fontSize=11, textColor=GREEN, alignment=TA_CENTER))],
-    [Paragraph("• Prices falling ~15–20%/year\n• 3D NAND stacking → denser chips\n• PCIe 5.0 NVMe: 12,000+ MB/s\n• Replacing HDD in most laptops\n• Storage-class memory (Optane) emerging",
-               ms("FTT", fontSize=10, leading=16)),
-     Paragraph("• HAMR technology: 100 TB drives soon\n• MAMR for higher density\n• SMR for ultra-high capacity\n• Staying dominant in data centres\n• $/TB continues to fall vs SSD",
-               ms("FTT2", fontSize=10, leading=16))],
-]
-ft_tbl = Table(ft_data, colWidths=[10*cm, 10*cm])
-ft_tbl.setStyle(TableStyle([
-    ("BACKGROUND",    (0,0), (0,0), LIGHT_BLUE),
-    ("BACKGROUND",    (1,0), (1,0), colors.HexColor("#E8F5E9")),
-    ("BACKGROUND",    (0,1), (0,1), colors.HexColor("#F5F9FF")),
-    ("BACKGROUND",    (1,1), (1,1), colors.HexColor("#F5FFF7")),
-    ("BOX",           (0,0), (-1,-1), 0.7, GRAY),
-    ("INNERGRID",     (0,0), (-1,-1), 0.3, GRAY),
-    ("TOPPADDING",    (0,0), (-1,-1), 8),
-    ("BOTTOMPADDING", (0,0), (-1,-1), 8),
-    ("LEFTPADDING",   (0,0), (-1,-1), 14),
-    ("VALIGN",        (0,0), (-1,-1), "TOP"),
-]))
-story.append(ft_tbl)
-story.append(Spacer(1, 0.2*cm))
-story.append(Paragraph("Verdict: SSDs will dominate performance tiers; HDDs will remain vital for massive-scale cheap storage for at least a decade.",
-                        ms("FTN", fontName="Helvetica-Oblique", fontSize=10, textColor=GRAY, leading=14)))
-slide_backgrounds.append("content")
-end_slide()
+// ── STATE ──
+let UD = null; // user data object
+let editIdx = -1;
+let selGoal = '';
+let selDay = '';
+let selMuscles = new Set();
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-# ── SLIDE 12: CONCLUSION ────────────────────────────────────────────
-story.append(Spacer(1, 1.5*cm))
-story.append(Paragraph("Conclusion", ms("CH", fontName="Helvetica-Bold", fontSize=24, textColor=WHITE,
-                                         leading=30, alignment=TA_CENTER)))
-story.append(Spacer(1, 0.4*cm))
-story.append(HRFlowable(width="60%", thickness=2, color=ACCENT2, spaceAfter=16))
-for line in [
-    "🔵  HDD: best for <b>high capacity at low cost</b> — backups, archives, media servers.",
-    "🟢  SSD: best for <b>speed, reliability, and portability</b> — every modern laptop &amp; PC.",
-    "🔁  <b>Hybrid approach</b> gives maximum value: NVMe SSD + HDD in one system.",
-    "📈  SSD prices keep falling — will displace HDD in most segments by 2030.",
-    "🏭  HDDs remain essential in data centres for cold storage economics.",
-]:
-    story.append(Paragraph(line, ms("CL", fontName="Helvetica", fontSize=11, textColor=WHITE,
-                                     leading=19, spaceAfter=6)))
-story.append(Spacer(1, 0.5*cm))
-story.append(Paragraph("Thank You  🙏", ms("TY", fontName="Helvetica-Bold", fontSize=18,
-                                            textColor=ACCENT2, alignment=TA_CENTER)))
-slide_backgrounds.append("section")
-# No PageBreak needed for last slide
+// ── FIRESTORE HELPERS ──
+async function loadUD(uid) {
+  const snap = await getDoc(doc(db, 'users', uid));
+  return snap.exists() ? snap.data() : null;
+}
+async function saveUD(uid, data) {
+  await setDoc(doc(db, 'users', uid), data, { merge: true });
+}
 
-# ── BUILD ───────────────────────────────────────────────────────────
-SLIDE_NUM[0] = 0
-bg_iter = iter(slide_backgrounds)
+// ── AUTH STATE OBSERVER ──
+onAuthStateChanged(auth, async (user) => {
+  hideEl('loader');
+  if (user) {
+    UD = await loadUD(user.uid);
+    if (!UD) {
+      // brand new user, no Firestore doc yet
+      UD = { uid: user.uid, name: user.displayName || user.email.split('@')[0], email: user.email, onboarded: false, age:'', weight:'', height:'', goal:'', workouts:[] };
+      await saveUD(user.uid, UD);
+    }
+    if (!UD.onboarded) { showScreen('onboarding'); }
+    else { bootApp(); }
+  } else {
+    // No session – show intro then auth
+    showEl('intro');
+    setTimeout(() => {
+      byId('intro').classList.add('out');
+      setTimeout(() => { hideEl('intro'); showScreen('auth'); }, 820);
+    }, 2900);
+  }
+});
 
-def on_page(canvas, doc):
-    try:
-        bg = next(bg_iter)
-    except StopIteration:
-        bg = "content"
-    draw_slide_bg(canvas, doc, bg)
+// ── AUTH FUNCTIONS (exposed globally) ──
+window.switchTab = (tab) => {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.textContent.toLowerCase().includes(tab === 'login' ? 'sign i' : 'sign u')));
+  showEl(tab === 'login' ? 'login-form' : 'signup-form');
+  hideEl(tab === 'login' ? 'signup-form' : 'login-form');
+};
 
-doc.build(story, onFirstPage=on_page, onLaterPages=on_page)
-print("Presentation saved!")
+window.doLogin = async () => {
+  const u = val('li-u'), p = val('li-p');
+  const errEl = byId('li-err');
+  errEl.classList.add('hidden');
+  if (!u || !p) { showErr(errEl,'Enter username and password'); return; }
+  // username → email conversion (store as username@eron.fit)
+  try {
+    await signInWithEmailAndPassword(auth, toEmail(u), p);
+  } catch(e) {
+    showErr(errEl, e.code === 'auth/invalid-credential' ? 'Invalid username or password.' : 'Login failed. Please try again.');
+  }
+};
+
+window.doSignup = async () => {
+  const name = val('su-n'), u = val('su-u'), p = val('su-p');
+  const errEl = byId('su-err');
+  errEl.classList.add('hidden');
+  if (!name || !u || !p) { showErr(errEl,'Fill in all fields'); return; }
+  if (u.length < 3) { showErr(errEl,'Username must be 3+ characters'); return; }
+  if (p.length < 6) { showErr(errEl,'Password must be 6+ characters'); return; }
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, toEmail(u), p);
+    await updateProfile(cred.user, { displayName: name });
+    UD = { uid: cred.user.uid, name, email: toEmail(u), username: u.toLowerCase(), onboarded: false, age:'', weight:'', height:'', goal:'', workouts:[] };
+    await saveUD(cred.user.uid, UD);
+    showScreen('onboarding');
+  } catch(e) {
+    showErr(errEl, e.code === 'auth/email-already-in-use' ? 'Username already taken.' : 'Signup failed: ' + e.message);
+  }
+};
+
+window.doLogout = async () => {
+  await signOut(auth);
+  UD = null;
+  hideEl('app'); hideEl('ai-fab');
+  location.reload();
+};
+
+// ── ONBOARDING ──
+window.pickGoal = (g) => {
+  selGoal = g;
+  byId('gc-loss').classList.toggle('sel', g === 'loss');
+  byId('gc-gain').classList.toggle('sel', g === 'gain');
+};
+
+window.saveOB = async () => {
+  const age = val('ob-age'), wt = val('ob-wt'), ht = val('ob-ht');
+  const errEl = byId('ob-err');
+  errEl.classList.add('hidden');
+  if (!age || !wt || !ht) { showErr(errEl,'Fill in all fields'); return; }
+  if (!selGoal) { showErr(errEl,'Select your goal'); return; }
+  UD.age = age; UD.weight = wt; UD.height = ht; UD.goal = selGoal; UD.onboarded = true;
+  await saveUD(auth.currentUser.uid, UD);
+  hideEl('onboarding');
+  bootApp();
+};
+
+// ── APP BOOT ──
+function bootApp() {
+  hideEl('auth'); hideEl('onboarding');
+  showEl('app'); showEl('ai-fab');
+  updateUI();
+  buildDaySel();
+  buildFoodGrid();
+  buildDietContent();
+  renderWLog();
+  renderRecent();
+  renderNutPreview();
+  setDate();
+  setTimeout(() => {
+    addAImsg(`Hey ${UD.name.split(' ')[0]}! 👋 I'm Eron AI, your personal fitness coach. Ask me anything — workouts, nutrition, or motivation. Let's crush your ${UD.goal === 'loss' ? 'weight loss' : 'muscle gain'} goal! 💪`, 'ai');
+  }, 600);
+}
+
+function updateUI() {
+  if (!UD) return;
+  const init = (UD.name||'?').charAt(0).toUpperCase();
+  setText('prof-init', init); setText('pd-av', init);
+  setText('pd-nm', UD.name); setText('pd-gl', UD.goal === 'loss' ? '🔥 Weight Loss' : '💪 Weight Gain');
+  setText('pd-age', UD.age||'—'); setText('pd-wt', UD.weight||'—'); setText('pd-ht', UD.height||'—');
+  setText('h-name', (UD.name||'Athlete').split(' ')[0] + '.');
+  setText('h-greet', 'Welcome back,');
+  setText('h-desc', UD.goal === 'loss'
+    ? 'Every rep is a step closer to your ideal physique. Stay consistent.'
+    : 'Build the muscle mass you\'ve always envisioned. Progressive overload is key.');
+  setText('h-goal', UD.goal === 'loss' ? '🔥 Weight Loss Program' : '💪 Weight Gain Program');
+  setText('hs-wt', UD.weight ? UD.weight + ' kg' : '—');
+  setText('hs-ht', UD.height ? UD.height + ' cm' : '—');
+  setText('hs-age', UD.age || '—');
+  setText('hs-sess', (UD.workouts||[]).length);
+}
+
+// ── DATE ──
+function setDate() {
+  const d = new Date();
+  byId('t-date').textContent = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}).toUpperCase();
+}
+
+// ── WORKOUTS ──
+function buildDaySel() {
+  const c = byId('day-sel'); c.innerHTML = '';
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    const btn = document.createElement('div');
+    btn.className = 'day-btn' + (i===0?' sel':'');
+    const label = `${DAYS[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+    if (i===0) selDay = label;
+    btn.innerHTML = `<span class="d-nm">${DAYS[d.getDay()]}</span><span class="d-dt">${d.getDate()}</span>`;
+    btn.dataset.day = label;
+    btn.onclick = function() {
+      document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('sel'));
+      this.classList.add('sel'); selDay = this.dataset.day;
+    };
+    c.appendChild(btn);
+  }
+}
+
+window.togM = (btn) => {
+  const m = btn.dataset.m;
+  if (selMuscles.has(m)) { selMuscles.delete(m); btn.classList.remove('sel'); }
+  else { selMuscles.add(m); btn.classList.add('sel'); }
+};
+
+window.logWorkout = async () => {
+  const w = val('w-weight'), ex = val('w-exer');
+  if (!selDay) { toast('Select a day'); return; }
+  if (!selMuscles.size) { toast('Select a muscle group'); return; }
+  if (!w) { toast('Enter max weight lifted'); return; }
+  UD.workouts = UD.workouts || [];
+  UD.workouts.unshift({ day: selDay, muscles: [...selMuscles].join(', '), weight: parseFloat(w), exercise: ex||'General Training', date: new Date().toISOString() });
+  await saveUD(auth.currentUser.uid, { workouts: UD.workouts });
+  byId('w-weight').value = ''; byId('w-exer').value = '';
+  selMuscles.clear();
+  document.querySelectorAll('.m-btn').forEach(b=>b.classList.remove('sel'));
+  renderWLog(); renderRecent(); updateUI();
+  toast('Workout logged! 💪 Great work.');
+};
+
+function renderWLog() {
+  const w = UD?.workouts || [];
+  const c = byId('wlog');
+  if (!w.length) { c.innerHTML = '<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No sessions yet. Add your first above!</div>'; return; }
+  c.innerHTML = w.map((s,i) => `
+    <div class="wl-row">
+      <div class="wl-left"><div class="wl-day">${s.day}</div><div class="wl-mus">${s.muscles} — ${s.exercise}</div></div>
+      <div><span class="wl-w">${s.weight}</span><span class="wl-wu"> kg</span></div>
+      <button class="sess-edit" onclick="openEdit(${i})">Edit</button>
+    </div>`).join('');
+}
+
+function renderRecent() {
+  const w = (UD?.workouts||[]).slice(0,3);
+  const c = byId('recent-home');
+  if (!w.length) {
+    c.innerHTML = `<div class="empty-state"><p>No sessions logged yet.</p><a onclick="openPanel('p-workouts')">Log your first workout →</a></div>`;
+    return;
+  }
+  c.innerHTML = `<div class="sess-list">${w.map((s,i) => `
+    <div class="sess-row">
+      <span class="sess-icon">🏋️</span>
+      <div class="sess-info"><div class="sess-day">${s.day}</div><div class="sess-name">${s.muscles} — ${s.exercise}</div></div>
+      <div><span class="sess-w">${s.weight}</span><span class="sess-wu"> kg</span></div>
+      <button class="sess-edit" onclick="openPanel('p-workouts')">Edit</button>
+    </div>`).join('')}</div>`;
+}
+
+window.openEdit = (i) => { editIdx = i; byId('m-edit-w').value = UD.workouts[i].weight; openModal('m-edit'); };
+window.saveEdit = async () => {
+  const v = byId('m-edit-w').value; if (!v) return;
+  UD.workouts[editIdx].weight = parseFloat(v);
+  await saveUD(auth.currentUser.uid, { workouts: UD.workouts });
+  renderWLog(); renderRecent();
+  closeModal('m-edit'); toast('Weight updated!');
+};
+
+// ── PROFILE EDIT ──
+window.openEditProfile = () => {
+  byId('pd').classList.add('hidden');
+  byId('mp-age').value = UD.age||'';
+  byId('mp-wt').value = UD.weight||'';
+  byId('mp-ht').value = UD.height||'';
+  byId('mp-goal').value = UD.goal||'loss';
+  openModal('m-prof');
+};
+window.saveProfile = async () => {
+  UD.age = val('mp-age'); UD.weight = val('mp-wt');
+  UD.height = val('mp-ht'); UD.goal = val('mp-goal');
+  await saveUD(auth.currentUser.uid, UD);
+  updateUI(); closeModal('m-prof'); toast('Profile updated!');
+};
+
+// ── FOOD DATA ──
+const PROTEINS = [
+  { name:'Eggs', img:'https://images.unsplash.com/photo-1587486913049-53fc88980cfc?w=400&q=80', pro:'13g/100g', cal:'155 kcal' },
+  { name:'Chicken Breast', img:'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&q=80', pro:'31g/100g', cal:'165 kcal' },
+  { name:'Fish', img:'https://images.unsplash.com/photo-1510130387422-82bed34b37e9?w=400&q=80', pro:'26g/100g', cal:'136 kcal' },
+  { name:'Red Meat', img:'https://images.unsplash.com/photo-1558030006-450675393462?w=400&q=80', pro:'26g/100g', cal:'250 kcal' },
+  { name:'Greek Yogurt', img:'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&q=80', pro:'10g/100g', cal:'97 kcal' },
+  { name:'Cheese', img:'https://images.unsplash.com/photo-1452195100486-9cc805987862?w=400&q=80', pro:'25g/100g', cal:'402 kcal' },
+  { name:'Lentils', img:'https://images.unsplash.com/photo-1590779033100-9f60a05a013d?w=400&q=80', pro:'9g/100g', cal:'116 kcal' },
+  { name:'Beans', img:'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&q=80', pro:'7g/100g', cal:'127 kcal' },
+  { name:'Chickpeas', img:'https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=400&q=80', pro:'8.9g/100g', cal:'164 kcal' },
+  { name:'Almonds & Pistachios', img:'https://images.unsplash.com/photo-1546548970-71785318a17b?w=400&q=80', pro:'21g/100g', cal:'579 kcal' },
+  { name:'Oatmeal', img:'https://images.unsplash.com/photo-1495214783159-3503fd1b572d?w=400&q=80', pro:'17g/100g', cal:'389 kcal' },
+  { name:'Milk', img:'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&q=80', pro:'3.4g/100g', cal:'61 kcal' },
+];
+
+function buildFoodGrid() {
+  byId('food-grid').innerHTML = PROTEINS.map(f=>`
+    <div class="fd">
+      <div class="fd-img" style="background-image:url('${f.img}')"></div>
+      <div class="fd-body"><div class="fd-name">${f.name}</div><div class="fd-pro">Protein: ${f.pro}</div><div class="fd-cal">${f.cal}</div></div>
+    </div>`).join('');
+}
+
+function renderNutPreview() {
+  byId('nut-preview').innerHTML = PROTEINS.slice(0,6).map(f=>`
+    <div class="nut-card">
+      <div class="nut-img" style="background-image:url('${f.img}')"></div>
+      <div class="nut-body"><div class="nut-name">${f.name}</div><div class="nut-macro">Protein: ${f.pro}</div><div class="nut-cal">${f.cal}</div></div>
+    </div>`).join('');
+}
+
+// ── DIET CONTENT ──
+function buildDietContent() {
+  const foods = [
+    {icon:'🥚',name:'Boiled Eggs',note:'High protein, filling, low calorie'},
+    {icon:'🍗',name:'Grilled Chicken Breast',note:'Lean protein, virtually zero fat'},
+    {icon:'🐟',name:'Fish',note:'Omega-3 rich, high protein'},
+    {icon:'🫙',name:'Fat-Free Greek Yogurt',note:'Probiotic & protein-packed'},
+    {icon:'🫘',name:'Lentils & Beans',note:'Fiber + plant-based protein'},
+    {icon:'🥗',name:'Salad & Green Vegetables',note:'Low calorie, nutrient dense'},
+    {icon:'🥣',name:'Oatmeal',note:'Slow-burn energy, high fiber'},
+    {icon:'🥛',name:'Skimmed / Fat-Free Milk',note:'Calcium & lean protein'},
+    {icon:'🥜',name:'A Small Portion of Almonds',note:'Healthy fats, portion-controlled'},
+  ];
+  const habits = ['Reduce sugar, soda, and fast food','Drink plenty of water throughout the day','Walk or exercise daily — even 30 minutes counts'];
+  const meals = [{t:'Breakfast',c:'2 Eggs + Oatmeal'},{t:'Lunch',c:'Chicken Breast + small Rice + Salad'},{t:'Dinner',c:'Greek Yogurt or Fish + Green Vegetables'}];
+  byId('diet-cnt').innerHTML = `
+    <div class="diet-sec"><div class="diet-sec-t">Best Weight Loss Foods</div>${foods.map(f=>`<div class="di"><span class="di-icon">${f.icon}</span><div><div class="di-name">${f.name}</div><div class="di-note">${f.note}</div></div></div>`).join('')}</div>
+    <div class="div"></div>
+    <div class="diet-sec"><div class="diet-sec-t">Healthy Daily Habits</div>${habits.map(h=>`<div class="habit-i"><div class="h-dot"></div><div style="font-size:13px;color:var(--text2);line-height:1.55">${h}</div></div>`).join('')}</div>
+    <div class="div"></div>
+    <div class="diet-sec"><div class="diet-sec-t">Sample Meal Plan</div>${meals.map(m=>`<div class="meal-c"><div class="meal-t">${m.t}</div><div class="meal-cnt">${m.c}</div></div>`).join('')}</div>
+  `;
+}
+
+// ── PANELS & MODALS ──
+window.openPanel = (id) => { byId('overlay').classList.add('on'); byId(id).classList.add('on'); };
+window.closePanel = (id) => { byId('overlay').classList.remove('on'); byId(id).classList.remove('on'); };
+window.closeAllPanels = () => { byId('overlay').classList.remove('on'); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on')); };
+window.openModal = (id) => byId(id).classList.add('on');
+window.closeModal = (id) => byId(id).classList.remove('on');
+window.scrollToTop = () => window.scrollTo({top:0,behavior:'smooth'});
+
+// Profile dropdown
+window.togglePD = () => {
+  byId('pd').classList.toggle('hidden');
+  setTimeout(()=>document.addEventListener('click',closePDOnce,{once:true}),10);
+};
+function closePDOnce(e) { if (!byId('prof-btn').contains(e.target)) byId('pd').classList.add('hidden'); }
+
+// ── ERON AI ──
+let aiOpen = false;
+window.togAI = () => { aiOpen = !aiOpen; byId('ai-box').classList.toggle('on', aiOpen); };
+
+function addAImsg(text, role) {
+  const c = byId('ai-msgs');
+  const d = document.createElement('div');
+  d.className = `ai-m ${role}`;
+  d.innerHTML = `<div class="ai-mb">${text}</div>`;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+
+const AI_R = {
+  protein: "💪 For muscle building, aim for 1.6–2.2g of protein per kg of body weight daily. Top sources: chicken breast, eggs, Greek yogurt, and fish. Spread intake across 4–5 meals.",
+  workout: "📅 A solid split: Monday–Chest, Tuesday–Back, Wednesday–Shoulders, Thursday–Legs, Friday–Arms. Rest or active recovery on weekends. Always warm up for 10 minutes!",
+  loss: "🔥 For fat loss: create a 300–500 kcal deficit, eat high-protein to preserve muscle, do cardio 3–4x/week, and strength train to boost metabolism. Track your food intake.",
+  gain: "📈 To gain quality muscle: eat 200–300 kcal above maintenance, prioritize compound lifts (squat, deadlift, bench), sleep 8hrs, and track progressive overload weekly.",
+  recovery: "😴 Recovery is where muscle is built! Aim for 7–9hrs sleep. Eat protein within 45min post-workout. Stretch, walk, and consider contrast showers for soreness.",
+  motivate: "🔥 Remember: the champion is simply someone who gets up and does the work every single day. Your only competition is yesterday's version of you. You've GOT this!",
+  default: "Great question! I'm here to help with workouts, nutrition, recovery, or motivation. What would you like to know more about? 💪"
+};
+
+window.sendAI = () => {
+  const inp = byId('ai-inp'), t = inp.value.trim(); if (!t) return;
+  addAImsg(t,'user'); inp.value = '';
+  const c = byId('ai-msgs');
+  const typ = document.createElement('div'); typ.className='ai-m ai';
+  typ.innerHTML = '<div class="ai-mb"><div class="typing"><span></span><span></span><span></span></div></div>';
+  c.appendChild(typ); c.scrollTop = c.scrollHeight;
+  setTimeout(()=>{
+    c.removeChild(typ);
+    const l = t.toLowerCase();
+    let r = AI_R.default;
+    if (l.match(/protein|food|eat|nutrition|diet/)) r = AI_R.protein;
+    else if (l.match(/workout|exercise|training|split|gym/)) r = AI_R.workout;
+    else if (l.match(/los|fat|cut|slim|thin/)) r = AI_R.loss;
+    else if (l.match(/gain|muscle|bulk|mass|big/)) r = AI_R.gain;
+    else if (l.match(/recover|sleep|rest|sore/)) r = AI_R.recovery;
+    else if (l.match(/motiv|tired|quit|hard|discourag/)) r = AI_R.motivate;
+    addAImsg(r,'ai');
+  },1100);
+};
+
+// ── TOAST ──
+let tTimer;
+window.toast = (msg) => {
+  const t = byId('toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(tTimer); tTimer = setTimeout(()=>t.classList.remove('on'),2800);
+};
+
+// ── KEYBOARD ──
+document.addEventListener('keydown',e=>{
+  if (e.key==='Escape') {
+    closeAllPanels();
+    document.querySelectorAll('.modal-ov').forEach(m=>m.classList.remove('on'));
+    byId('pd').classList.add('hidden');
+    if (aiOpen){aiOpen=false;byId('ai-box').classList.remove('on');}
+  }
+});
+
+// ── UTILS ──
+function toEmail(u) { return u.toLowerCase().replace(/\s/g,'') + '@eron.fit'; }
+function byId(id) { return document.getElementById(id); }
+function val(id) { return byId(id)?.value?.trim()||''; }
+function setText(id, t) { const el = byId(id); if(el) el.textContent = t; }
+function showEl(id) { byId(id)?.classList.remove('hidden'); }
+function hideEl(id) { byId(id)?.classList.add('hidden'); }
+function showScreen(id) {
+  ['auth','onboarding','app'].forEach(s => { if(s!==id) hideEl(s); });
+  showEl(id);
+}
+function showErr(el,msg){ el.textContent=msg; el.classList.remove('hidden'); }
+</script>
+</body>
+</html>
