@@ -389,7 +389,7 @@ select.fi option{background:var(--surface2)}
     <img class="auth-bg-img" src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1400&q=85" alt="Gym" loading="eager">
     <div class="auth-vis-overlay"></div>
     <div class="auth-vis-text">
-      <h1>ERON</h1>
+      <h1>FITNESS</h1>
       <p>Forge Your Legacy</p>
     </div>
   </div>
@@ -399,7 +399,7 @@ select.fi option{background:var(--surface2)}
     <div class="auth-mobile-hero">
       <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80" alt="Fitness" loading="eager">
       <div class="auth-mobile-hero-ov"></div>
-      <div class="auth-mobile-hero-text">ERON</div>
+      <div class="auth-mobile-hero-text">FITNESS</div>
     </div>
     <div class="auth-logo">ERON</div>
     <div class="auth-tag">Elite Fitness Studio</div>
@@ -783,7 +783,7 @@ window.doSignup = async () => {
   if (p.length < 6){ showErr(err,'Password must be 6+ characters'); return; }
   if (!/^[a-zA-Z0-9_]+$/.test(u)){ showErr(err,'Username: letters, numbers, underscores only'); return; }
   const btn = byId('su-btn');
-  btn.disabled = true; btn.textContent = 'Please wait…';
+  btn.disabled = true; btn.textContent = 'Creating account…';
   try {
     const uid = 'u_' + u.toLowerCase();
     const snap = await userDoc(uid);
@@ -796,16 +796,30 @@ window.doSignup = async () => {
     UD = { uid, name, username:u.toLowerCase(), passHash:hash, onboarded:false, age:'', weight:'', height:'', goal:'', workouts:[] };
     await writeUser(uid, UD);
     setSession(uid);
+    btn.disabled = false;
     hideEl('auth');
     showScreen('onboarding');
   } catch(e){
-    showErr(err, e.code === 'permission-denied'
-      ? 'Permission denied — please update your Firestore Rules (see console).'
-      : 'Signup failed: ' + (e.message||'Check your internet connection.'));
-    console.error('Signup error:', e);
+    const msg = (e.message||'').toLowerCase();
+    const isRules = msg.includes('permission') || msg.includes('missing or insufficient') || e.code === 'permission-denied';
+    if (isRules) { showRulesError(err); }
+    else { showErr(err, 'Signup failed: ' + (e.message || 'Check your internet connection.')); }
+    console.error('Signup error:', e.code, e.message);
     btn.disabled = false; btn.textContent = 'Create My Profile';
   }
 };
+
+function showRulesError(errEl) {
+  errEl.innerHTML = `
+    <strong style="color:#f99;display:block;margin-bottom:8px">⚠️ Firebase Rules are blocking access</strong>
+    <span style="font-size:12px;line-height:1.7;display:block">Fix it in 30 seconds:<br>
+    1. Go to <a href="https://console.firebase.google.com" target="_blank" style="color:#c8a84b">console.firebase.google.com</a><br>
+    2. Select your project → <b>Firestore Database</b> → <b>Rules</b><br>
+    3. Replace all rules with:<br>
+    <code style="background:rgba(0,0,0,.4);display:block;padding:6px 8px;margin:6px 0;border-radius:3px;font-size:11px;letter-spacing:0">rules_version = '2';<br>service cloud.firestore {<br>&nbsp;&nbsp;match /databases/{database}/documents {<br>&nbsp;&nbsp;&nbsp;&nbsp;match /{document=**} {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;allow read, write: if true;<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;}<br>}</code>
+    4. Click <b>Publish</b> → then try again.</span>`;
+  errEl.classList.remove('hidden');
+}
 
 window.doLogout = () => {
   clearSession(); UD = null;
@@ -1084,7 +1098,7 @@ function showScreen(id){
   ['auth','onboarding','app','intro'].forEach(s=>{ if(s!==id) hideEl(s); });
   showEl(id);
 }
-function showErr(el,msg){ el.textContent=msg; el.classList.remove('hidden'); }
+function showErr(el,msg){ el.innerHTML=msg; el.classList.remove('hidden'); }
 function setLoading(id,on){ const b=byId(id); if(b){b.disabled=on; b.textContent=on?'Please wait…':(id==='li-btn'?'Enter the Studio':id==='su-btn'?'Create My Profile':'Begin My Training');} }
 
 /* ── ONE-TIME FIRESTORE RULES REMINDER ── */
