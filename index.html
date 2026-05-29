@@ -34,7 +34,7 @@ img{display:block;max-width:100%}
 /* SCREEN UTILITY */
 .screen{position:fixed;inset:0;z-index:50;overflow-y:auto}
 
-/* ══ INTRO ══ */
+/* INTRO */
 #intro{background:var(--black);display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:200}
 .i-wrap{text-align:center;position:relative;padding:20px}
 .i-pre{font-family:var(--fs);font-size:clamp(12px,2vw,17px);font-weight:300;letter-spacing:.7em;color:var(--text3);text-transform:uppercase;overflow:hidden}
@@ -51,7 +51,7 @@ img{display:block;max-width:100%}
 @keyframes expand{to{width:min(360px,65vw)}}
 @keyframes fadeOut{to{opacity:0}}
 
-/* ══ AUTH ══ */
+/* AUTH */
 #auth{display:flex;min-height:100vh;background:var(--black)}
 .auth-vis{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:100vh}
 @media(max-width:768px){.auth-vis{display:none}}
@@ -65,7 +65,6 @@ img{display:block;max-width:100%}
 .auth-logo{font-family:var(--fd);font-size:28px;color:var(--gold);letter-spacing:.15em;margin-bottom:6px}
 .auth-tag{font-family:var(--fs);font-style:italic;color:var(--text3);font-size:13px;letter-spacing:.2em;margin-bottom:48px}
 
-/* Mobile hero strip on auth page */
 .auth-mobile-hero{display:none;position:relative;width:100%;height:200px;overflow:hidden;margin-bottom:32px;flex-shrink:0}
 @media(max-width:768px){.auth-mobile-hero{display:block}}
 .auth-mobile-hero img{width:100%;height:100%;object-fit:cover;opacity:.45}
@@ -97,7 +96,7 @@ select.fi option{background:var(--surface2)}
 .btn-ghost:hover{border-color:var(--text3);color:var(--text)}
 .err{background:rgba(200,60,60,.1);border:1px solid rgba(200,60,60,.3);color:#f88;padding:11px 14px;font-size:13px;border-radius:var(--r)}
 
-/* ══ ONBOARDING ══ */
+/* ONBOARDING */
 #onboarding{background:var(--black);display:flex;align-items:center;justify-content:center;padding:24px;z-index:51}
 #onboarding::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 50%,rgba(200,168,75,.06) 0%,transparent 70%);pointer-events:none}
 .ob-card{width:100%;max-width:540px;background:var(--obsidian);border:1px solid var(--border);padding:52px 44px;position:relative;animation:fadeUp .5s ease forwards}
@@ -115,7 +114,7 @@ select.fi option{background:var(--surface2)}
 .g-desc{font-size:11px;color:var(--text3);margin-top:4px}
 @media(max-width:480px){.ob-card{padding:36px 24px}}
 
-/* ══ APP SHELL ══ */
+/* APP SHELL */
 #app{background:var(--black);display:flex;flex-direction:column;min-height:100vh;position:relative}
 .app-bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 70% 40% at 85% 10%,rgba(200,168,75,.05) 0%,transparent 60%),radial-gradient(ellipse 40% 30% at 5% 85%,rgba(200,168,75,.04) 0%,transparent 60%)}
 
@@ -150,10 +149,9 @@ select.fi option{background:var(--surface2)}
 .pd-act.danger{color:var(--red)}
 .pd-act.danger:hover{background:rgba(200,60,60,.1)}
 
-/* ══ HERO SECTION ══ */
+/* HERO */
 .hero{position:relative;min-height:92vh;display:flex;flex-direction:column;overflow:hidden}
 @media(max-width:600px){.hero{min-height:auto}}
-/* Hero image using <img> tag so it always works on mobile */
 .hero-img-wrap{position:absolute;inset:0;overflow:hidden}
 .hero-img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center;opacity:.32}
 .hero-grad1{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,6,7,.25) 0%,rgba(6,6,7,.55) 50%,rgba(6,6,7,1) 100%)}
@@ -177,7 +175,7 @@ select.fi option{background:var(--surface2)}
 .hs-l{font-size:11px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-top:4px}
 @media(max-width:380px){.hs{padding:0 16px 0 0;margin-right:16px}}
 
-/* ══ SECTIONS ══ */
+/* SECTIONS */
 .section{padding:64px 64px;position:relative;z-index:1}
 @media(max-width:768px){.section{padding:48px 28px}}
 @media(max-width:480px){.section{padding:36px 20px}}
@@ -193,7 +191,6 @@ select.fi option{background:var(--surface2)}
 @media(max-width:600px){.prog-grid{grid-template-columns:1fr}}
 .prog-card{background:var(--black);position:relative;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;min-height:360px}
 @media(max-width:900px){.prog-card{min-height:220px}}
-/* prog card image using <img> tag */
 .pc-img-wrap{position:absolute;inset:0;overflow:hidden}
 .pc-img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center;opacity:.42;transition:opacity .4s,transform .5s}
 .prog-card:hover .pc-img-wrap img{opacity:.62;transform:scale(1.05)}
@@ -234,7 +231,7 @@ select.fi option{background:var(--surface2)}
 .empty-state p{color:var(--text3);font-size:13px;margin-bottom:14px}
 .empty-state a{color:var(--gold);cursor:pointer}
 
-/* ══ PANELS ══ */
+/* PANELS */
 .overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s}
 .overlay.on{opacity:1;pointer-events:auto}
 .panel{position:fixed;top:0;right:0;bottom:0;width:min(660px,100%);background:var(--obsidian);border-left:1px solid var(--border);overflow-y:auto;transform:translateX(100%);transition:transform .42s cubic-bezier(.16,1,.3,1);z-index:301}
@@ -272,7 +269,7 @@ select.fi option{background:var(--surface2)}
 .wl-w{font-family:var(--fd);font-size:24px;color:var(--gold);white-space:nowrap}
 .wl-wu{font-size:10px;color:var(--text3)}
 
-/* FOOD GRID (panel) */
+/* FOOD GRID */
 .food-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px}
 @media(max-width:480px){.food-grid{grid-template-columns:repeat(2,1fr);gap:10px}}
 .fd{background:var(--surface);border:1px solid var(--border);overflow:hidden;transition:all .2s;border-radius:var(--r)}
@@ -313,7 +310,7 @@ select.fi option{background:var(--surface2)}
 .info strong{color:var(--gold)}
 .divider{height:1px;background:var(--border);margin:24px 0}
 
-/* ══ COURSE ANALYZER ══ */
+/* COURSE ANALYZER */
 .course-steps{display:flex;gap:0;margin-bottom:28px;overflow-x:auto;padding-bottom:4px}
 .cs-step{display:flex;align-items:center;gap:0;flex-shrink:0}
 .cs-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text3);transition:all .3s;flex-shrink:0}
@@ -387,7 +384,7 @@ select.fi option{background:var(--surface2)}
 .tw-status.underweight{background:rgba(80,180,130,.12);border:1px solid rgba(80,180,130,.3);color:#7ecba1}
 .tw-status.normal{background:rgba(200,168,75,.12);border:1px solid rgba(200,168,75,.3);color:var(--gold)}
 
-/* ══ END COURSE ══ */
+/* AI FAB */
 #ai-fab{position:fixed;bottom:28px;right:28px;z-index:200}
 @media(max-width:480px){#ai-fab{bottom:18px;right:18px}}
 .ai-btn{width:56px;height:56px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:23px;box-shadow:0 4px 26px var(--gold-glow),0 0 0 1px rgba(200,168,75,.25);transition:all .2s}
@@ -447,7 +444,7 @@ select.fi option{background:var(--surface2)}
 <!-- INTRO -->
 <div id="intro" class="screen hidden">
   <div class="i-wrap">
-    <div class="i-pre"><span>Direct by</span></div>
+    <div class="i-pre"><span>Powered by</span></div>
     <div class="i-logo-wrap">
       <span class="i-logo">ERON</span>
       <div class="i-logo-fill">ERON</div>
@@ -459,7 +456,6 @@ select.fi option{background:var(--surface2)}
 
 <!-- AUTH -->
 <div id="auth" class="screen hidden">
-  <!-- Desktop visual side -->
   <div class="auth-vis">
     <img class="auth-bg-img" src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1400&q=85" alt="Gym" loading="eager">
     <div class="auth-vis-overlay"></div>
@@ -468,9 +464,7 @@ select.fi option{background:var(--surface2)}
       <p>Forge Your Legacy</p>
     </div>
   </div>
-  <!-- Auth panel -->
   <div class="auth-panel">
-    <!-- Mobile hero strip -->
     <div class="auth-mobile-hero">
       <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80" alt="Fitness" loading="eager">
       <div class="auth-mobile-hero-ov"></div>
@@ -711,7 +705,6 @@ select.fi option{background:var(--surface2)}
     </div>
   </div>
   <div class="p-body">
-    <!-- STEP PROGRESS -->
     <div class="course-steps" id="course-steps">
       <div class="cs-step"><div class="cs-dot active" id="csd-0">1</div></div>
       <div class="cs-step"><div class="cs-line" id="csl-0"></div><div class="cs-dot" id="csd-1">2</div></div>
@@ -720,11 +713,7 @@ select.fi option{background:var(--surface2)}
       <div class="cs-step"><div class="cs-line" id="csl-3"></div><div class="cs-dot" id="csd-4">5</div></div>
       <div class="cs-step"><div class="cs-line" id="csl-4"></div><div class="cs-dot" id="csd-5">✓</div></div>
     </div>
-
-    <!-- QUESTIONS AREA -->
     <div id="course-q-area"></div>
-
-    <!-- COURSE RESULT -->
     <div id="course-result" class="hidden"></div>
   </div>
 </div>
@@ -763,7 +752,7 @@ select.fi option{background:var(--surface2)}
   </div>
 </div>
 
-<!-- ERON AI FAB -->
+<!-- AI FAB -->
 <div id="ai-fab" class="hidden">
   <div class="ai-box" id="ai-box">
     <div class="ai-hd">
@@ -784,12 +773,79 @@ select.fi option{background:var(--surface2)}
 <div id="toast"></div>
 
 <!-- ══════════════════════════════════════════
-     FIREBASE (Firestore-only auth — no Email/Password provider needed)
-     All credentials stored in Firestore, zero Firebase Auth dependency.
+     GLOBAL HELPERS — defined BEFORE module so onclick= attributes work
+══════════════════════════════════════════ -->
+<script>
+/* These functions are called by onclick= attributes and must live in global scope */
+
+function byId(id){ return document.getElementById(id); }
+function val(id){ return byId(id)?.value?.trim()||''; }
+function setText(id,t){ const el=byId(id); if(el) el.textContent=t; }
+function showEl(id){ byId(id)?.classList.remove('hidden'); }
+function hideEl(id){ byId(id)?.classList.add('hidden'); }
+function showScreen(id){
+  ['auth','onboarding','app','intro'].forEach(s=>{ if(s!==id) hideEl(s); });
+  showEl(id);
+}
+function showErr(el,msg){ el.innerHTML=msg; el.classList.remove('hidden'); }
+function setLoading(id,on){
+  const b=byId(id); if(!b) return;
+  b.disabled=on;
+  if(on){ b.textContent='Please wait…'; return; }
+  if(id==='li-btn') b.textContent='Enter the Studio';
+  else if(id==='su-btn') b.textContent='Create My Profile';
+  else b.textContent='Begin My Training';
+}
+
+/* Panel / Modal / Overlay controls — globally available */
+function openPanel(id){
+  byId('overlay').classList.add('on');
+  byId(id).classList.add('on');
+  if(id === 'p-course'){
+    // Handled by module after load
+    if(typeof _courseOpenHandler === 'function') _courseOpenHandler();
+  }
+}
+function closePanel(id){ byId('overlay').classList.remove('on'); byId(id).classList.remove('on'); }
+function closeAllPanels(){ byId('overlay').classList.remove('on'); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on')); }
+function openModal(id){ byId(id).classList.add('on'); }
+function closeModal(id){ byId(id).classList.remove('on'); }
+
+/* Profile dropdown */
+function togglePD(){
+  byId('pd').classList.toggle('hidden');
+  setTimeout(()=>document.addEventListener('click',closePDOnce,{once:true}),10);
+}
+function closePDOnce(e){ if(!byId('prof-btn').contains(e.target)) byId('pd').classList.add('hidden'); }
+
+/* AI FAB toggle */
+let aiOpen = false;
+function togAI(){ aiOpen=!aiOpen; byId('ai-box').classList.toggle('on',aiOpen); }
+
+/* Toast */
+let _toastTimer;
+function toast(msg){
+  const t=byId('toast'); t.textContent=msg; t.classList.add('on');
+  clearTimeout(_toastTimer); _toastTimer=setTimeout(()=>t.classList.remove('on'),2800);
+}
+
+/* Keyboard ESC */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeAllPanels();
+    document.querySelectorAll('.modal-ov').forEach(m=>m.classList.remove('on'));
+    byId('pd').classList.add('hidden');
+    if(aiOpen){ aiOpen=false; byId('ai-box').classList.remove('on'); }
+  }
+});
+</script>
+
+<!-- ══════════════════════════════════════════
+     FIREBASE + APP LOGIC (ES module)
 ══════════════════════════════════════════ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const cfg = {
   apiKey:"AIzaSyBL1RXtI-F7z1Umoijyd2ebfQeZOUSZ7Dw",
@@ -802,19 +858,16 @@ const cfg = {
 const fbApp = initializeApp(cfg);
 const db = getFirestore(fbApp);
 
-/* ── Simple hash (SHA-256 via Web Crypto) ── */
-async function hashPass(pass) {
+async function hashPass(pass){
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
-/* ── Session via localStorage (key: 'eron_uid') ── */
 const SESSION_KEY = 'eron_uid';
 function getSession(){ return localStorage.getItem(SESSION_KEY); }
 function setSession(uid){ localStorage.setItem(SESSION_KEY,uid); }
 function clearSession(){ localStorage.removeItem(SESSION_KEY); }
 
-/* ── Firestore helpers ── */
 async function userDoc(uid){ return await getDoc(doc(db,'users',uid)); }
 async function writeUser(uid,data){ await setDoc(doc(db,'users',uid),data,{merge:true}); }
 
@@ -826,22 +879,21 @@ let selDay = '';
 let selMuscles = new Set();
 const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-/* ── BOOT: check session ── */
+/* ── BOOT ── */
 window.addEventListener('DOMContentLoaded', async () => {
   const uid = getSession();
-  if (uid) {
+  if(uid){
     try {
       const snap = await userDoc(uid);
-      if (snap.exists()) {
+      if(snap.exists()){
         UD = snap.data();
         hideEl('loader');
-        if (!UD.onboarded) { showScreen('onboarding'); }
+        if(!UD.onboarded){ showScreen('onboarding'); }
         else { bootApp(); }
         return;
       }
-    } catch(e) { /* fall through */ }
+    } catch(e){ /* fall through */ }
   }
-  // No valid session → intro → auth
   hideEl('loader');
   showEl('intro');
   setTimeout(()=>{
@@ -860,112 +912,82 @@ window.switchTab = (tab) => {
 window.doLogin = async () => {
   const u = val('li-u'), p = val('li-p');
   const err = byId('li-err'); err.classList.add('hidden');
-  if (!u||!p){ showErr(err,'Enter username and password'); return; }
+  if(!u||!p){ showErr(err,'Enter username and password'); return; }
   const btn = byId('li-btn');
-  btn.disabled = true; btn.textContent = 'Please wait…';
+  btn.disabled=true; btn.textContent='Please wait…';
   try {
     const uid = 'u_' + u.toLowerCase().replace(/\W/g,'');
     const snap = await userDoc(uid);
-    if (!snap.exists()){
-      showErr(err,'Username not found.');
-      btn.disabled = false; btn.textContent = 'Enter the Studio';
-      return;
-    }
+    if(!snap.exists()){ showErr(err,'Username not found.'); btn.disabled=false; btn.textContent='Enter the Studio'; return; }
     const data = snap.data();
     const hash = await hashPass(p);
-    if (data.passHash !== hash){
-      showErr(err,'Incorrect password.');
-      btn.disabled = false; btn.textContent = 'Enter the Studio';
-      return;
-    }
-    UD = data;
-    setSession(uid);
+    if(data.passHash !== hash){ showErr(err,'Incorrect password.'); btn.disabled=false; btn.textContent='Enter the Studio'; return; }
+    UD = data; setSession(uid);
     hideEl('auth');
-    if (!UD.onboarded) showScreen('onboarding');
-    else bootApp();
+    if(!UD.onboarded) showScreen('onboarding'); else bootApp();
   } catch(e){
-    showErr(err, e.code === 'permission-denied'
-      ? 'Permission denied — update your Firestore Rules.'
-      : 'Connection error. Check your internet.');
-    console.error('Login error:', e);
-    btn.disabled = false; btn.textContent = 'Enter the Studio';
+    showErr(err, e.code==='permission-denied' ? 'Permission denied — update your Firestore Rules.' : 'Connection error. Check your internet.');
+    console.error(e); btn.disabled=false; btn.textContent='Enter the Studio';
   }
 };
 
 window.doSignup = async () => {
-  const name = val('su-n'), u = val('su-u'), p = val('su-p');
-  const err = byId('su-err'); err.classList.add('hidden');
-  if (!name||!u||!p){ showErr(err,'Fill in all fields'); return; }
-  if (u.length < 3){ showErr(err,'Username must be 3+ characters'); return; }
-  if (p.length < 6){ showErr(err,'Password must be 6+ characters'); return; }
-  if (!/^[a-zA-Z0-9_]+$/.test(u)){ showErr(err,'Username: letters, numbers, underscores only'); return; }
-  const btn = byId('su-btn');
-  btn.disabled = true; btn.textContent = 'Creating account…';
+  const name=val('su-n'), u=val('su-u'), p=val('su-p');
+  const err=byId('su-err'); err.classList.add('hidden');
+  if(!name||!u||!p){ showErr(err,'Fill in all fields'); return; }
+  if(u.length<3){ showErr(err,'Username must be 3+ characters'); return; }
+  if(p.length<6){ showErr(err,'Password must be 6+ characters'); return; }
+  if(!/^[a-zA-Z0-9_]+$/.test(u)){ showErr(err,'Username: letters, numbers, underscores only'); return; }
+  const btn=byId('su-btn');
+  btn.disabled=true; btn.textContent='Creating account…';
   try {
-    const uid = 'u_' + u.toLowerCase();
-    const snap = await userDoc(uid);
-    if (snap.exists()){
-      showErr(err,'Username already taken. Choose another.');
-      btn.disabled = false; btn.textContent = 'Create My Profile';
-      return;
-    }
-    const hash = await hashPass(p);
-    UD = { uid, name, username:u.toLowerCase(), passHash:hash, onboarded:false, age:'', weight:'', height:'', goal:'', workouts:[] };
-    await writeUser(uid, UD);
-    setSession(uid);
-    btn.disabled = false;
-    hideEl('auth');
-    showScreen('onboarding');
+    const uid='u_'+u.toLowerCase();
+    const snap=await userDoc(uid);
+    if(snap.exists()){ showErr(err,'Username already taken.'); btn.disabled=false; btn.textContent='Create My Profile'; return; }
+    const hash=await hashPass(p);
+    UD={ uid, name, username:u.toLowerCase(), passHash:hash, onboarded:false, age:'', weight:'', height:'', goal:'', workouts:[] };
+    await writeUser(uid,UD); setSession(uid);
+    btn.disabled=false; hideEl('auth'); showScreen('onboarding');
   } catch(e){
-    const msg = (e.message||'').toLowerCase();
-    const isRules = msg.includes('permission') || msg.includes('missing or insufficient') || e.code === 'permission-denied';
-    if (isRules) { showRulesError(err); }
-    else { showErr(err, 'Signup failed: ' + (e.message || 'Check your internet connection.')); }
-    console.error('Signup error:', e.code, e.message);
-    btn.disabled = false; btn.textContent = 'Create My Profile';
+    const isRules=(e.message||'').toLowerCase().includes('permission')||e.code==='permission-denied';
+    if(isRules){ showRulesError(err); }
+    else{ showErr(err,'Signup failed: '+(e.message||'Check your internet.')); }
+    console.error(e); btn.disabled=false; btn.textContent='Create My Profile';
   }
 };
 
-function showRulesError(errEl) {
-  errEl.innerHTML = `
-    <strong style="color:#f99;display:block;margin-bottom:8px">⚠️ Firebase Rules are blocking access</strong>
-    <span style="font-size:12px;line-height:1.7;display:block">Fix it in 30 seconds:<br>
+function showRulesError(errEl){
+  errEl.innerHTML=`<strong style="color:#f99;display:block;margin-bottom:8px">⚠️ Firebase Rules are blocking access</strong>
+    <span style="font-size:12px;line-height:1.7;display:block">Fix it:<br>
     1. Go to <a href="https://console.firebase.google.com" target="_blank" style="color:#c8a84b">console.firebase.google.com</a><br>
-    2. Select your project → <b>Firestore Database</b> → <b>Rules</b><br>
-    3. Replace all rules with:<br>
-    <code style="background:rgba(0,0,0,.4);display:block;padding:6px 8px;margin:6px 0;border-radius:3px;font-size:11px;letter-spacing:0">rules_version = '2';<br>service cloud.firestore {<br>&nbsp;&nbsp;match /databases/{database}/documents {<br>&nbsp;&nbsp;&nbsp;&nbsp;match /{document=**} {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;allow read, write: if true;<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;}<br>}</code>
-    4. Click <b>Publish</b> → then try again.</span>`;
+    2. Firestore Database → Rules<br>
+    3. Replace with: <code style="background:rgba(0,0,0,.4);display:block;padding:6px 8px;margin:6px 0;border-radius:3px;font-size:11px">rules_version = '2';<br>service cloud.firestore {<br>&nbsp;&nbsp;match /databases/{database}/documents {<br>&nbsp;&nbsp;&nbsp;&nbsp;match /{document=**} {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;allow read, write: if true;<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;}<br>}</code>
+    4. Click Publish → retry.</span>`;
   errEl.classList.remove('hidden');
 }
 
-window.doLogout = () => {
-  clearSession(); UD = null;
-  hideEl('app'); hideEl('ai-fab');
-  location.reload();
-};
+window.doLogout = () => { clearSession(); UD=null; hideEl('app'); hideEl('ai-fab'); location.reload(); };
 
 /* ── ONBOARDING ── */
 window.pickGoal = (g) => {
-  selGoal = g;
-  byId('gc-loss').classList.toggle('sel', g==='loss');
-  byId('gc-gain').classList.toggle('sel', g==='gain');
+  selGoal=g;
+  byId('gc-loss').classList.toggle('sel',g==='loss');
+  byId('gc-gain').classList.toggle('sel',g==='gain');
 };
 
 window.saveOB = async () => {
-  const age = val('ob-age'), wt = val('ob-wt'), ht = val('ob-ht');
-  const err = byId('ob-err'); err.classList.add('hidden');
-  if (!age||!wt||!ht){ showErr(err,'Fill in all fields'); return; }
-  if (!selGoal){ showErr(err,'Select your goal'); return; }
+  const age=val('ob-age'), wt=val('ob-wt'), ht=val('ob-ht');
+  const err=byId('ob-err'); err.classList.add('hidden');
+  if(!age||!wt||!ht){ showErr(err,'Fill in all fields'); return; }
+  if(!selGoal){ showErr(err,'Select your goal'); return; }
   setLoading('ob-btn',true);
   UD.age=age; UD.weight=wt; UD.height=ht; UD.goal=selGoal; UD.onboarded=true;
-  try { await writeUser(UD.uid, UD); } catch(e){ console.error(e); }
-  hideEl('onboarding');
-  bootApp();
-  setLoading('ob-btn',false);
+  try{ await writeUser(UD.uid,UD); } catch(e){ console.error(e); }
+  hideEl('onboarding'); bootApp(); setLoading('ob-btn',false);
 };
 
 /* ── APP BOOT ── */
-function bootApp() {
+function bootApp(){
   showEl('app'); showEl('ai-fab');
   updateUI(); buildDaySel(); buildFoodGrid(); buildDietContent();
   renderWLog(); renderRecent(); renderNutPreview(); setDate();
@@ -974,69 +996,68 @@ function bootApp() {
   },700);
 }
 
-function updateUI() {
-  if (!UD) return;
-  const init = (UD.name||'?').charAt(0).toUpperCase();
+function updateUI(){
+  if(!UD) return;
+  const init=(UD.name||'?').charAt(0).toUpperCase();
   setText('prof-init',init); setText('pd-av',init); setText('pd-nm',UD.name||'');
-  setText('pd-gl', UD.goal==='loss'?'🔥 Weight Loss':'💪 Weight Gain');
+  setText('pd-gl',UD.goal==='loss'?'🔥 Weight Loss':'💪 Weight Gain');
   setText('pd-age',UD.age||'—'); setText('pd-wt',UD.weight||'—'); setText('pd-ht',UD.height||'—');
-  const first = (UD.name||'Athlete').split(' ')[0];
-  setText('h-name', first + '.');
-  setText('h-desc', UD.goal==='loss'
+  const first=(UD.name||'Athlete').split(' ')[0];
+  setText('h-name',first+'.');
+  setText('h-desc',UD.goal==='loss'
     ? 'Every rep is a step closer to your ideal physique. Stay consistent and trust the process.'
     : 'Build the muscle and strength you\'ve always envisioned. Progressive overload is the key.');
-  setText('h-goal', UD.goal==='loss'?'🔥 Weight Loss Program':'💪 Weight Gain Program');
-  setText('hs-wt', UD.weight ? UD.weight+' kg' : '—');
-  setText('hs-ht', UD.height ? UD.height+' cm' : '—');
-  setText('hs-age', UD.age||'—');
-  setText('hs-sess', (UD.workouts||[]).length);
+  setText('h-goal',UD.goal==='loss'?'🔥 Weight Loss Program':'💪 Weight Gain Program');
+  setText('hs-wt',UD.weight?UD.weight+' kg':'—');
+  setText('hs-ht',UD.height?UD.height+' cm':'—');
+  setText('hs-age',UD.age||'—');
+  setText('hs-sess',(UD.workouts||[]).length);
 }
 
-function setDate() {
-  byId('t-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}).toUpperCase();
+function setDate(){
+  byId('t-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}).toUpperCase();
 }
 
 /* ── WORKOUTS ── */
-function buildDaySel() {
-  const c = byId('day-sel'); c.innerHTML = '';
-  const today = new Date();
-  for (let i=6;i>=0;i--) {
-    const d = new Date(today); d.setDate(today.getDate()-i);
-    const label = `${DAYS[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
-    if (i===0) selDay = label;
-    const btn = document.createElement('div');
-    btn.className = 'd-btn'+(i===0?' sel':'');
-    btn.dataset.day = label;
-    btn.innerHTML = `<span class="d-nm">${DAYS[d.getDay()]}</span><span class="d-dt">${d.getDate()}</span>`;
-    btn.onclick = function(){ document.querySelectorAll('.d-btn').forEach(b=>b.classList.remove('sel')); this.classList.add('sel'); selDay=this.dataset.day; };
+function buildDaySel(){
+  const c=byId('day-sel'); c.innerHTML='';
+  const today=new Date();
+  for(let i=6;i>=0;i--){
+    const d=new Date(today); d.setDate(today.getDate()-i);
+    const label=`${DAYS[d.getDay()]}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+    if(i===0) selDay=label;
+    const btn=document.createElement('div');
+    btn.className='d-btn'+(i===0?' sel':'');
+    btn.dataset.day=label;
+    btn.innerHTML=`<span class="d-nm">${DAYS[d.getDay()]}</span><span class="d-dt">${d.getDate()}</span>`;
+    btn.onclick=function(){ document.querySelectorAll('.d-btn').forEach(b=>b.classList.remove('sel')); this.classList.add('sel'); selDay=this.dataset.day; };
     c.appendChild(btn);
   }
 }
 
 window.togM = (btn) => {
-  const m = btn.dataset.m;
-  selMuscles.has(m) ? (selMuscles.delete(m),btn.classList.remove('sel')) : (selMuscles.add(m),btn.classList.add('sel'));
+  const m=btn.dataset.m;
+  selMuscles.has(m)?(selMuscles.delete(m),btn.classList.remove('sel')):(selMuscles.add(m),btn.classList.add('sel'));
 };
 
 window.logWorkout = async () => {
-  const w = val('w-weight'), ex = val('w-exer');
-  if (!selDay){ toast('Select a day'); return; }
-  if (!selMuscles.size){ toast('Select at least one muscle group'); return; }
-  if (!w){ toast('Enter max weight lifted'); return; }
-  UD.workouts = UD.workouts||[];
-  UD.workouts.unshift({ day:selDay, muscles:[...selMuscles].join(', '), weight:parseFloat(w), exercise:ex||'General Training', date:new Date().toISOString() });
-  try { await writeUser(UD.uid,{workouts:UD.workouts}); } catch(e){ toast('Save failed — check connection'); return; }
+  const w=val('w-weight'), ex=val('w-exer');
+  if(!selDay){ toast('Select a day'); return; }
+  if(!selMuscles.size){ toast('Select at least one muscle group'); return; }
+  if(!w){ toast('Enter max weight lifted'); return; }
+  UD.workouts=UD.workouts||[];
+  UD.workouts.unshift({day:selDay,muscles:[...selMuscles].join(', '),weight:parseFloat(w),exercise:ex||'General Training',date:new Date().toISOString()});
+  try{ await writeUser(UD.uid,{workouts:UD.workouts}); } catch(e){ toast('Save failed — check connection'); return; }
   byId('w-weight').value=''; byId('w-exer').value='';
   selMuscles.clear(); document.querySelectorAll('.m-btn').forEach(b=>b.classList.remove('sel'));
-  renderWLog(); renderRecent(); updateUI();
-  toast('Workout logged! 💪 Great work.');
+  renderWLog(); renderRecent(); updateUI(); toast('Workout logged! 💪 Great work.');
 };
 
-function renderWLog() {
-  const w = UD?.workouts||[];
-  const c = byId('wlog');
-  if (!w.length){ c.innerHTML='<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No sessions yet. Add your first above!</div>'; return; }
-  c.innerHTML = w.map((s,i)=>`
+function renderWLog(){
+  const w=UD?.workouts||[];
+  const c=byId('wlog');
+  if(!w.length){ c.innerHTML='<div style="text-align:center;padding:28px;color:var(--text3);font-size:13px">No sessions yet. Add your first above!</div>'; return; }
+  c.innerHTML=w.map((s,i)=>`
     <div class="wlog-row">
       <div class="wl-left"><div class="wl-day">${s.day}</div><div class="wl-mus">${s.muscles} — ${s.exercise}</div></div>
       <div><span class="wl-w">${s.weight}</span><span class="wl-wu"> kg</span></div>
@@ -1044,10 +1065,10 @@ function renderWLog() {
     </div>`).join('');
 }
 
-function renderRecent() {
-  const w = (UD?.workouts||[]).slice(0,3);
-  const c = byId('recent-home');
-  if (!w.length){
+function renderRecent(){
+  const w=(UD?.workouts||[]).slice(0,3);
+  const c=byId('recent-home');
+  if(!w.length){
     c.innerHTML='<div class="empty-state"><p>No sessions logged yet.</p><a onclick="openPanel(\'p-workouts\')">Log your first workout →</a></div>';
     return;
   }
@@ -1062,9 +1083,9 @@ function renderRecent() {
 
 window.openEdit = (i) => { editIdx=i; byId('m-edit-w').value=UD.workouts[i].weight; openModal('m-edit'); };
 window.saveEdit = async () => {
-  const v = byId('m-edit-w').value; if (!v) return;
-  UD.workouts[editIdx].weight = parseFloat(v);
-  try { await writeUser(UD.uid,{workouts:UD.workouts}); } catch(e){ toast('Save failed'); return; }
+  const v=byId('m-edit-w').value; if(!v) return;
+  UD.workouts[editIdx].weight=parseFloat(v);
+  try{ await writeUser(UD.uid,{workouts:UD.workouts}); } catch(e){ toast('Save failed'); return; }
   renderWLog(); renderRecent(); closeModal('m-edit'); toast('Weight updated!');
 };
 
@@ -1077,12 +1098,12 @@ window.openEditProfile = () => {
 };
 window.saveProfile = async () => {
   UD.age=val('mp-age'); UD.weight=val('mp-wt'); UD.height=val('mp-ht'); UD.goal=val('mp-goal');
-  try { await writeUser(UD.uid,UD); } catch(e){ toast('Save failed'); return; }
+  try{ await writeUser(UD.uid,UD); } catch(e){ toast('Save failed'); return; }
   updateUI(); closeModal('m-prof'); toast('Profile updated!');
 };
 
 /* ── FOOD DATA ── */
-const PROTEINS = [
+const PROTEINS=[
   {name:'Eggs',img:'https://images.unsplash.com/photo-1587486913049-53fc88980cfc?w=400&q=80',pro:'13g/100g',cal:'155 kcal'},
   {name:'Chicken Breast',img:'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&q=80',pro:'31g/100g',cal:'165 kcal'},
   {name:'Fish',img:'https://images.unsplash.com/photo-1510130387422-82bed34b37e9?w=400&q=80',pro:'26g/100g',cal:'136 kcal'},
@@ -1097,16 +1118,16 @@ const PROTEINS = [
   {name:'Milk',img:'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&q=80',pro:'3.4g/100g',cal:'61 kcal'},
 ];
 
-function buildFoodGrid() {
-  byId('food-grid').innerHTML = PROTEINS.map(f=>`
+function buildFoodGrid(){
+  byId('food-grid').innerHTML=PROTEINS.map(f=>`
     <div class="fd">
       <img src="${f.img}" alt="${f.name}" loading="lazy">
       <div class="fd-body"><div class="fd-name">${f.name}</div><div class="fd-pro">Protein: ${f.pro}</div><div class="fd-cal">${f.cal}</div></div>
     </div>`).join('');
 }
 
-function renderNutPreview() {
-  byId('nut-preview').innerHTML = PROTEINS.slice(0,6).map(f=>`
+function renderNutPreview(){
+  byId('nut-preview').innerHTML=PROTEINS.slice(0,6).map(f=>`
     <div class="nut-card">
       <img src="${f.img}" alt="${f.name}" loading="lazy">
       <div class="nut-body"><div class="nut-name">${f.name}</div><div class="nut-macro">Protein: ${f.pro}</div><div class="nut-cal">${f.cal}</div></div>
@@ -1114,7 +1135,7 @@ function renderNutPreview() {
 }
 
 /* ── DIET ── */
-function buildDietContent() {
+function buildDietContent(){
   const foods=[
     {icon:'🥚',name:'Boiled Eggs',note:'High protein, filling, low calorie'},
     {icon:'🍗',name:'Grilled Chicken Breast',note:'Lean protein, virtually zero fat'},
@@ -1137,315 +1158,149 @@ function buildDietContent() {
 }
 
 /* ══════════════════════════════════════════
-   COURSE ANALYZER ENGINE
+   COURSE ANALYZER
 ══════════════════════════════════════════ */
-
-/* ── Full gym exercise database ── */
-const GYM_DB = {
+const GYM_DB={
   shoulders:[
-    {name:'Shoulder Press Machine',muscle:'Shoulders',sets:'4 sets × 12 reps',rest:'90s',
-     img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',
-     desc:'Sit upright, grip handles at shoulder height. Push straight up until arms almost fully extended. Lower slowly with control. Keep back flat against pad throughout.',
-     video:'https://www.youtube.com/watch?v=qEwKCR5JCog',alt:'Dumbbell Shoulder Press'},
-    {name:'Lateral Raise Machine',muscle:'Side Delts',sets:'3 sets × 15 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1581009137042-c552e485697a?w=600&q=80',
-     desc:'Sit with arms at sides, pads resting on forearms. Raise arms upward to shoulder level in a smooth arc. Pause at top, lower slowly. Do not shrug shoulders.',
-     video:'https://www.youtube.com/watch?v=3VcKaXpzqRo',alt:'Dumbbell Lateral Raise'},
-    {name:'Cable Front Raise',muscle:'Front Delts',sets:'3 sets × 12 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',
-     desc:'Stand facing cable machine, handle at lowest setting. Raise cable straight forward to shoulder height, keeping arm slightly bent. Lower with control.',
-     video:'https://www.youtube.com/watch?v=gkUkNKqFZ7Y',alt:'Plate Front Raise'},
-    {name:'Rear Delt Fly Machine',muscle:'Rear Delts',sets:'3 sets × 15 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=600&q=80',
-     desc:'Sit facing the pad, grip handles with arms forward. Pull handles back in a wide arc, squeezing shoulder blades together. Slow return to start.',
-     video:'https://www.youtube.com/watch?v=0GSu6Z-Awk8',alt:'Bent-Over Dumbbell Rear Delt Raise'},
-    {name:'Smith Machine Upright Row',muscle:'Traps & Shoulders',sets:'3 sets × 12 reps',rest:'75s',
-     img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',
-     desc:'Grip bar slightly narrower than shoulder width. Pull bar straight up along body to chin level, elbows flaring out high. Lower under control.',
-     video:'https://www.youtube.com/watch?v=amCU-ziHITM',alt:'Dumbbell Upright Row'},
-    {name:'Cable Lateral Raise',muscle:'Side Delts',sets:'3 sets × 15 reps each side',rest:'45s',
-     img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',
-     desc:'Stand sideways to cable, handle at lowest point. Raise arm out to side to shoulder height with a slight bend in elbow. Controlled return.',
-     video:'https://www.youtube.com/watch?v=PPdLkGHagaA',alt:'Dumbbell Lateral Raise'},
-    {name:'Shoulder Shrug Machine',muscle:'Trapezius',sets:'4 sets × 15 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&q=80',
-     desc:'Stand or sit in machine, grip handles. Shrug shoulders straight up toward ears, hold 1 second at top. Lower fully to stretch the traps.',
-     video:'https://www.youtube.com/watch?v=XB_7En-zf_M',alt:'Dumbbell Shrug'},
-    {name:'Arnold Press (Dumbbell)',muscle:'Full Shoulder',sets:'4 sets × 10 reps',rest:'90s',
-     img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',
-     desc:'Start with palms facing you at chin. As you press up, rotate palms away from you. At top arms are extended. Reverse motion on the way down.',
-     video:'https://www.youtube.com/watch?v=vj2w851ZHRM',alt:'Single-Arm Dumbbell Press'},
-    {name:'Face Pull Cable',muscle:'Rear Delts & Rotator Cuff',sets:'3 sets × 15 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',
-     desc:'Set cable at upper chest height, use rope attachment. Pull rope toward your face, elbows flaring wide. Rotate hands outward at end position.',
-     video:'https://www.youtube.com/watch?v=eIq5CB9JfKE',alt:'Band Pull-Apart'}
+    {name:'Shoulder Press Machine',muscle:'Shoulders',sets:'4 sets × 12 reps',rest:'90s',img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',desc:'Sit upright, grip handles at shoulder height. Push straight up until arms almost fully extended. Lower slowly with control. Keep back flat against pad throughout.',video:'https://www.youtube.com/watch?v=qEwKCR5JCog',alt:'Dumbbell Shoulder Press'},
+    {name:'Lateral Raise Machine',muscle:'Side Delts',sets:'3 sets × 15 reps',rest:'60s',img:'https://images.unsplash.com/photo-1581009137042-c552e485697a?w=600&q=80',desc:'Sit with arms at sides, pads resting on forearms. Raise arms upward to shoulder level in a smooth arc. Pause at top, lower slowly. Do not shrug shoulders.',video:'https://www.youtube.com/watch?v=3VcKaXpzqRo',alt:'Dumbbell Lateral Raise'},
+    {name:'Cable Front Raise',muscle:'Front Delts',sets:'3 sets × 12 reps',rest:'60s',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',desc:'Stand facing cable machine, handle at lowest setting. Raise cable straight forward to shoulder height, keeping arm slightly bent. Lower with control.',video:'https://www.youtube.com/watch?v=gkUkNKqFZ7Y',alt:'Plate Front Raise'},
+    {name:'Rear Delt Fly Machine',muscle:'Rear Delts',sets:'3 sets × 15 reps',rest:'60s',img:'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=600&q=80',desc:'Sit facing the pad, grip handles with arms forward. Pull handles back in a wide arc, squeezing shoulder blades together. Slow return to start.',video:'https://www.youtube.com/watch?v=0GSu6Z-Awk8',alt:'Bent-Over Dumbbell Rear Delt Raise'},
+    {name:'Smith Machine Upright Row',muscle:'Traps & Shoulders',sets:'3 sets × 12 reps',rest:'75s',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',desc:'Grip bar slightly narrower than shoulder width. Pull bar straight up along body to chin level, elbows flaring out high. Lower under control.',video:'https://www.youtube.com/watch?v=amCU-ziHITM',alt:'Dumbbell Upright Row'},
+    {name:'Cable Lateral Raise',muscle:'Side Delts',sets:'3 sets × 15 reps each side',rest:'45s',img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',desc:'Stand sideways to cable, handle at lowest point. Raise arm out to side to shoulder height with a slight bend in elbow. Controlled return.',video:'https://www.youtube.com/watch?v=PPdLkGHagaA',alt:'Dumbbell Lateral Raise'},
+    {name:'Shoulder Shrug Machine',muscle:'Trapezius',sets:'4 sets × 15 reps',rest:'60s',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&q=80',desc:'Stand or sit in machine, grip handles. Shrug shoulders straight up toward ears, hold 1 second at top. Lower fully to stretch the traps.',video:'https://www.youtube.com/watch?v=XB_7En-zf_M',alt:'Dumbbell Shrug'},
+    {name:'Arnold Press (Dumbbell)',muscle:'Full Shoulder',sets:'4 sets × 10 reps',rest:'90s',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',desc:'Start with palms facing you at chin. As you press up, rotate palms away from you. At top arms are extended. Reverse motion on the way down.',video:'https://www.youtube.com/watch?v=vj2w851ZHRM',alt:'Single-Arm Dumbbell Press'},
+    {name:'Face Pull Cable',muscle:'Rear Delts & Rotator Cuff',sets:'3 sets × 15 reps',rest:'60s',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',desc:'Set cable at upper chest height, use rope attachment. Pull rope toward your face, elbows flaring wide. Rotate hands outward at end position.',video:'https://www.youtube.com/watch?v=eIq5CB9JfKE',alt:'Band Pull-Apart'}
   ],
   chest:[
-    {name:'Chest Press Machine',muscle:'Chest',sets:'4 sets × 12 reps',rest:'90s',
-     img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',
-     desc:'Sit with back flat, grip handles at chest height. Push forward until arms nearly extended. Return slowly, feeling full chest stretch. Keep chest proud throughout.',
-     video:'https://www.youtube.com/watch?v=xUm0BiZCX_I',alt:'Dumbbell Bench Press'},
-    {name:'Incline Chest Press Machine',muscle:'Upper Chest',sets:'4 sets × 10 reps',rest:'90s',
-     img:'https://images.unsplash.com/photo-1581009137042-c552e485697a?w=600&q=80',
-     desc:'Adjust seat so handles are at upper chest. Press upward at slight incline angle. Squeeze chest at top. Lower slowly to feel upper pec stretch.',
-     video:'https://www.youtube.com/watch?v=DbFgADa2PL8',alt:'Incline Dumbbell Press'},
-    {name:'Cable Crossover (Pec Fly)',muscle:'Inner Chest',sets:'3 sets × 15 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',
-     desc:'Stand between cable towers, arms wide. Bring hands together in front of chest in hugging motion. Squeeze chest hard at centre, return with control.',
-     video:'https://www.youtube.com/watch?v=taI4XduLpTk',alt:'Resistance Band Fly'},
-    {name:'Pec Deck Fly Machine',muscle:'Chest',sets:'3 sets × 15 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=600&q=80',
-     desc:'Sit with forearms on pads. Bring pads together in front of chest, squeezing pecs hard. Open wide for full stretch. Do not let weight crash at open position.',
-     video:'https://www.youtube.com/watch?v=Z57CtFmRMxA',alt:'Dumbbell Fly'},
-    {name:'Smith Machine Bench Press',muscle:'Chest',sets:'4 sets × 10 reps',rest:'2min',
-     img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',
-     desc:'Lie on bench, bar over lower chest. Lower bar with control to touch chest lightly. Drive up powerfully. Keep feet flat, back arched slightly, shoulder blades retracted.',
-     video:'https://www.youtube.com/watch?v=y-wV4Venusic',alt:'Push-Ups'},
-    {name:'Decline Cable Fly',muscle:'Lower Chest',sets:'3 sets × 12 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',
-     desc:'Set cables high. Pull down and across in a decline arc, crossing hands slightly at bottom. Focus on contracting lower pec fibres. Return slowly.',
-     video:'https://www.youtube.com/watch?v=Iwe6AmxVf7o',alt:'Decline Push-Up'},
-    {name:'Chest Dip Machine',muscle:'Lower Chest & Triceps',sets:'3 sets × 12 reps',rest:'90s',
-     img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&q=80',
-     desc:'Lean slightly forward to target chest. Lower until shoulders at elbow height. Drive up without locking elbows. Forward lean is key to chest activation.',
-     video:'https://www.youtube.com/watch?v=2z8JmcrW-As',alt:'Bench Dip'},
-    {name:'Landmine Press',muscle:'Upper Chest',sets:'3 sets × 12 reps each',rest:'75s',
-     img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',
-     desc:'Hold end of barbell at shoulder, press upward at 45° angle. Great for upper chest with shoulder-friendly movement. Alternate arms or press both together.',
-     video:'https://www.youtube.com/watch?v=IODxDxX7oi4',alt:'Pike Push-Up'},
-    {name:'Seated Chest Squeeze',muscle:'Inner Chest',sets:'3 sets × 20 reps',rest:'45s',
-     img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',
-     desc:'Use light dumbbells or plates. Hold weight between palms with arms extended. Squeeze palms together hard for 2 seconds. Constant tension on inner pecs.',
-     video:'https://www.youtube.com/watch?v=PmoinoBow1Q',alt:'Wall Push-Up Squeeze'}
+    {name:'Chest Press Machine',muscle:'Chest',sets:'4 sets × 12 reps',rest:'90s',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',desc:'Sit with back flat, grip handles at chest height. Push forward until arms nearly extended. Return slowly, feeling full chest stretch. Keep chest proud throughout.',video:'https://www.youtube.com/watch?v=xUm0BiZCX_I',alt:'Dumbbell Bench Press'},
+    {name:'Incline Chest Press Machine',muscle:'Upper Chest',sets:'4 sets × 10 reps',rest:'90s',img:'https://images.unsplash.com/photo-1581009137042-c552e485697a?w=600&q=80',desc:'Adjust seat so handles are at upper chest. Press upward at slight incline angle. Squeeze chest at top. Lower slowly to feel upper pec stretch.',video:'https://www.youtube.com/watch?v=DbFgADa2PL8',alt:'Incline Dumbbell Press'},
+    {name:'Cable Crossover (Pec Fly)',muscle:'Inner Chest',sets:'3 sets × 15 reps',rest:'60s',img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',desc:'Stand between cable towers, arms wide. Bring hands together in front of chest in hugging motion. Squeeze chest hard at centre, return with control.',video:'https://www.youtube.com/watch?v=taI4XduLpTk',alt:'Resistance Band Fly'},
+    {name:'Pec Deck Fly Machine',muscle:'Chest',sets:'3 sets × 15 reps',rest:'60s',img:'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=600&q=80',desc:'Sit with forearms on pads. Bring pads together in front of chest, squeezing pecs hard. Open wide for full stretch. Do not let weight crash at open position.',video:'https://www.youtube.com/watch?v=Z57CtFmRMxA',alt:'Dumbbell Fly'},
+    {name:'Smith Machine Bench Press',muscle:'Chest',sets:'4 sets × 10 reps',rest:'2min',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',desc:'Lie on bench, bar over lower chest. Lower bar with control to touch chest lightly. Drive up powerfully. Keep feet flat, back arched slightly, shoulder blades retracted.',video:'https://www.youtube.com/watch?v=y-wV4Venusic',alt:'Push-Ups'},
+    {name:'Decline Cable Fly',muscle:'Lower Chest',sets:'3 sets × 12 reps',rest:'60s',img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',desc:'Set cables high. Pull down and across in a decline arc, crossing hands slightly at bottom. Focus on contracting lower pec fibres. Return slowly.',video:'https://www.youtube.com/watch?v=Iwe6AmxVf7o',alt:'Decline Push-Up'},
+    {name:'Chest Dip Machine',muscle:'Lower Chest & Triceps',sets:'3 sets × 12 reps',rest:'90s',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&q=80',desc:'Lean slightly forward to target chest. Lower until shoulders at elbow height. Drive up without locking elbows. Forward lean is key to chest activation.',video:'https://www.youtube.com/watch?v=2z8JmcrW-As',alt:'Bench Dip'},
+    {name:'Landmine Press',muscle:'Upper Chest',sets:'3 sets × 12 reps each',rest:'75s',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',desc:'Hold end of barbell at shoulder, press upward at 45° angle. Great for upper chest with shoulder-friendly movement. Alternate arms or press both together.',video:'https://www.youtube.com/watch?v=IODxDxX7oi4',alt:'Pike Push-Up'},
+    {name:'Seated Chest Squeeze',muscle:'Inner Chest',sets:'3 sets × 20 reps',rest:'45s',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',desc:'Use light dumbbells or plates. Hold weight between palms with arms extended. Squeeze palms together hard for 2 seconds. Constant tension on inner pecs.',video:'https://www.youtube.com/watch?v=PmoinoBow1Q',alt:'Wall Push-Up Squeeze'}
   ],
   biceps:[
-    {name:'Bicep Curl Machine',muscle:'Biceps',sets:'4 sets × 12 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1581009137042-c552e485697a?w=600&q=80',
-     desc:'Sit with upper arms flat on pad. Curl handles toward face, squeezing bicep at top. Lower slowly for full stretch. Do not rock body to assist.',
-     video:'https://www.youtube.com/watch?v=av7-8igSXTs',alt:'Dumbbell Bicep Curl'},
-    {name:'Cable Rope Hammer Curl',muscle:'Biceps & Brachialis',sets:'3 sets × 15 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',
-     desc:'Use rope attachment at lowest cable. Curl up with neutral grip (thumbs up), keeping elbows pinned to sides. Great for brachialis and bicep peak.',
-     video:'https://www.youtube.com/watch?v=TwD-YGVP4Bk',alt:'Dumbbell Hammer Curl'},
-    {name:'EZ-Bar Preacher Curl',muscle:'Lower Biceps',sets:'3 sets × 12 reps',rest:'75s',
-     img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',
-     desc:'Arms on preacher pad, grip EZ-bar at shoulders. Curl up, squeeze at top. Lower all the way for deep stretch. Preacher pad isolates and prevents cheating.',
-     video:'https://www.youtube.com/watch?v=fIWP-FRFNU0',alt:'Single-Arm Dumbbell Preacher Curl'},
-    {name:'Concentration Curl',muscle:'Bicep Peak',sets:'3 sets × 12 reps each',rest:'45s',
-     img:'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=600&q=80',
-     desc:'Seated, elbow braced on inner thigh. Curl dumbbell up, turning pinky outward at top to maximise peak contraction. Lower fully, feel the stretch.',
-     video:'https://www.youtube.com/watch?v=0AUGkch3tzc',alt:'Seated Dumbbell Curl'},
-    {name:'High Cable Curl',muscle:'Long Head Biceps',sets:'3 sets × 15 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',
-     desc:'Set cables high on both sides. Stand in centre, curl both handles toward temples simultaneously. Incredible stretch and contraction of long head bicep.',
-     video:'https://www.youtube.com/watch?v=bqNqKsBK3V0',alt:'Resistance Band Overhead Curl'},
-    {name:'Incline Dumbbell Curl',muscle:'Long Head Stretch',sets:'3 sets × 10 reps',rest:'75s',
-     img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',
-     desc:'Lie on incline bench, arms hanging straight down. Curl up, supinating wrist at top. The incline angle creates a superior stretch on the long head of the bicep.',
-     video:'https://www.youtube.com/watch?v=sAq_ocpRh_I',alt:'Seated Incline Curl'},
-    {name:'Reverse Curl Cable',muscle:'Brachioradialis',sets:'3 sets × 12 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&q=80',
-     desc:'Use straight bar cable at lowest point with overhand grip. Curl up while keeping wrists straight. Targets forearms and brachioradialis heavily.',
-     video:'https://www.youtube.com/watch?v=nRgxYX2Ve9w',alt:'Reverse Dumbbell Curl'},
-    {name:'Zottman Curl',muscle:'Full Arm',sets:'3 sets × 10 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',
-     desc:'Curl dumbbells up with supinated grip. At the top, rotate to overhand grip. Lower slowly with overhand grip. Rotate back at bottom. Full bicep and forearm developer.',
-     video:'https://www.youtube.com/watch?v=ZrFZwbpyzUw',alt:'Alternate Dumbbell Curl'},
-    {name:'Spider Curl',muscle:'Bicep Peak',sets:'3 sets × 12 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',
-     desc:'Lie face down on incline bench, arms hanging over the front. Curl dumbbells up to forehead level. Eliminates all cheating, pure bicep isolation.',
-     video:'https://www.youtube.com/watch?v=oRCWPNa4OoM',alt:'Seated Alternating Curl'}
+    {name:'Bicep Curl Machine',muscle:'Biceps',sets:'4 sets × 12 reps',rest:'60s',img:'https://images.unsplash.com/photo-1581009137042-c552e485697a?w=600&q=80',desc:'Sit with upper arms flat on pad. Curl handles toward face, squeezing bicep at top. Lower slowly for full stretch. Do not rock body to assist.',video:'https://www.youtube.com/watch?v=av7-8igSXTs',alt:'Dumbbell Bicep Curl'},
+    {name:'Cable Rope Hammer Curl',muscle:'Biceps & Brachialis',sets:'3 sets × 15 reps',rest:'60s',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',desc:'Use rope attachment at lowest cable. Curl up with neutral grip (thumbs up), keeping elbows pinned to sides. Great for brachialis and bicep peak.',video:'https://www.youtube.com/watch?v=TwD-YGVP4Bk',alt:'Dumbbell Hammer Curl'},
+    {name:'EZ-Bar Preacher Curl',muscle:'Lower Biceps',sets:'3 sets × 12 reps',rest:'75s',img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',desc:'Arms on preacher pad, grip EZ-bar at shoulders. Curl up, squeeze at top. Lower all the way for deep stretch. Preacher pad isolates and prevents cheating.',video:'https://www.youtube.com/watch?v=fIWP-FRFNU0',alt:'Single-Arm Dumbbell Preacher Curl'},
+    {name:'Concentration Curl',muscle:'Bicep Peak',sets:'3 sets × 12 reps each',rest:'45s',img:'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=600&q=80',desc:'Seated, elbow braced on inner thigh. Curl dumbbell up, turning pinky outward at top to maximise peak contraction. Lower fully, feel the stretch.',video:'https://www.youtube.com/watch?v=0AUGkch3tzc',alt:'Seated Dumbbell Curl'},
+    {name:'High Cable Curl',muscle:'Long Head Biceps',sets:'3 sets × 15 reps',rest:'60s',img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',desc:'Set cables high on both sides. Stand in centre, curl both handles toward temples simultaneously. Incredible stretch and contraction of long head bicep.',video:'https://www.youtube.com/watch?v=bqNqKsBK3V0',alt:'Resistance Band Overhead Curl'},
+    {name:'Incline Dumbbell Curl',muscle:'Long Head Stretch',sets:'3 sets × 10 reps',rest:'75s',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',desc:'Lie on incline bench, arms hanging straight down. Curl up, supinating wrist at top. The incline angle creates a superior stretch on the long head of the bicep.',video:'https://www.youtube.com/watch?v=sAq_ocpRh_I',alt:'Seated Incline Curl'},
+    {name:'Reverse Curl Cable',muscle:'Brachioradialis',sets:'3 sets × 12 reps',rest:'60s',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&q=80',desc:'Use straight bar cable at lowest point with overhand grip. Curl up while keeping wrists straight. Targets forearms and brachioradialis heavily.',video:'https://www.youtube.com/watch?v=nRgxYX2Ve9w',alt:'Reverse Dumbbell Curl'},
+    {name:'Zottman Curl',muscle:'Full Arm',sets:'3 sets × 10 reps',rest:'60s',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',desc:'Curl dumbbells up with supinated grip. At the top, rotate to overhand grip. Lower slowly with overhand grip. Rotate back at bottom. Full bicep and forearm developer.',video:'https://www.youtube.com/watch?v=ZrFZwbpyzUw',alt:'Alternate Dumbbell Curl'},
+    {name:'Spider Curl',muscle:'Bicep Peak',sets:'3 sets × 12 reps',rest:'60s',img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',desc:'Lie face down on incline bench, arms hanging over the front. Curl dumbbells up to forehead level. Eliminates all cheating, pure bicep isolation.',video:'https://www.youtube.com/watch?v=oRCWPNa4OoM',alt:'Seated Alternating Curl'}
   ],
   arms:[
-    {name:'Tricep Pushdown Machine',muscle:'Triceps',sets:'4 sets × 12 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=600&q=80',
-     desc:'Grip cable bar overhead, elbows at sides. Push down until arms fully extended, squeezing triceps hard at bottom. Do not let elbows flare out.',
-     video:'https://www.youtube.com/watch?v=2-LAMcpzODU',alt:'Dumbbell Kickback'},
-    {name:'Overhead Tricep Extension',muscle:'Long Head Triceps',sets:'3 sets × 12 reps',rest:'75s',
-     img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',
-     desc:'Hold dumbbell or cable overhead, elbows pointing up. Lower weight behind head, then extend fully. The overhead position maximises long head stretch.',
-     video:'https://www.youtube.com/watch?v=YbX7Wd8jQ-Q',alt:'Lying Tricep Extension'},
-    {name:'Skull Crusher Machine',muscle:'Triceps',sets:'3 sets × 12 reps',rest:'75s',
-     img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',
-     desc:'Lie on bench, EZ-bar above forehead. Lower bar toward forehead by bending only the elbows. Extend back up. Keep upper arms perfectly vertical throughout.',
-     video:'https://www.youtube.com/watch?v=d_KZxkY_0cM',alt:'Bench Tricep Dip'},
-    {name:'Rope Tricep Pushdown',muscle:'Triceps All Heads',sets:'3 sets × 15 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1581009137042-c552e485697a?w=600&q=80',
-     desc:'Use rope attachment at high cable. Elbows at sides, push rope down and slightly outward at bottom to spread the rope and maximize contraction.',
-     video:'https://www.youtube.com/watch?v=kiuVA0gs3EI',alt:'Tricep Diamond Push-Up'},
-    {name:'Wrist Curl Machine',muscle:'Forearms',sets:'3 sets × 20 reps',rest:'45s',
-     img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',
-     desc:'Rest forearms on pad, wrists off edge. Curl wrists upward with full range of motion. Reverse wrist curls work the opposing forearm muscles.',
-     video:'https://www.youtube.com/watch?v=gOHDMzsUOOg',alt:'Dumbbell Wrist Curl'},
-    {name:'Cable Kickback',muscle:'Triceps',sets:'3 sets × 15 reps each',rest:'45s',
-     img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',
-     desc:'Bend over, upper arm parallel to floor. Extend arm fully back, contracting tricep hard at end. Hinge at elbow only, keep upper arm still.',
-     video:'https://www.youtube.com/watch?v=6SS6K3lAwZ8',alt:'Dumbbell Kickback'},
-    {name:'Reverse Wrist Curl',muscle:'Forearm Extensors',sets:'3 sets × 20 reps',rest:'45s',
-     img:'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=600&q=80',
-     desc:'Forearms on pad, overhand grip. Extend wrists upward against resistance. Often neglected but balances forearm development and prevents injury.',
-     video:'https://www.youtube.com/watch?v=KenMTSFGCWU',alt:'Plate Wrist Extension'},
-    {name:'Hammer Curl to Press',muscle:'Full Arms',sets:'3 sets × 10 reps',rest:'75s',
-     img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',
-     desc:'Curl dumbbells with neutral grip to shoulder. Without pausing, press overhead. Reverse the motion. Combines bicep curl and shoulder press for efficiency.',
-     video:'https://www.youtube.com/watch?v=FWJR5Ve8bnQ',alt:'Dumbbell Curl to Press'},
-    {name:'Close-Grip Bench Press',muscle:'Triceps & Inner Chest',sets:'4 sets × 12 reps',rest:'90s',
-     img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',
-     desc:'Use Smith machine or barbell. Hands shoulder-width apart. Lower bar to lower chest, elbows close to body. Press up fully. Tricep dominant movement.',
-     video:'https://www.youtube.com/watch?v=nEF0bv2FW94',alt:'Tricep Push-Up'}
+    {name:'Tricep Pushdown Machine',muscle:'Triceps',sets:'4 sets × 12 reps',rest:'60s',img:'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=600&q=80',desc:'Grip cable bar overhead, elbows at sides. Push down until arms fully extended, squeezing triceps hard at bottom. Do not let elbows flare out.',video:'https://www.youtube.com/watch?v=2-LAMcpzODU',alt:'Dumbbell Kickback'},
+    {name:'Overhead Tricep Extension',muscle:'Long Head Triceps',sets:'3 sets × 12 reps',rest:'75s',img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',desc:'Hold dumbbell or cable overhead, elbows pointing up. Lower weight behind head, then extend fully. The overhead position maximises long head stretch.',video:'https://www.youtube.com/watch?v=YbX7Wd8jQ-Q',alt:'Lying Tricep Extension'},
+    {name:'Skull Crusher Machine',muscle:'Triceps',sets:'3 sets × 12 reps',rest:'75s',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',desc:'Lie on bench, EZ-bar above forehead. Lower bar toward forehead by bending only the elbows. Extend back up. Keep upper arms perfectly vertical throughout.',video:'https://www.youtube.com/watch?v=d_KZxkY_0cM',alt:'Bench Tricep Dip'},
+    {name:'Rope Tricep Pushdown',muscle:'Triceps All Heads',sets:'3 sets × 15 reps',rest:'60s',img:'https://images.unsplash.com/photo-1581009137042-c552e485697a?w=600&q=80',desc:'Use rope attachment at high cable. Elbows at sides, push rope down and slightly outward at bottom to spread the rope and maximize contraction.',video:'https://www.youtube.com/watch?v=kiuVA0gs3EI',alt:'Tricep Diamond Push-Up'},
+    {name:'Wrist Curl Machine',muscle:'Forearms',sets:'3 sets × 20 reps',rest:'45s',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',desc:'Rest forearms on pad, wrists off edge. Curl wrists upward with full range of motion. Reverse wrist curls work the opposing forearm muscles.',video:'https://www.youtube.com/watch?v=gOHDMzsUOOg',alt:'Dumbbell Wrist Curl'},
+    {name:'Cable Kickback',muscle:'Triceps',sets:'3 sets × 15 reps each',rest:'45s',img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',desc:'Bend over, upper arm parallel to floor. Extend arm fully back, contracting tricep hard at end. Hinge at elbow only, keep upper arm still.',video:'https://www.youtube.com/watch?v=6SS6K3lAwZ8',alt:'Dumbbell Kickback'},
+    {name:'Reverse Wrist Curl',muscle:'Forearm Extensors',sets:'3 sets × 20 reps',rest:'45s',img:'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=600&q=80',desc:'Forearms on pad, overhand grip. Extend wrists upward against resistance. Balances forearm development and prevents injury.',video:'https://www.youtube.com/watch?v=KenMTSFGCWU',alt:'Plate Wrist Extension'},
+    {name:'Hammer Curl to Press',muscle:'Full Arms',sets:'3 sets × 10 reps',rest:'75s',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',desc:'Curl dumbbells with neutral grip to shoulder. Without pausing, press overhead. Reverse the motion. Combines bicep curl and shoulder press for efficiency.',video:'https://www.youtube.com/watch?v=FWJR5Ve8bnQ',alt:'Dumbbell Curl to Press'},
+    {name:'Close-Grip Bench Press',muscle:'Triceps & Inner Chest',sets:'4 sets × 12 reps',rest:'90s',img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',desc:'Use Smith machine or barbell. Hands shoulder-width apart. Lower bar to lower chest, elbows close to body. Press up fully. Tricep dominant movement.',video:'https://www.youtube.com/watch?v=nEF0bv2FW94',alt:'Tricep Push-Up'}
   ],
   legs:[
-    {name:'Leg Press Machine',muscle:'Quads & Glutes',sets:'4 sets × 15 reps',rest:'2min',
-     img:'https://images.unsplash.com/photo-1434608519344-49d77a699e1d?w=600&q=80',
-     desc:'Place feet shoulder-width on platform. Lower platform until knees at 90°. Drive through heels to extend legs. Do not lock knees at top. Feet position adjusts emphasis.',
-     video:'https://www.youtube.com/watch?v=IZxyjW7MPJQ',alt:'Bodyweight Squat'},
-    {name:'Leg Extension Machine',muscle:'Quadriceps',sets:'4 sets × 15 reps',rest:'75s',
-     img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',
-     desc:'Sit with pad just above ankles. Extend legs fully, hold at top for 1 second contracting quads. Lower slowly. Excellent quad isolation. Adjust seat so knee aligns with pivot.',
-     video:'https://www.youtube.com/watch?v=YyvSfVjQeL0',alt:'Dumbbell Lunge'},
-    {name:'Lying Leg Curl Machine',muscle:'Hamstrings',sets:'4 sets × 12 reps',rest:'75s',
-     img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&q=80',
-     desc:'Lie face down, pad just above heels. Curl legs up toward glutes, squeezing hamstrings at top. Lower slowly. Do not lift hips off pad during movement.',
-     video:'https://www.youtube.com/watch?v=1Tq3QdYUuHs',alt:'Romanian Deadlift'},
-    {name:'Smith Machine Squat',muscle:'Full Legs',sets:'4 sets × 12 reps',rest:'2min',
-     img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',
-     desc:'Bar on upper traps, feet shoulder-width. Squat down until thighs parallel to floor. Drive through heels to stand. Smith machine guides the bar path safely.',
-     video:'https://www.youtube.com/watch?v=ultWZbUMPL8',alt:'Goblet Squat'},
-    {name:'Standing Calf Raise Machine',muscle:'Calves',sets:'4 sets × 20 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',
-     desc:'Shoulders under pads, balls of feet on platform. Rise up as high as possible on toes, hold 1 second. Lower heel below platform for deep stretch. Full ROM essential.',
-     video:'https://www.youtube.com/watch?v=-M4-G8p1fCI',alt:'Bodyweight Calf Raise'},
-    {name:'Hip Abductor Machine',muscle:'Glutes & Outer Thigh',sets:'3 sets × 20 reps',rest:'60s',
-     img:'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=600&q=80',
-     desc:'Sit with pads on outer knees. Push legs outward against resistance, squeezing glutes at widest point. Return slowly. Targets glute medius and outer thighs.',
-     video:'https://www.youtube.com/watch?v=0NBUf_e25Wg',alt:'Side-Lying Hip Abduction'},
-    {name:'Hack Squat Machine',muscle:'Quads & Glutes',sets:'3 sets × 12 reps',rest:'2min',
-     img:'https://images.unsplash.com/photo-1581009137042-c552e485697a?w=600&q=80',
-     desc:'Back against pad, feet on platform. Lower until deep squat, keeping torso on pad. Drive through full foot to return. Feet placement changes muscle emphasis.',
-     video:'https://www.youtube.com/watch?v=0tn5K9NlCfo',alt:'Bulgarian Split Squat'},
-    {name:'Seated Leg Curl Machine',muscle:'Hamstrings',sets:'3 sets × 15 reps',rest:'75s',
-     img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',
-     desc:'Sit upright, pad on lower legs. Curl feet down and back as far as possible. Squeeze hamstrings at full contraction. Seated position stretches hamstrings differently than lying.',
-     video:'https://www.youtube.com/watch?v=1Tq3QdYUuHs',alt:'Nordic Curl'},
-    {name:'Electronic Cardio — Crosstrainer',muscle:'Full Body Cardio',sets:'15 min HIIT or 20 min steady',rest:'After workout',
-     img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',
-     desc:'The elliptical crosstrainer gives zero-impact full-body cardio. Use interval mode: 1 min hard / 1 min easy for fat burning. Maintain upright posture, use arm handles.',
-     video:'https://www.youtube.com/watch?v=bu6_W0H2Ev8',alt:'Treadmill Walk/Run'}
+    {name:'Leg Press Machine',muscle:'Quads & Glutes',sets:'4 sets × 15 reps',rest:'2min',img:'https://images.unsplash.com/photo-1434608519344-49d77a699e1d?w=600&q=80',desc:'Place feet shoulder-width on platform. Lower platform until knees at 90°. Drive through heels to extend legs. Do not lock knees at top.',video:'https://www.youtube.com/watch?v=IZxyjW7MPJQ',alt:'Bodyweight Squat'},
+    {name:'Leg Extension Machine',muscle:'Quadriceps',sets:'4 sets × 15 reps',rest:'75s',img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',desc:'Sit with pad just above ankles. Extend legs fully, hold at top for 1 second contracting quads. Lower slowly. Adjust seat so knee aligns with pivot.',video:'https://www.youtube.com/watch?v=YyvSfVjQeL0',alt:'Dumbbell Lunge'},
+    {name:'Lying Leg Curl Machine',muscle:'Hamstrings',sets:'4 sets × 12 reps',rest:'75s',img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&q=80',desc:'Lie face down, pad just above heels. Curl legs up toward glutes, squeezing hamstrings at top. Lower slowly. Do not lift hips off pad during movement.',video:'https://www.youtube.com/watch?v=1Tq3QdYUuHs',alt:'Romanian Deadlift'},
+    {name:'Smith Machine Squat',muscle:'Full Legs',sets:'4 sets × 12 reps',rest:'2min',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',desc:'Bar on upper traps, feet shoulder-width. Squat down until thighs parallel to floor. Drive through heels to stand. Smith machine guides the bar path safely.',video:'https://www.youtube.com/watch?v=ultWZbUMPL8',alt:'Goblet Squat'},
+    {name:'Standing Calf Raise Machine',muscle:'Calves',sets:'4 sets × 20 reps',rest:'60s',img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',desc:'Shoulders under pads, balls of feet on platform. Rise up as high as possible on toes, hold 1 second. Lower heel below platform for deep stretch.',video:'https://www.youtube.com/watch?v=-M4-G8p1fCI',alt:'Bodyweight Calf Raise'},
+    {name:'Hip Abductor Machine',muscle:'Glutes & Outer Thigh',sets:'3 sets × 20 reps',rest:'60s',img:'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=600&q=80',desc:'Sit with pads on outer knees. Push legs outward against resistance, squeezing glutes at widest point. Return slowly. Targets glute medius and outer thighs.',video:'https://www.youtube.com/watch?v=0NBUf_e25Wg',alt:'Side-Lying Hip Abduction'},
+    {name:'Hack Squat Machine',muscle:'Quads & Glutes',sets:'3 sets × 12 reps',rest:'2min',img:'https://images.unsplash.com/photo-1581009137042-c552e485697a?w=600&q=80',desc:'Back against pad, feet on platform. Lower until deep squat, keeping torso on pad. Drive through full foot to return. Feet placement changes muscle emphasis.',video:'https://www.youtube.com/watch?v=0tn5K9NlCfo',alt:'Bulgarian Split Squat'},
+    {name:'Seated Leg Curl Machine',muscle:'Hamstrings',sets:'3 sets × 15 reps',rest:'75s',img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',desc:'Sit upright, pad on lower legs. Curl feet down and back as far as possible. Squeeze hamstrings at full contraction.',video:'https://www.youtube.com/watch?v=1Tq3QdYUuHs',alt:'Nordic Curl'},
+    {name:'Electronic Cardio — Crosstrainer',muscle:'Full Body Cardio',sets:'15 min HIIT or 20 min steady',rest:'After workout',img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',desc:'The elliptical crosstrainer gives zero-impact full-body cardio. Use interval mode: 1 min hard / 1 min easy for fat burning. Maintain upright posture.',video:'https://www.youtube.com/watch?v=bu6_W0H2Ev8',alt:'Treadmill Walk/Run'}
   ]
 };
 
-/* ── Questions ── */
-const QUESTIONS = [
-  {
-    id:'exp', step:0,
-    title:'What is your training experience?',
-    sub:'This helps us set the right weights and intensity for your program.',
-    opts:[
-      {icon:'🌱',txt:'Beginner',sub:'Less than 6 months',val:'beginner'},
-      {icon:'⚡',txt:'Intermediate',sub:'6 months – 2 years',val:'intermediate'},
-      {icon:'🏆',txt:'Advanced',sub:'2+ years training',val:'advanced'},
-      {icon:'🔄',txt:'Returning',sub:'Had a break, coming back',val:'beginner'}
-    ]
-  },
-  {
-    id:'goal', step:1,
-    title:'What is your main training goal?',
-    sub:'Your program structure, rep ranges and rest periods are built around this.',
-    opts:[
-      {icon:'🔥',txt:'Burn Fat & Lose Weight',sub:'Leaner physique, cardio included',val:'loss'},
-      {icon:'💪',txt:'Build Muscle & Gain Size',sub:'Hypertrophy focus, progressive overload',val:'gain'},
-      {icon:'⚖️',txt:'Body Recomposition',sub:'Lose fat and gain muscle together',val:'recomp'},
-      {icon:'💪',txt:'Increase Strength',sub:'Heavier lifts, lower reps',val:'strength'}
-    ]
-  },
-  {
-    id:'weight', step:2,
-    title:'What is your current body weight?',
-    sub:'We\'ll calculate your BMI and show you how far you are from your target weight.',
-    type:'input',
-    placeholder:'Enter your weight in kg',
-    inputType:'number'
-  },
-  {
-    id:'target', step:3,
-    title:'What is your target weight?',
-    sub:'We\'ll track your progress and adjust your program intensity accordingly.',
-    type:'input',
-    placeholder:'Enter your target weight in kg',
-    inputType:'number'
-  },
-  {
-    id:'days', step:4,
-    title:'How many days per week can you train?',
-    sub:'We cycle a 3-day program. Select your available days.',
-    opts:[
-      {icon:'📅',txt:'3 Days',sub:'Mon / Wed / Fri',val:'3'},
-      {icon:'📅',txt:'4 Days',sub:'Mon / Tue / Thu / Fri',val:'4'},
-      {icon:'📅',txt:'5 Days',sub:'Mon–Fri',val:'5'},
-      {icon:'📅',txt:'6 Days',sub:'Mon–Sat',val:'6'}
-    ]
-  },
-  {
-    id:'equipment', step:5,
-    title:'Which equipment is available in your gym?',
-    sub:'If a machine is not available, we\'ll automatically swap it with an alternative exercise targeting the same muscle.',
-    opts:[
-      {icon:'🏋️',txt:'Full Equipment Gym',sub:'All machines + free weights + cardio',val:'full'},
-      {icon:'🔧',txt:'Mostly Free Weights',sub:'Dumbbells, barbells, cables',val:'free'},
-      {icon:'📦',txt:'Limited Equipment',sub:'Some machines, basics only',val:'limited'},
-      {icon:'🏠',txt:'Minimal Equipment',sub:'Mostly bodyweight & dumbbells',val:'minimal'}
-    ]
-  }
+const QUESTIONS=[
+  {id:'exp',step:0,title:'What is your training experience?',sub:'This helps us set the right weights and intensity for your program.',opts:[
+    {icon:'🌱',txt:'Beginner',sub:'Less than 6 months',val:'beginner'},
+    {icon:'⚡',txt:'Intermediate',sub:'6 months – 2 years',val:'intermediate'},
+    {icon:'🏆',txt:'Advanced',sub:'2+ years training',val:'advanced'},
+    {icon:'🔄',txt:'Returning',sub:'Had a break, coming back',val:'beginner'}
+  ]},
+  {id:'goal',step:1,title:'What is your main training goal?',sub:'Your program structure, rep ranges and rest periods are built around this.',opts:[
+    {icon:'🔥',txt:'Burn Fat & Lose Weight',sub:'Leaner physique, cardio included',val:'loss'},
+    {icon:'💪',txt:'Build Muscle & Gain Size',sub:'Hypertrophy focus, progressive overload',val:'gain'},
+    {icon:'⚖️',txt:'Body Recomposition',sub:'Lose fat and gain muscle together',val:'recomp'},
+    {icon:'💪',txt:'Increase Strength',sub:'Heavier lifts, lower reps',val:'strength'}
+  ]},
+  {id:'weight',step:2,title:'What is your current body weight?',sub:'We\'ll calculate your BMI and show you how far you are from your target weight.',type:'input',placeholder:'Enter your weight in kg',inputType:'number'},
+  {id:'target',step:3,title:'What is your target weight?',sub:'We\'ll track your progress and adjust your program intensity accordingly.',type:'input',placeholder:'Enter your target weight in kg',inputType:'number'},
+  {id:'days',step:4,title:'How many days per week can you train?',sub:'We cycle a 3-day program. Select your available days.',opts:[
+    {icon:'📅',txt:'3 Days',sub:'Mon / Wed / Fri',val:'3'},
+    {icon:'📅',txt:'4 Days',sub:'Mon / Tue / Thu / Fri',val:'4'},
+    {icon:'📅',txt:'5 Days',sub:'Mon–Fri',val:'5'},
+    {icon:'📅',txt:'6 Days',sub:'Mon–Sat',val:'6'}
+  ]},
+  {id:'equipment',step:5,title:'Which equipment is available in your gym?',sub:'If a machine is not available, we\'ll automatically swap it with an alternative exercise.',opts:[
+    {icon:'🏋️',txt:'Full Equipment Gym',sub:'All machines + free weights + cardio',val:'full'},
+    {icon:'🔧',txt:'Mostly Free Weights',sub:'Dumbbells, barbells, cables',val:'free'},
+    {icon:'📦',txt:'Limited Equipment',sub:'Some machines, basics only',val:'limited'},
+    {icon:'🏠',txt:'Minimal Equipment',sub:'Mostly bodyweight & dumbbells',val:'minimal'}
+  ]}
 ];
 
-/* ── Course state ── */
-let CA = { step:0, answers:{}, course:null };
+let CA={ step:0, answers:{}, course:null };
 
-/* ── Init course when panel opens ── */
-function initCourse() {
-  CA = { step:0, answers:{}, course:null };
-  byId('course-restart-btn').style.display = 'none';
+/* Expose course open handler to global scope for openPanel to call */
+window._courseOpenHandler = function(){
+  if(UD?.course && !CA.course){
+    CA.course=UD.course;
+    renderCourse();
+    byId('course-q-area').innerHTML='';
+    updateStepDots(6);
+    byId('course-restart-btn').style.display='flex';
+  } else if(!CA.course){
+    initCourse();
+  }
+};
+
+function initCourse(){
+  CA={ step:0, answers:{}, course:null };
+  byId('course-restart-btn').style.display='none';
   byId('course-result').classList.add('hidden');
-  byId('course-result').innerHTML = '';
-  // Pre-fill from user profile
-  if (UD) {
-    if (UD.weight) CA.answers.weight = UD.weight;
-    if (UD.goal) CA.answers.goal = UD.goal;
+  byId('course-result').innerHTML='';
+  if(UD){
+    if(UD.weight) CA.answers.weight=UD.weight;
+    if(UD.goal) CA.answers.goal=UD.goal;
   }
   updateStepDots(0);
   showQuestion(0);
 }
 
-function updateStepDots(active) {
+function updateStepDots(active){
   for(let i=0;i<6;i++){
-    const dot = byId('csd-'+i);
-    if(!dot) continue;
+    const dot=byId('csd-'+i); if(!dot) continue;
     dot.classList.remove('active','done');
-    if(i < active) dot.classList.add('done');
-    else if(i === active) dot.classList.add('active');
-    if(i < 5){ const ln = byId('csl-'+i); if(ln){ ln.classList.toggle('done', i < active); }}
+    if(i<active) dot.classList.add('done');
+    else if(i===active) dot.classList.add('active');
+    if(i<5){ const ln=byId('csl-'+i); if(ln) ln.classList.toggle('done',i<active); }
   }
 }
 
-function showQuestion(idx) {
-  const q = QUESTIONS[idx];
+function showQuestion(idx){
+  const q=QUESTIONS[idx];
   if(!q){ buildCourse(); return; }
   updateStepDots(idx);
-  const area = byId('course-q-area');
-
-  // Skip weight/target if already known
-  if(q.id === 'weight' && CA.answers.weight){ CA.step++; showQuestion(idx+1); return; }
-  if(q.id === 'goal' && CA.answers.goal){ CA.step++; showQuestion(idx+1); return; }
-
-  area.innerHTML = `
+  const area=byId('course-q-area');
+  if(q.id==='weight'&&CA.answers.weight){ CA.step++; showQuestion(idx+1); return; }
+  if(q.id==='goal'&&CA.answers.goal){ CA.step++; showQuestion(idx+1); return; }
+  area.innerHTML=`
     <div class="q-card">
       <div class="q-title">${q.title}</div>
       <div class="q-sub">${q.sub}</div>
-      ${q.type === 'input' ? `
+      ${q.type==='input'?`
         <div class="q-inp-area">
           <input class="fi" id="q-input-val" type="${q.inputType||'text'}" placeholder="${q.placeholder}" style="font-size:20px;padding:16px;font-family:var(--fd);letter-spacing:.05em" autofocus>
           <button class="btn-p" style="margin-top:12px" onclick="answerInput('${q.id}')">Continue →</button>
-        </div>` : `
+        </div>`:`
         <div class="q-opts">
           ${q.opts.map(o=>`
             <div class="q-opt" onclick="answerOpt('${q.id}','${o.val}',this)">
@@ -1454,102 +1309,67 @@ function showQuestion(idx) {
             </div>`).join('')}
         </div>`}
     </div>`;
-
-  // Allow enter key on inputs
-  const inp = byId('q-input-val');
-  if(inp) inp.addEventListener('keydown', e=>{ if(e.key==='Enter') answerInput(q.id); });
+  const inp=byId('q-input-val');
+  if(inp) inp.addEventListener('keydown',e=>{ if(e.key==='Enter') answerInput(q.id); });
 }
 
-window.answerOpt = (qid, val, el) => {
+window.answerOpt = (qid,val2,el) => {
   document.querySelectorAll('.q-opt').forEach(o=>o.classList.remove('sel'));
   el.classList.add('sel');
-  setTimeout(()=>{
-    CA.answers[qid] = val;
-    CA.step++;
-    showQuestion(CA.step);
-  },280);
+  setTimeout(()=>{ CA.answers[qid]=val2; CA.step++; showQuestion(CA.step); },280);
 };
 
 window.answerInput = (qid) => {
-  const v = byId('q-input-val')?.value?.trim();
-  if(!v || isNaN(v)){ toast('Please enter a valid number'); return; }
-  CA.answers[qid] = parseFloat(v);
-  CA.step++;
-  showQuestion(CA.step);
+  const v=byId('q-input-val')?.value?.trim();
+  if(!v||isNaN(v)){ toast('Please enter a valid number'); return; }
+  CA.answers[qid]=parseFloat(v); CA.step++; showQuestion(CA.step);
 };
 
-/* ── Build course ── */
-function buildCourse() {
-  byId('course-q-area').innerHTML = `
+function buildCourse(){
+  byId('course-q-area').innerHTML=`
     <div style="text-align:center;padding:48px 20px">
       <div style="font-size:40px;margin-bottom:16px">⚙️</div>
       <div style="font-family:var(--fd);font-size:28px;letter-spacing:.08em;color:var(--gold);margin-bottom:8px">BUILDING YOUR COURSE</div>
       <div style="font-size:13px;color:var(--text3)">Analyzing your data and selecting the best exercises…</div>
     </div>`;
-
-  setTimeout(async () => {
-    const a = CA.answers;
-    const isLimited = (a.equipment === 'limited' || a.equipment === 'minimal');
-    const isFat = (a.goal === 'loss' || a.goal === 'recomp');
-    const isStrength = (a.goal === 'strength');
-
-    // Sets modifier
-    const setsMulti = a.exp === 'beginner' ? 0.75 : a.exp === 'advanced' ? 1.25 : 1;
-
-    // Pick 9 exercises per day — swap to alt if limited equipment
-    function pick(pool, count, equipLimited) {
-      const shuffled = [...pool].sort(()=>Math.random()-.5);
-      return shuffled.slice(0, count).map(ex => {
-        if(equipLimited) return {...ex, name: ex.alt || ex.name, swapped: !!ex.alt};
-        return {...ex, swapped: false};
-      });
+  setTimeout(async()=>{
+    const a=CA.answers;
+    const isLimited=(a.equipment==='limited'||a.equipment==='minimal');
+    const isFat=(a.goal==='loss'||a.goal==='recomp');
+    function pick(pool,count,equipLimited){
+      const shuffled=[...pool].sort(()=>Math.random()-.5);
+      return shuffled.slice(0,count).map(ex=>{ if(equipLimited) return{...ex,name:ex.alt||ex.name,swapped:!!ex.alt}; return{...ex,swapped:false}; });
     }
-
-    // 3-day split: Day1=Shoulders+Chest, Day2=Biceps+Arms, Day3=Legs
-    const day1 = [...pick(GYM_DB.shoulders, 5, isLimited), ...pick(GYM_DB.chest, 4, isLimited)];
-    const day2 = [...pick(GYM_DB.biceps, 5, isLimited), ...pick(GYM_DB.arms, 4, isLimited)];
-    const day3 = [...pick(GYM_DB.legs, 9, isLimited)];
-    // Add cardio to day3 if fat loss
-    if(isFat && !day3.find(e=>e.name.includes('Cardio')||e.name.includes('Crosstrainer'))) {
-      day3[8] = GYM_DB.legs.find(e=>e.name.includes('Cardio')) || day3[8];
+    const day1=[...pick(GYM_DB.shoulders,5,isLimited),...pick(GYM_DB.chest,4,isLimited)];
+    const day2=[...pick(GYM_DB.biceps,5,isLimited),...pick(GYM_DB.arms,4,isLimited)];
+    const day3=[...pick(GYM_DB.legs,9,isLimited)];
+    if(isFat&&!day3.find(e=>e.name.includes('Cardio')||e.name.includes('Crosstrainer'))){
+      day3[8]=GYM_DB.legs.find(e=>e.name.includes('Cardio'))||day3[8];
     }
-
-    // BMI + weight status
-    const wt = parseFloat(a.weight||UD?.weight||70);
-    const ht = parseFloat(UD?.height||170);
-    const bmi = ht > 0 ? (wt / ((ht/100)**2)).toFixed(1) : '—';
-    const targetWt = parseFloat(a.target||wt);
-    const diff = (wt - targetWt).toFixed(1);
-    const status = bmi === '—' ? 'normal' : bmi < 18.5 ? 'underweight' : bmi > 25 ? 'overweight' : 'normal';
-    const statusTxt = status==='overweight' ? `⬆️ ${diff} kg above target` : status==='underweight' ? `⬇️ ${Math.abs(diff)} kg below target` : `✅ At target range`;
-    const statusClass = status;
-
-    CA.course = { day1, day2, day3, bmi, wt, targetWt, diff, status, statusTxt, statusClass, answers:a };
-
-    // Save course to Firestore
-    if(UD && auth) {
-      try { await writeUser(UD.uid, { course: CA.course }); UD.course = CA.course; } catch(_){}
-    }
-
+    const wt=parseFloat(a.weight||UD?.weight||70);
+    const ht=parseFloat(UD?.height||170);
+    const bmi=ht>0?(wt/((ht/100)**2)).toFixed(1):'—';
+    const targetWt=parseFloat(a.target||wt);
+    const diff=(wt-targetWt).toFixed(1);
+    const status=bmi==='—'?'normal':bmi<18.5?'underweight':bmi>25?'overweight':'normal';
+    const statusTxt=status==='overweight'?`⬆️ ${diff} kg above target`:status==='underweight'?`⬇️ ${Math.abs(diff)} kg below target`:`✅ At target range`;
+    CA.course={day1,day2,day3,bmi,wt,targetWt,diff,status,statusTxt,answers:a};
+    /* Save to Firestore — fixed: removed incorrect 'auth' reference */
+    if(UD){ try{ await writeUser(UD.uid,{course:CA.course}); UD.course=CA.course; }catch(_){} }
     renderCourse();
-  }, 1400);
+  },1400);
 }
 
-/* ── Render the built course ── */
-function renderCourse() {
-  const c = CA.course;
-  if(!c) return;
-  byId('course-q-area').innerHTML = '';
-  byId('course-restart-btn').style.display = 'flex';
+function renderCourse(){
+  const c=CA.course; if(!c) return;
+  byId('course-q-area').innerHTML='';
+  byId('course-restart-btn').style.display='flex';
   updateStepDots(6);
-
-  const goalLabel = {loss:'Fat Loss',gain:'Muscle Gain',recomp:'Body Recomposition',strength:'Strength'}[c.answers.goal]||'Fitness';
-  const expLabel = {beginner:'Beginner',intermediate:'Intermediate',advanced:'Advanced'}[c.answers.exp]||'';
-
-  const res = byId('course-result');
+  const goalLabel={loss:'Fat Loss',gain:'Muscle Gain',recomp:'Body Recomposition',strength:'Strength'}[c.answers.goal]||'Fitness';
+  const expLabel={beginner:'Beginner',intermediate:'Intermediate',advanced:'Advanced'}[c.answers.exp]||'';
+  const res=byId('course-result');
   res.classList.remove('hidden');
-  res.innerHTML = `
-    <!-- HEADER -->
+  res.innerHTML=`
     <div class="course-header">
       <div class="ch-tag">Your Personal Program</div>
       <div class="ch-title">3-DAY GYM COURSE</div>
@@ -1562,55 +1382,43 @@ function renderCourse() {
         <div class="ch-stat"><div class="ch-stat-v">${c.targetWt}kg</div><div class="ch-stat-l">Target</div></div>
       </div>
     </div>
-
-    <!-- WEIGHT STATUS -->
     <div class="target-widget">
       <div>
         <div class="tw-label">Weight Status</div>
         <div class="tw-val">${c.wt} kg → ${c.targetWt} kg</div>
       </div>
-      <div class="tw-status ${c.statusClass}">${c.statusTxt}</div>
+      <div class="tw-status ${c.status}">${c.statusTxt}</div>
       <div style="font-size:12px;color:var(--text3);flex:1;min-width:160px;line-height:1.5">
-        ${c.status==='overweight' ? '🔥 Focus on cardio + compound lifts. Maintain calorie deficit.' :
-          c.status==='underweight' ? '💪 Progressive overload + caloric surplus. Prioritize protein intake.' :
-          '✅ Maintain current nutrition. Focus on body recomposition.'}
+        ${c.status==='overweight'?'🔥 Focus on cardio + compound lifts. Maintain calorie deficit.':c.status==='underweight'?'💪 Progressive overload + caloric surplus. Prioritize protein intake.':'✅ Maintain current nutrition. Focus on body recomposition.'}
       </div>
     </div>
-
-    <!-- DAY TABS -->
     <div class="day-tabs">
       <div class="day-tab active" id="dt-0" onclick="switchDay(0)">Day 1<br><span style="font-size:10px;opacity:.7">Shoulders & Chest</span></div>
       <div class="day-tab" id="dt-1" onclick="switchDay(1)">Day 2<br><span style="font-size:10px;opacity:.7">Biceps & Arms</span></div>
       <div class="day-tab" id="dt-2" onclick="switchDay(2)">Day 3<br><span style="font-size:10px;opacity:.7">Legs & Cardio</span></div>
     </div>
-
-    <!-- EXERCISE LIST -->
-    <div id="ex-list-wrap"></div>
-  `;
-
+    <div id="ex-list-wrap"></div>`;
   switchDay(0);
 }
 
-let currentDay = 0;
+let currentDay=0;
 window.switchDay = (day) => {
-  currentDay = day;
+  currentDay=day;
   document.querySelectorAll('.day-tab').forEach((t,i)=>t.classList.toggle('active',i===day));
-  const days = [CA.course.day1, CA.course.day2, CA.course.day3];
-  const dayNames = ['Shoulders & Chest','Biceps & Arms','Legs & Cardio'];
-  const exs = days[day];
-  const wrap = byId('ex-list-wrap');
+  const days=[CA.course.day1,CA.course.day2,CA.course.day3];
+  const dayNames=['Shoulders & Chest','Biceps & Arms','Legs & Cardio'];
+  const exs=days[day];
+  const wrap=byId('ex-list-wrap');
   if(!wrap||!exs) return;
-  wrap.innerHTML = `
+  wrap.innerHTML=`
     <div style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:16px;padding:0 2px">
       Day ${day+1} — ${dayNames[day]} · ${exs.length} Exercises · Repeat cycle after Day 3
     </div>
-    <div class="ex-list">
-      ${exs.map((ex,i) => renderExCard(ex,i,day)).join('')}
-    </div>`;
+    <div class="ex-list">${exs.map((ex,i)=>renderExCard(ex,i,day)).join('')}</div>`;
 };
 
-function renderExCard(ex, idx, day) {
-  const swappedNote = ex.swapped ? `<div class="alt-badge show">⚡ Auto-swapped to home/dumbbell alternative targeting same muscle</div>` : '';
+function renderExCard(ex,idx,day){
+  const swappedNote=ex.swapped?`<div class="alt-badge show">⚡ Auto-swapped to home/dumbbell alternative targeting same muscle</div>`:'';
   return `
     <div class="ex-card">
       <div class="ex-card-img">
@@ -1628,72 +1436,36 @@ function renderExCard(ex, idx, day) {
         <div class="ex-desc">${ex.desc}</div>
         ${swappedNote}
         <div class="ex-card-btns">
-          <a class="ex-video-btn" href="${ex.video}" target="_blank" rel="noopener">
-            ▶ Watch How to Use
-          </a>
+          <a class="ex-video-btn" href="${ex.video}" target="_blank" rel="noopener">▶ Watch How to Use</a>
           <span class="ex-swap-btn" onclick="swapExercise(${day},${idx})">⚡ Swap Exercise</span>
         </div>
       </div>
     </div>`;
 }
 
-window.swapExercise = (day, idx) => {
-  const dayKey = ['day1','day2','day3'][day];
-  const poolKey = [['shoulders','chest'],['biceps','arms'],['legs']][day];
-  const allExs = poolKey.flatMap(k => GYM_DB[k]);
-  const current = CA.course[dayKey][idx];
-  const alternatives = allExs.filter(e => e.name !== current.name && e.muscle === current.muscle);
-  const pick = alternatives.length > 0
-    ? alternatives[Math.floor(Math.random()*alternatives.length)]
-    : allExs[Math.floor(Math.random()*allExs.length)];
-  CA.course[dayKey][idx] = {...pick, swapped: true};
+window.swapExercise = (day,idx) => {
+  const dayKey=['day1','day2','day3'][day];
+  const poolKey=[['shoulders','chest'],['biceps','arms'],['legs']][day];
+  const allExs=poolKey.flatMap(k=>GYM_DB[k]);
+  const current=CA.course[dayKey][idx];
+  const alternatives=allExs.filter(e=>e.name!==current.name&&e.muscle===current.muscle);
+  const pick=alternatives.length>0?alternatives[Math.floor(Math.random()*alternatives.length)]:allExs[Math.floor(Math.random()*allExs.length)];
+  CA.course[dayKey][idx]={...pick,swapped:true};
   toast(`⚡ Swapped to: ${pick.name}`);
   switchDay(day);
-  // Save updated course
-  if(UD) { try { writeUser(UD.uid, { course: CA.course }); } catch(_){} }
+  if(UD){ try{ writeUser(UD.uid,{course:CA.course}); }catch(_){} }
 };
 
 window.restartCourse = () => {
   byId('course-result').classList.add('hidden');
-  byId('course-restart-btn').style.display = 'none';
-  CA = { step:0, answers:{}, course:null };
+  byId('course-restart-btn').style.display='none';
+  CA={step:0,answers:{},course:null};
   initCourse();
 };
 
-/* Patch openPanel to init course */
-const _origOpenPanel = window.openPanel;
-window.openPanel = (id) => {
-  _origOpenPanel(id);
-  if(id === 'p-course') {
-    // Show existing course if available
-    if(UD?.course && !CA.course) {
-      CA.course = UD.course;
-      renderCourse();
-      byId('course-q-area').innerHTML = '';
-      updateStepDots(6);
-      byId('course-restart-btn').style.display = 'flex';
-    } else if(!CA.course) {
-      initCourse();
-    }
-  }
-};
-window.closePanel = (id) => { byId('overlay').classList.remove('on'); byId(id).classList.remove('on'); };
-window.closeAllPanels = () => { byId('overlay').classList.remove('on'); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on')); };
-window.openModal = (id) => byId(id).classList.add('on');
-window.closeModal = (id) => byId(id).classList.remove('on');
-
-window.togglePD = () => {
-  byId('pd').classList.toggle('hidden');
-  setTimeout(()=>document.addEventListener('click',closePDOnce,{once:true}),10);
-};
-function closePDOnce(e){ if(!byId('prof-btn').contains(e.target)) byId('pd').classList.add('hidden'); }
-
-/* ── ERON AI ── */
-let aiOpen=false;
-window.togAI = () => { aiOpen=!aiOpen; byId('ai-box').classList.toggle('on',aiOpen); };
-
-function addAImsg(text,role) {
-  const c=byId('ai-msgs'), d=document.createElement('div');
+/* ── AI ── */
+function addAImsg(text,role){
+  const c=byId('ai-msgs'),d=document.createElement('div');
   d.className=`ai-m ${role}`;
   d.innerHTML=`<div class="ai-mb">${text}</div>`;
   c.appendChild(d); c.scrollTop=c.scrollHeight;
@@ -1710,7 +1482,7 @@ const AI_R={
 };
 
 window.sendAI = () => {
-  const inp=byId('ai-inp'), t=inp.value.trim(); if(!t) return;
+  const inp=byId('ai-inp'),t=inp.value.trim(); if(!t) return;
   addAImsg(t,'user'); inp.value='';
   const c=byId('ai-msgs');
   const typ=document.createElement('div'); typ.className='ai-m ai';
@@ -1729,37 +1501,6 @@ window.sendAI = () => {
     addAImsg(r,'ai');
   },1100);
 };
-
-/* ── TOAST ── */
-let tT;
-window.toast=(msg)=>{ const t=byId('toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove('on'),2800); };
-
-/* ── KEYBOARD ESC ── */
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    closeAllPanels();
-    document.querySelectorAll('.modal-ov').forEach(m=>m.classList.remove('on'));
-    byId('pd').classList.add('hidden');
-    if(aiOpen){aiOpen=false;byId('ai-box').classList.remove('on');}
-  }
-});
-
-/* ── UTILS ── */
-function byId(id){ return document.getElementById(id); }
-function val(id){ return byId(id)?.value?.trim()||''; }
-function setText(id,t){ const el=byId(id); if(el) el.textContent=t; }
-function showEl(id){ byId(id)?.classList.remove('hidden'); }
-function hideEl(id){ byId(id)?.classList.add('hidden'); }
-function showScreen(id){
-  ['auth','onboarding','app','intro'].forEach(s=>{ if(s!==id) hideEl(s); });
-  showEl(id);
-}
-function showErr(el,msg){ el.innerHTML=msg; el.classList.remove('hidden'); }
-function setLoading(id,on){ const b=byId(id); if(b){b.disabled=on; b.textContent=on?'Please wait…':(id==='li-btn'?'Enter the Studio':id==='su-btn'?'Create My Profile':'Begin My Training');} }
-
-/* ── ONE-TIME FIRESTORE RULES REMINDER ── */
-console.info('%c⚡ ERON Firebase Setup','color:#c8a84b;font-weight:bold;font-size:14px');
-console.info('Make sure your Firestore Rules allow reads/writes:\n\nrules_version = \'2\';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /users/{userId} {\n      allow read, write: if true;\n    }\n  }\n}\n\nGo to: Firebase Console → Firestore Database → Rules');
 </script>
 </body>
 </html>
