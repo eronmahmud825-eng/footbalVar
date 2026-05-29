@@ -188,8 +188,9 @@ select.fi option{background:var(--surface2)}
 .sec-hd a{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);cursor:pointer;white-space:nowrap;text-decoration:none}
 
 /* PROGRAM CARDS */
-.prog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
-@media(max-width:900px){.prog-grid{grid-template-columns:1fr;gap:1px}}
+.prog-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
+@media(max-width:1100px){.prog-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.prog-grid{grid-template-columns:1fr}}
 .prog-card{background:var(--black);position:relative;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;min-height:360px}
 @media(max-width:900px){.prog-card{min-height:220px}}
 /* prog card image using <img> tag */
@@ -312,7 +313,81 @@ select.fi option{background:var(--surface2)}
 .info strong{color:var(--gold)}
 .divider{height:1px;background:var(--border);margin:24px 0}
 
-/* ERON AI */
+/* ══ COURSE ANALYZER ══ */
+.course-steps{display:flex;gap:0;margin-bottom:28px;overflow-x:auto;padding-bottom:4px}
+.cs-step{display:flex;align-items:center;gap:0;flex-shrink:0}
+.cs-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text3);transition:all .3s;flex-shrink:0}
+.cs-dot.active{border-color:var(--gold);background:var(--gold-dim);color:var(--gold)}
+.cs-dot.done{border-color:var(--gold);background:var(--gold);color:var(--black)}
+.cs-line{width:32px;height:2px;background:var(--border);transition:background .3s}
+.cs-line.done{background:var(--gold)}
+.q-card{background:var(--surface);border:1px solid var(--border);padding:28px;border-radius:var(--r);margin-bottom:16px;animation:fadeUp .35s ease forwards}
+.q-title{font-family:var(--fs);font-size:22px;font-weight:300;margin-bottom:6px;line-height:1.3}
+.q-sub{font-size:12px;color:var(--text3);margin-bottom:22px;line-height:1.5}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:480px){.q-opts{grid-template-columns:1fr}}
+.q-opt{background:var(--surface2);border:1px solid var(--border);padding:14px 16px;cursor:pointer;transition:all .2s;border-radius:var(--r);display:flex;align-items:center;gap:12px;text-align:left}
+.q-opt:hover{border-color:var(--gold);background:var(--gold-dim)}
+.q-opt.sel{border-color:var(--gold);background:var(--gold-dim)}
+.q-opt-icon{font-size:22px;flex-shrink:0}
+.q-opt-txt{font-size:13px;font-weight:500;line-height:1.3}
+.q-opt-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.q-opt.sel .q-opt-sub{color:var(--gold)}
+.q-inp-area{margin-top:16px}
+
+/* COURSE VIEW */
+.course-header{background:linear-gradient(135deg,var(--surface) 0%,var(--surface2) 100%);border:1px solid var(--border);padding:24px 28px;margin-bottom:20px;border-radius:var(--r);position:relative;overflow:hidden}
+.course-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold))}
+.course-header::after{content:'ERON';position:absolute;right:-10px;top:-10px;font-family:var(--fd);font-size:80px;color:rgba(200,168,75,.05);pointer-events:none}
+.ch-tag{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;font-weight:500}
+.ch-title{font-family:var(--fd);font-size:28px;letter-spacing:.05em;margin-bottom:4px}
+.ch-sub{font-size:13px;color:var(--text2)}
+.ch-stats{display:flex;gap:20px;margin-top:16px;flex-wrap:wrap}
+.ch-stat{text-align:center}
+.ch-stat-v{font-family:var(--fd);font-size:22px;color:var(--gold)}
+.ch-stat-l{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+
+/* DAY TABS */
+.day-tabs{display:flex;gap:1px;background:var(--border);margin-bottom:20px;border-radius:var(--r);overflow:hidden}
+.day-tab{flex:1;padding:12px 8px;text-align:center;cursor:pointer;background:var(--surface);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);transition:all .2s;border-bottom:2px solid transparent}
+.day-tab.active{background:var(--gold-dim);color:var(--gold);border-bottom-color:var(--gold)}
+.day-tab:hover{background:var(--surface2)}
+
+/* EXERCISE CARDS */
+.ex-list{display:flex;flex-direction:column;gap:14px}
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .2s}
+.ex-card:hover{border-color:var(--border2)}
+.ex-card-img{position:relative;height:160px;overflow:hidden;background:var(--surface2)}
+@media(max-width:480px){.ex-card-img{height:130px}}
+.ex-card-img img{width:100%;height:100%;object-fit:cover;opacity:.75;transition:opacity .3s,transform .4s}
+.ex-card:hover .ex-card-img img{opacity:.9;transform:scale(1.03)}
+.ex-card-img-ov{position:absolute;inset:0;background:linear-gradient(0deg,rgba(6,6,7,.8) 0%,transparent 60%)}
+.ex-set-badge{position:absolute;top:12px;right:12px;background:var(--gold);color:var(--black);font-size:11px;font-weight:700;padding:4px 10px;border-radius:2px;letter-spacing:.06em}
+.ex-card-body{padding:16px 18px}
+.ex-name{font-family:var(--fs);font-size:20px;font-weight:400;margin-bottom:4px}
+.ex-muscle{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;font-weight:500}
+.ex-details{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.ex-detail{background:var(--surface2);border:1px solid var(--border);padding:6px 12px;font-size:11px;border-radius:2px;display:flex;align-items:center;gap:6px}
+.ex-detail-icon{font-size:13px}
+.ex-desc{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px}
+.ex-video-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,0,0,.12);border:1px solid rgba(255,80,80,.3);color:#ff6b6b;padding:8px 14px;font-size:12px;font-weight:600;letter-spacing:.06em;cursor:pointer;border-radius:var(--r);text-decoration:none;transition:all .2s}
+.ex-video-btn:hover{background:rgba(255,0,0,.2);border-color:rgba(255,80,80,.6)}
+.ex-swap-btn{display:inline-flex;align-items:center;gap:8px;background:var(--gold-dim);border:1px solid rgba(200,168,75,.3);color:var(--gold);padding:8px 14px;font-size:12px;font-weight:600;letter-spacing:.06em;cursor:pointer;border-radius:var(--r);text-decoration:none;transition:all .2s;margin-left:8px}
+.ex-swap-btn:hover{background:rgba(200,168,75,.2)}
+.ex-card-btns{display:flex;flex-wrap:wrap;gap:8px}
+.alt-badge{background:rgba(200,168,75,.15);border:1px dashed rgba(200,168,75,.4);padding:8px 14px;font-size:12px;color:var(--text2);border-radius:var(--r);margin-top:10px;display:none}
+.alt-badge.show{display:block}
+
+/* TARGET WIDGET */
+.target-widget{background:var(--surface);border:1px solid var(--border);padding:20px 22px;border-radius:var(--r);margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.tw-label{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.tw-val{font-family:var(--fd);font-size:28px;color:var(--gold)}
+.tw-status{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:2px;font-size:12px;font-weight:600;letter-spacing:.06em}
+.tw-status.overweight{background:rgba(221,80,80,.12);border:1px solid rgba(221,80,80,.3);color:#f88}
+.tw-status.underweight{background:rgba(80,180,130,.12);border:1px solid rgba(80,180,130,.3);color:#7ecba1}
+.tw-status.normal{background:rgba(200,168,75,.12);border:1px solid rgba(200,168,75,.3);color:var(--gold)}
+
+/* ══ END COURSE ══ */
 #ai-fab{position:fixed;bottom:28px;right:28px;z-index:200}
 @media(max-width:480px){#ai-fab{bottom:18px;right:18px}}
 .ai-btn{width:56px;height:56px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:23px;box-shadow:0 4px 26px var(--gold-glow),0 0 0 1px rgba(200,168,75,.25);transition:all .2s}
@@ -540,6 +615,17 @@ select.fi option{background:var(--surface2)}
           <div class="pc-cta">Discover <div class="pc-cta-line"></div></div>
         </div>
       </div>
+      <div class="prog-card" onclick="openPanel('p-course')" style="position:relative">
+        <div class="pc-img-wrap"><img src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&q=80" alt="Analyze Course" loading="lazy"></div>
+        <div class="pc-ov"></div>
+        <div style="position:absolute;top:16px;right:16px;background:var(--gold);color:var(--black);font-size:10px;font-weight:700;letter-spacing:.1em;padding:4px 10px;border-radius:2px;z-index:3">NEW</div>
+        <div class="pc-content">
+          <div class="pc-num">04 — Smart Plan</div>
+          <div class="pc-title">Analyze Course</div>
+          <div class="pc-desc">AI builds your personal 3-day gym program based on your body & goals. Real equipment, real results.</div>
+          <div class="pc-cta">Analyze <div class="pc-cta-line"></div></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -609,6 +695,37 @@ select.fi option{background:var(--surface2)}
   <div class="p-body">
     <div class="info"><strong>High protein, lower calories.</strong> Foods chosen to help you lose fat efficiently while preserving lean muscle.</div>
     <div id="diet-cnt"></div>
+  </div>
+</div>
+
+<!-- COURSE ANALYZER PANEL -->
+<div class="panel" id="p-course" style="width:min(780px,100%)">
+  <div class="p-top">
+    <div>
+      <div class="p-title">ANALYZE COURSE</div>
+      <div style="font-size:11px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-top:2px">AI-Powered 3-Day Gym Program</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="btn-s" id="course-restart-btn" onclick="restartCourse()" style="display:none;padding:8px 14px;font-size:11px">↺ Restart</button>
+      <div class="p-close" onclick="closePanel('p-course')">✕</div>
+    </div>
+  </div>
+  <div class="p-body">
+    <!-- STEP PROGRESS -->
+    <div class="course-steps" id="course-steps">
+      <div class="cs-step"><div class="cs-dot active" id="csd-0">1</div></div>
+      <div class="cs-step"><div class="cs-line" id="csl-0"></div><div class="cs-dot" id="csd-1">2</div></div>
+      <div class="cs-step"><div class="cs-line" id="csl-1"></div><div class="cs-dot" id="csd-2">3</div></div>
+      <div class="cs-step"><div class="cs-line" id="csl-2"></div><div class="cs-dot" id="csd-3">4</div></div>
+      <div class="cs-step"><div class="cs-line" id="csl-3"></div><div class="cs-dot" id="csd-4">5</div></div>
+      <div class="cs-step"><div class="cs-line" id="csl-4"></div><div class="cs-dot" id="csd-5">✓</div></div>
+    </div>
+
+    <!-- QUESTIONS AREA -->
+    <div id="course-q-area"></div>
+
+    <!-- COURSE RESULT -->
+    <div id="course-result" class="hidden"></div>
   </div>
 </div>
 
