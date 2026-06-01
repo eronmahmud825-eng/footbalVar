@@ -783,6 +783,74 @@ select.fi option{background:var(--surface2)}
 <!-- TOAST -->
 <div id="toast"></div>
 
+<!-- GLOBAL UI CONTROLS — plain script so onclick= works before module loads -->
+<script>
+function byId(id){ return document.getElementById(id); }
+function showEl(id){ byId(id)?.classList.remove('hidden'); }
+function hideEl(id){ byId(id)?.classList.add('hidden'); }
+function val(id){ return byId(id)?.value?.trim()||''; }
+function setText(id,t){ const el=byId(id); if(el) el.textContent=t; }
+function showErr(el,msg){ el.innerHTML=msg; el.classList.remove('hidden'); }
+function setLoading(id,on){
+  const b=byId(id); if(!b) return;
+  b.disabled=on;
+  if(on){ b.textContent='Please wait…'; return; }
+  if(id==='li-btn') b.textContent='Enter the Studio';
+  else if(id==='su-btn') b.textContent='Create My Profile';
+  else b.textContent='Begin My Training';
+}
+function showScreen(id){
+  ['auth','onboarding','app','intro'].forEach(s=>{ if(s!==id) hideEl(s); });
+  showEl(id);
+}
+
+/* ── PANELS ── */
+function openPanel(id){
+  byId('overlay').classList.add('on');
+  byId(id).classList.add('on');
+  /* Course panel — init if not started */
+  if(id === 'p-course'){
+    if(typeof _courseInit === 'function') _courseInit();
+  }
+}
+function closePanel(id){
+  byId('overlay').classList.remove('on');
+  byId(id).classList.remove('on');
+}
+function closeAllPanels(){
+  byId('overlay').classList.remove('on');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+}
+
+/* ── MODALS ── */
+function openModal(id){ byId(id).classList.add('on'); }
+function closeModal(id){ byId(id).classList.remove('on'); }
+
+/* ── PROFILE DROPDOWN ── */
+function togglePD(){
+  byId('pd').classList.toggle('hidden');
+  setTimeout(()=>document.addEventListener('click',function closePDOnce(e){
+    if(!byId('prof-btn').contains(e.target)) byId('pd').classList.add('hidden');
+  },{once:true}),10);
+}
+
+/* ── AI FAB ── */
+let aiOpen = false;
+function togAI(){ aiOpen=!aiOpen; byId('ai-box').classList.toggle('on',aiOpen); }
+
+/* toast() defined in global script */
+
+/* ── KEYBOARD ESC ── */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeAllPanels();
+    document.querySelectorAll('.modal-ov').forEach(m=>m.classList.remove('on'));
+    byId('pd').classList.add('hidden');
+    if(aiOpen){ aiOpen=false; byId('ai-box').classList.remove('on'); }
+  }
+});
+</script>
+
 <!-- ══════════════════════════════════════════
      FIREBASE (Firestore-only auth — no Email/Password provider needed)
      All credentials stored in Firestore, zero Firebase Auth dependency.
@@ -820,6 +888,7 @@ async function writeUser(uid,data){ await setDoc(doc(db,'users',uid),data,{merge
 
 /* ── State ── */
 let UD = null;
+window.UD = null; /* keep global ref in sync */
 let editIdx = -1;
 let selGoal = '';
 let selDay = '';
@@ -1402,6 +1471,26 @@ const QUESTIONS = [
 let CA = { step:0, answers:{}, course:null };
 
 /* ── Init course when panel opens ── */
+/* Expose course init to global openPanel */
+window._courseInit = function(){
+  if(CA.course){
+    /* Already have a course — show it */
+    renderCourse();
+    byId('course-q-area').innerHTML='';
+    updateStepDots(6);
+    byId('course-restart-btn').style.display='flex';
+  } else if(window.UD?.course){
+    /* Load saved course from Firestore data */
+    CA.course = window.UD.course;
+    renderCourse();
+    byId('course-q-area').innerHTML='';
+    updateStepDots(6);
+    byId('course-restart-btn').style.display='flex';
+  } else {
+    initCourse();
+  }
+};
+
 function initCourse() {
   CA = { step:0, answers:{}, course:null };
   byId('course-restart-btn').style.display = 'none';
@@ -1660,37 +1749,10 @@ window.restartCourse = () => {
   initCourse();
 };
 
-/* Patch openPanel to init course */
-const _origOpenPanel = window.openPanel;
-window.openPanel = (id) => {
-  _origOpenPanel(id);
-  if(id === 'p-course') {
-    // Show existing course if available
-    if(UD?.course && !CA.course) {
-      CA.course = UD.course;
-      renderCourse();
-      byId('course-q-area').innerHTML = '';
-      updateStepDots(6);
-      byId('course-restart-btn').style.display = 'flex';
-    } else if(!CA.course) {
-      initCourse();
-    }
-  }
-};
-window.closePanel = (id) => { byId('overlay').classList.remove('on'); byId(id).classList.remove('on'); };
-window.closeAllPanels = () => { byId('overlay').classList.remove('on'); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on')); };
-window.openModal = (id) => byId(id).classList.add('on');
-window.closeModal = (id) => byId(id).classList.remove('on');
+/* Course open handler called from global openPanel */
+/* panel/modal functions live in global <script> below */
 
-window.togglePD = () => {
-  byId('pd').classList.toggle('hidden');
-  setTimeout(()=>document.addEventListener('click',closePDOnce,{once:true}),10);
-};
-function closePDOnce(e){ if(!byId('prof-btn').contains(e.target)) byId('pd').classList.add('hidden'); }
-
-/* ── ERON AI ── */
-let aiOpen=false;
-window.togAI = () => { aiOpen=!aiOpen; byId('ai-box').classList.toggle('on',aiOpen); };
+/* ── ERON AI ── aiOpen and togAI are defined in global script ── */
 
 function addAImsg(text,role) {
   const c=byId('ai-msgs'), d=document.createElement('div');
@@ -1744,18 +1806,11 @@ document.addEventListener('keydown',e=>{
   }
 });
 
-/* ── UTILS ── */
-function byId(id){ return document.getElementById(id); }
-function val(id){ return byId(id)?.value?.trim()||''; }
-function setText(id,t){ const el=byId(id); if(el) el.textContent=t; }
-function showEl(id){ byId(id)?.classList.remove('hidden'); }
-function hideEl(id){ byId(id)?.classList.add('hidden'); }
-function showScreen(id){
-  ['auth','onboarding','app','intro'].forEach(s=>{ if(s!==id) hideEl(s); });
-  showEl(id);
-}
+/* ── UTILS (all defined in global <script>, not redeclared here) ── */
+/* setText and showErr still needed in module scope */
+function setText(id,t){ const el=document.getElementById(id); if(el) el.textContent=t; }
 function showErr(el,msg){ el.innerHTML=msg; el.classList.remove('hidden'); }
-function setLoading(id,on){ const b=byId(id); if(b){b.disabled=on; b.textContent=on?'Please wait…':(id==='li-btn'?'Enter the Studio':id==='su-btn'?'Create My Profile':'Begin My Training');} }
+function setLoading(id,on){ const b=document.getElementById(id); if(b){b.disabled=on; b.textContent=on?'Please wait…':(id==='li-btn'?'Enter the Studio':id==='su-btn'?'Create My Profile':'Begin My Training');} }
 
 /* ── ONE-TIME FIRESTORE RULES REMINDER ── */
 console.info('%c⚡ ERON Firebase Setup','color:#c8a84b;font-weight:bold;font-size:14px');
